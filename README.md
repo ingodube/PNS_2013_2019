@@ -3,7 +3,7 @@
 A Pesquisa Nacional de Saúde (PNS) é um dos principais inquéritos domiciliares realizados no Brasil, conduzido pelo Instituto Brasileiro de Geografia e Estatística (IBGE)
 em parceria com o Ministério da Saúde. Seu objetivo é produzir informações abrangentes sobre condições de saúde, doenças crônicas, estilo de vida, acesso e utilização dos serviços de saúde,
 além de indicadores de bem-estar e qualidade de vida. A PNS complementa outras pesquisas nacionais, fornecendo dados atualizados e de alta qualidade que permitem compreender
-o panorama da saúde da população brasileira.
+o panorama da saúde e condições socioeconômicas da população brasileira.
 
 O plano amostral da PNS é probabilístico, estratificado e por conglomerados em múltiplos estágios. No primeiro estágio, selecionam-se setores censitários do IBGE,
 que são as unidades primárias de amostragem. No segundo estágio, são selecionados domicílios dentro desses setores. No terceiro estágio, quando necessário, escolhe-se
