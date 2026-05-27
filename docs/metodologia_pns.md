@@ -27,7 +27,7 @@ Essas opções são compatíveis com o fluxo usado pelo `PNSIBGE::pns_design()` 
 
 ## Intervalos de confiança
 
-Para proporções binárias, o padrão dos scripts é `survey::svyciprop(method = "logit")` com nível de 95%. Esse método evita os limites fora da escala 0-1 que podem aparecer com intervalos Wald calculados por `svymean()`/`confint()` em proporções pequenas, grandes ou com amostras efetivas menores.
+Para proporções binárias, o padrão dos scripts é `survey::svyciprop(method = "beta")` com nível de 95%. Esse método evita os limites fora da escala 0-1 que podem aparecer com intervalos Wald calculados por `svymean()`/`confint()` e é estável em domínios pequenos da PNS.
 
 Os scripts não devem truncar manualmente limites superiores em 100%. Se um intervalo de confiança de proporção precisar respeitar a escala percentual, a transformação deve vir do estimador adequado, não de pós-processamento manual.
 
@@ -41,4 +41,4 @@ Não usar o intervalo de confiança de um total estimado dividido por um denomin
 
 - `PNSIBGE::pns_design()` cria um objeto de desenho amostral da PNS para análise com o pacote `survey`: <https://www.rdocumentation.org/packages/PNSIBGE/versions/0.2.1/topics/pns_design>
 - O código-fonte do `pns_design()` mostra o uso de `survey.lonely.psu = "adjust"`, `survey.adjust.domain.lonely = TRUE` e pós-estratificação por conjunto de pesos: <https://rdrr.io/cran/PNSIBGE/src/R/pns_design.R>
-- `survey::svyciprop()` documenta métodos de IC para proporções em desenhos complexos, incluindo `method = "logit"`: <https://rdrr.io/rforge/survey/man/svyciprop.html>
+- `survey::svyciprop()` documenta métodos de IC para proporções em desenhos complexos, incluindo `method = "beta"`: <https://rdrr.io/rforge/survey/man/svyciprop.html>

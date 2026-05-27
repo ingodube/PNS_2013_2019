@@ -17,19 +17,45 @@ cria_design_pns = function(data_pns){
   pns_design(data_pns = data_design)
 }
 
-estima_prop_logit = function(var, design, pct_col){
+estima_prop_beta = function(var, design, pct_col){
   formula_var = as.formula(paste0("~", var))
   
   estima_uma = function(design_atual, uf_atual){
-    est = svyciprop(formula_var, design = design_atual,
-                    method = "logit", na.rm = TRUE)
-    ci = as.numeric(confint(est))
+    est = tryCatch(
+      svyciprop(formula_var, design = design_atual,
+                method = "beta", na.rm = TRUE),
+      error = function(e) NULL
+    )
+    
+    if (is.null(est)) {
+      return(data.frame(
+        uf = uf_atual,
+        valor = NA_real_,
+        ci_l = NA_real_,
+        ci_u = NA_real_,
+        metodo_ic = "indisponivel"
+      ))
+    }
+    
+    ci = tryCatch(as.numeric(confint(est)), error = function(e) c(NA_real_, NA_real_))
+    valor = as.numeric(coef(est))[1]
+    
+    if (!is.finite(valor) || length(ci) < 2 || any(!is.finite(ci))) {
+      return(data.frame(
+        uf = uf_atual,
+        valor = NA_real_,
+        ci_l = NA_real_,
+        ci_u = NA_real_,
+        metodo_ic = "indisponivel"
+      ))
+    }
     
     data.frame(
       uf = uf_atual,
-      valor = as.numeric(coef(est))[1],
+      valor = valor,
       ci_l = ci[1],
-      ci_u = ci[2]
+      ci_u = ci[2],
+      metodo_ic = "beta"
     )
   }
   
@@ -82,10 +108,10 @@ design_pns2013 = cria_design_pns(pns2013)
 design_pns2019 = cria_design_pns(pns2019)
 
 # Prevalência de crises de asma nos últimos 12 meses
-prev_crise_2013 = estima_prop_logit("crise_asma_12m", design_pns2013, "prevalencia")
+prev_crise_2013 = estima_prop_beta("crise_asma_12m", design_pns2013, "prevalencia")
 prev_crise_2013$ano = 2013
 
-prev_crise_2019 = estima_prop_logit("crise_asma_12m", design_pns2019, "prevalencia")
+prev_crise_2019 = estima_prop_beta("crise_asma_12m", design_pns2019, "prevalencia")
 prev_crise_2019$ano = 2019
 
 # Juntando crises

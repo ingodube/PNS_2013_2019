@@ -17,22 +17,54 @@ cria_design_pns = function(data_pns){
   pns_design(data_pns = data_design)
 }
 
-estima_prop_logit = function(var, design, pct_col, value_col = var){
+estima_prop_beta = function(var, design, pct_col, value_col = var){
   formula_var = as.formula(paste0("~", var))
   
   estima_uma = function(design_atual, uf_atual){
-    est = svyciprop(formula_var, design = design_atual,
-                    method = "logit", na.rm = TRUE)
-    ci = as.numeric(confint(est))
+    est = tryCatch(
+      svyciprop(formula_var, design = design_atual,
+                method = "beta", na.rm = TRUE),
+      error = function(e) NULL
+    )
+    
+    if (is.null(est)) {
+      return(data.frame(
+        uf = uf_atual,
+        valor = NA_real_,
+        ci_l = NA_real_,
+        ci_u = NA_real_,
+        pct = NA_real_,
+        li = NA_real_,
+        ls = NA_real_,
+        metodo_ic = "indisponivel"
+      ))
+    }
+    
+    ci = tryCatch(as.numeric(confint(est)), error = function(e) c(NA_real_, NA_real_))
+    valor = as.numeric(coef(est))[1]
+    
+    if (!is.finite(valor) || length(ci) < 2 || any(!is.finite(ci))) {
+      return(data.frame(
+        uf = uf_atual,
+        valor = NA_real_,
+        ci_l = NA_real_,
+        ci_u = NA_real_,
+        pct = NA_real_,
+        li = NA_real_,
+        ls = NA_real_,
+        metodo_ic = "indisponivel"
+      ))
+    }
     
     data.frame(
       uf = uf_atual,
-      valor = as.numeric(coef(est))[1],
+      valor = valor,
       ci_l = ci[1],
       ci_u = ci[2],
-      pct = as.numeric(coef(est))[1] * 100,
+      pct = valor * 100,
       li = ci[1] * 100,
-      ls = ci[2] * 100
+      ls = ci[2] * 100,
+      metodo_ic = "beta"
     )
   }
   
@@ -59,10 +91,27 @@ estima_taxa_medic_100k = function(var, denom_var, design){
   estima_uma = function(design_atual, uf_atual){
     total = svytotal(formula_var, design = design_atual, na.rm = TRUE)
     total_pop = svytotal(formula_denom, design = design_atual, na.rm = TRUE)
-    taxa = svyciprop(formula_var, design = design_atual,
-                     method = "logit", na.rm = TRUE)
     ci_total = as.numeric(confint(total))
-    ci_taxa = as.numeric(confint(taxa))
+    taxa = tryCatch(
+      svyciprop(formula_var, design = design_atual,
+                method = "beta", na.rm = TRUE),
+      error = function(e) NULL
+    )
+    
+    if (is.null(taxa)) {
+      valor_taxa = NA_real_
+      ci_taxa = c(NA_real_, NA_real_)
+      metodo_ic = "indisponivel"
+    } else {
+      ci_taxa = tryCatch(as.numeric(confint(taxa)), error = function(e) c(NA_real_, NA_real_))
+      valor_taxa = as.numeric(coef(taxa))[1]
+      metodo_ic = ifelse(!is.finite(valor_taxa) || length(ci_taxa) < 2 || any(!is.finite(ci_taxa)),
+                         "indisponivel", "beta")
+      if (metodo_ic == "indisponivel") {
+        valor_taxa = NA_real_
+        ci_taxa = c(NA_real_, NA_real_)
+      }
+    }
     
     data.frame(
       uf = uf_atual,
@@ -70,9 +119,10 @@ estima_taxa_medic_100k = function(var, denom_var, design){
       lim_inf_total_medic_asma = ci_total[1],
       lim_sup_total_medic_asma = ci_total[2],
       total_pop = as.numeric(coef(total_pop))[1],
-      taxa_100k_medic_asma = round(as.numeric(coef(taxa))[1] * 100000),
+      taxa_100k_medic_asma = round(valor_taxa * 100000),
       lim_inf_taxa_100k_medic_asma = round(ci_taxa[1] * 100000),
-      lim_sup_taxa_100k_medic_asma = round(ci_taxa[2] * 100000)
+      lim_sup_taxa_100k_medic_asma = round(ci_taxa[2] * 100000),
+      metodo_ic = metodo_ic
     )
   }
   
@@ -175,11 +225,11 @@ design_pns2013 = cria_design_pns(pns2013)
 design_pns2019 = cria_design_pns(pns2019)
 
 # Porcentagem de pessoas com asma que usam medicamentos atualmente
-medic_asma_2013 = estima_prop_logit("asma_medic", design_pns2013,
+medic_asma_2013 = estima_prop_beta("asma_medic", design_pns2013,
                                     "pct_medic_asma", "asma_medic")
 medic_asma_2013$ano = 2013
 
-medic_asma_2019 = estima_prop_logit("asma_medic", design_pns2019,
+medic_asma_2019 = estima_prop_beta("asma_medic", design_pns2019,
                                     "pct_medic_asma", "asma_medic")
 medic_asma_2019$ano = 2019
 
@@ -226,7 +276,7 @@ ggplot(df_plot, aes(x = uf,
   theme(axis.text.y = element_text(size = 11))
 
 # Porcentagem de asmáticos que tiveram crises recentes e que consomem medicamentos
-medic_crise_asma_2013 = estima_prop_logit(
+medic_crise_asma_2013 = estima_prop_beta(
   "asma_medic",
   subset(design_pns2013, crise_asma_12m == 1),
   "pct_medic_crise_asma",
@@ -234,7 +284,7 @@ medic_crise_asma_2013 = estima_prop_logit(
 )
 medic_crise_asma_2013$ano = 2013
 
-medic_crise_asma_2019 = estima_prop_logit(
+medic_crise_asma_2019 = estima_prop_beta(
   "asma_medic",
   subset(design_pns2019, crise_asma_12m == 1),
   "pct_medic_crise_asma",
