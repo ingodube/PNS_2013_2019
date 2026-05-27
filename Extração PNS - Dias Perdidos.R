@@ -17,20 +17,48 @@ cria_design_pns = function(data_pns){
   pns_design(data_pns = data_design)
 }
 
-estima_prop_logit = function(var, label, design){
+estima_prop_beta = function(var, label, design){
   formula_var = as.formula(paste0("~", var))
   
   estima_uma = function(design_atual, uf_atual){
-    est = svyciprop(formula_var, design = design_atual,
-                    method = "logit", na.rm = TRUE)
-    ci = as.numeric(confint(est))
+    est = tryCatch(
+      svyciprop(formula_var, design = design_atual,
+                method = "beta", na.rm = TRUE),
+      error = function(e) NULL
+    )
+    
+    if (is.null(est)) {
+      return(data.frame(
+        uf = uf_atual,
+        pct = NA_real_,
+        li = NA_real_,
+        ls = NA_real_,
+        tipo = label,
+        metodo_ic = "indisponivel"
+      ))
+    }
+    
+    ci = tryCatch(as.numeric(confint(est)), error = function(e) c(NA_real_, NA_real_))
+    valor = as.numeric(coef(est))[1]
+    
+    if (!is.finite(valor) || length(ci) < 2 || any(!is.finite(ci))) {
+      return(data.frame(
+        uf = uf_atual,
+        pct = NA_real_,
+        li = NA_real_,
+        ls = NA_real_,
+        tipo = label,
+        metodo_ic = "indisponivel"
+      ))
+    }
     
     data.frame(
       uf = uf_atual,
-      pct = as.numeric(coef(est))[1] * 100,
+      pct = valor * 100,
       li = ci[1] * 100,
       ls = ci[2] * 100,
-      tipo = label
+      tipo = label,
+      metodo_ic = "beta"
     )
   }
   
@@ -92,12 +120,12 @@ design_pns2019 = cria_design_pns(pns2019)
 
 # Estimação do percentual de pessoas que deixaram de realizar quaisquer de suas atividades
 # habituais por conta de alguma doença
-df_absenteismo = estima_prop_logit("absenteismo", "Geral", design_pns2019) %>%
+df_absenteismo = estima_prop_beta("absenteismo", "Geral", design_pns2019) %>%
   rename(pct_absenteismo = pct)
 
 # Função para estimar prevalência de absenteísmo por causa específica
 estima_absenteismo = function(var, label, design){
-  estima_prop_logit(var, label, design)
+  estima_prop_beta(var, label, design)
 }
 
 # Lista de variáveis dummy e labels correspondentes

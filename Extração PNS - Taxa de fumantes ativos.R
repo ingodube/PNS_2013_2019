@@ -24,10 +24,27 @@ estima_taxa_100k_uf = function(var, denom_var, design){
   estima_uma = function(design_atual, uf_atual){
     total = svytotal(formula_var, design = design_atual, na.rm = TRUE)
     total_pop = svytotal(formula_denom, design = design_atual, na.rm = TRUE)
-    taxa = svyciprop(formula_var, design = design_atual,
-                     method = "logit", na.rm = TRUE)
     ci_total = as.numeric(confint(total))
-    ci_taxa = as.numeric(confint(taxa))
+    taxa = tryCatch(
+      svyciprop(formula_var, design = design_atual,
+                method = "beta", na.rm = TRUE),
+      error = function(e) NULL
+    )
+    
+    if (is.null(taxa)) {
+      valor_taxa = NA_real_
+      ci_taxa = c(NA_real_, NA_real_)
+      metodo_ic = "indisponivel"
+    } else {
+      ci_taxa = tryCatch(as.numeric(confint(taxa)), error = function(e) c(NA_real_, NA_real_))
+      valor_taxa = as.numeric(coef(taxa))[1]
+      metodo_ic = ifelse(!is.finite(valor_taxa) || length(ci_taxa) < 2 || any(!is.finite(ci_taxa)),
+                         "indisponivel", "beta")
+      if (metodo_ic == "indisponivel") {
+        valor_taxa = NA_real_
+        ci_taxa = c(NA_real_, NA_real_)
+      }
+    }
     
     data.frame(
       uf = uf_atual,
@@ -35,9 +52,10 @@ estima_taxa_100k_uf = function(var, denom_var, design){
       lim_inf_total_fumantes = ci_total[1],
       lim_sup_total_fumantes = ci_total[2],
       total_pop = as.numeric(coef(total_pop))[1],
-      taxa_100k_fumantes = round(as.numeric(coef(taxa))[1] * 100000),
+      taxa_100k_fumantes = round(valor_taxa * 100000),
       lim_inf_taxa_100k_fumantes = round(ci_taxa[1] * 100000),
-      lim_sup_taxa_100k_fumantes = round(ci_taxa[2] * 100000)
+      lim_sup_taxa_100k_fumantes = round(ci_taxa[2] * 100000),
+      metodo_ic = metodo_ic
     )
   }
   

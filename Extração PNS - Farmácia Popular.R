@@ -1,6 +1,7 @@
 # Carregando pacotes necessários
 library(dplyr)
 library(PNSIBGE)
+library(ggplot2)
 library(survey)
 library(writexl)
 
@@ -15,23 +16,57 @@ cria_design_pns = function(data_pns){
   pns_design(data_pns = data_design)
 }
 
-estima_prop_logit = function(var, label, design){
+estima_prop_beta = function(var, label, design){
   formula_var = as.formula(paste0("~", var))
   
   estima_uma = function(design_atual, uf_atual){
-    est = svyciprop(formula_var, design = design_atual,
-                    method = "logit", na.rm = TRUE)
-    ci = as.numeric(confint(est))
+    est = tryCatch(
+      svyciprop(formula_var, design = design_atual,
+                method = "beta", na.rm = TRUE),
+      error = function(e) NULL
+    )
+    
+    if (is.null(est)) {
+      return(data.frame(
+        uf = uf_atual,
+        asma_pg = NA_real_,
+        ci_l = NA_real_,
+        ci_u = NA_real_,
+        pct_asma_med_pg = NA_real_,
+        li = NA_real_,
+        ls = NA_real_,
+        tipo_med = label,
+        metodo_ic = "indisponivel"
+      ))
+    }
+    
+    ci = tryCatch(as.numeric(confint(est)), error = function(e) c(NA_real_, NA_real_))
+    valor = as.numeric(coef(est))[1]
+    
+    if (!is.finite(valor) || length(ci) < 2 || any(!is.finite(ci))) {
+      return(data.frame(
+        uf = uf_atual,
+        asma_pg = NA_real_,
+        ci_l = NA_real_,
+        ci_u = NA_real_,
+        pct_asma_med_pg = NA_real_,
+        li = NA_real_,
+        ls = NA_real_,
+        tipo_med = label,
+        metodo_ic = "indisponivel"
+      ))
+    }
     
     data.frame(
       uf = uf_atual,
-      asma_pg = as.numeric(coef(est))[1],
+      asma_pg = valor,
       ci_l = ci[1],
       ci_u = ci[2],
-      pct_asma_med_pg = as.numeric(coef(est))[1] * 100,
+      pct_asma_med_pg = valor * 100,
       li = ci[1] * 100,
       ls = ci[2] * 100,
-      tipo_med = label
+      tipo_med = label,
+      metodo_ic = "beta"
     )
   }
   
@@ -117,13 +152,34 @@ pns2019 = pns2019 %>%
 design_pns2019 = cria_design_pns(pns2019)
 
 # Estimação do percentual de usuários de medicamentos orais que fizeram o desembolso
-asma_oral_pg = estima_prop_logit("asma_oral_pg", "Medicamento oral", design_pns2019)
-asma_bombinha_pg = estima_prop_logit("asma_bombinha_pg", "Bombinha", design_pns2019)
+asma_oral_pg = estima_prop_beta("asma_oral_pg", "Medicamento oral", design_pns2019)
+asma_bombinha_pg = estima_prop_beta("asma_bombinha_pg", "Bombinha", design_pns2019)
 
 # Juntando tudo
 df_desembolso = rbind(asma_oral_pg, asma_bombinha_pg)
 
-# Gerando o gráfico
+# Salvando a base de dados
+write_xlsx(df_desembolso, path = "df_desembolso.xlsx")
 
+# Gerando o gráfico
+df_plot = df_desembolso %>%
+  mutate(tipo_med = factor(tipo_med, levels = c("Bombinha", "Medicamento oral")))
+
+ggplot(df_plot, aes(x = reorder(uf, pct_asma_med_pg), 
+                    y = pct_asma_med_pg, 
+                    fill = tipo_med)) +
+  geom_col(position = position_dodge(width = 0.7), width = 0.8) +
+  geom_errorbar(aes(ymin = li,
+                    ymax = ls),
+                position = position_dodge(width = 0.9), 
+                width = 0.3) +
+  coord_flip() +
+  labs(x = NULL,
+       y = "(%) de usuários de medicamentos de asma que fizeram desembolso",
+       fill = NULL) +
+  scale_fill_manual(values = c("Medicamento oral" = "#a7a6f2", "Bombinha" = "#ead4a4"),
+                    breaks = c("Medicamento oral", "Bombinha")) + 
+  theme_minimal(base_size = 14) +
+  theme(axis.text.y = element_text(size = 11))
 
 # Estimando o total e a taxa por 100 mil habitantes de pessoas que fizeram o desembolso de medicamentos orais ou bombinhas
