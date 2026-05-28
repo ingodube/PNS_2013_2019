@@ -163,9 +163,13 @@ write_xlsx(df_desembolso, path = "df_desembolso.xlsx")
 
 # Gerando o gráfico
 df_plot = df_desembolso %>%
-  mutate(tipo_med = factor(tipo_med, levels = c("Bombinha", "Medicamento oral")))
+  mutate(
+    tipo_med = factor(tipo_med, levels = c("Bombinha", "Medicamento oral")),
+    uf = factor(uf,
+                levels = c(setdiff(unique(uf), "Brasil"), "Brasil")) # Brasil por último
+  )
 
-ggplot(df_plot, aes(x = reorder(uf, pct_asma_med_pg), 
+ggplot(df_plot, aes(x = uf, 
                     y = pct_asma_med_pg, 
                     fill = tipo_med)) +
   geom_col(position = position_dodge(width = 0.7), width = 0.8) +

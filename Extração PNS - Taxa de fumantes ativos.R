@@ -61,12 +61,16 @@ estima_taxa_100k_uf = function(var, denom_var, design){
   
   ufs = sort(unique(design$variables$V0001))
   
-  do.call(
+  est_uf = do.call(
     rbind,
     lapply(ufs, function(uf_atual){
       estima_uma(subset(design, V0001 == uf_atual), uf_atual)
     })
   )
+  
+  est_br = estima_uma(design, "Brasil")
+  
+  rbind(est_uf, est_br)
 }
 
 variaveis_2019 = c("V0001", "V0024", "UPA_PNS", "ID_DOMICILIO", "V0006_PNS",
@@ -152,10 +156,14 @@ write_xlsx(df_taxa_fumantes_2013_2019_wide, path = "df_taxa_fumantes_2013_2019_w
 
 # Corrigindo a base de dados
 df_plot = df_taxa_fumantes_2013_2019 %>%
-  mutate(ano = factor(ano, levels = c(2019, 2013))) # garante que 2019 fica embaixo
+  mutate(
+    ano = factor(ano, levels = c(2019, 2013)), # garante que 2019 fica embaixo
+    uf = factor(uf,
+                levels = c(setdiff(unique(uf), "Brasil"), "Brasil")) # Brasil por último
+  )
 
 # Criando gráfico
-ggplot(df_plot, aes(x = reorder(uf, taxa_100k_fumantes), 
+ggplot(df_plot, aes(x = uf, 
                     y = taxa_100k_fumantes, 
                     fill = ano)) +
   geom_col(position = position_dodge(width = 0.7), width = 0.8) + # barras mais finas e separadas

@@ -68,7 +68,9 @@ estima_prop_beta = function(var, design, pct_col){
     })
   )
   
-  est_uf %>%
+  est_br = estima_uma(design, "Brasil")
+  
+  rbind(est_uf, est_br) %>%
     mutate(
       !!pct_col := valor * 100,
       li = ci_l * 100,
@@ -131,10 +133,14 @@ write_xlsx(prev_asma_2013_2019_wide, path = "df_prev_asma_2013_2019_wide.xlsx")
 
 # Corrigindo a base de dados
 df_plot = prev_asma_2013_2019 %>%
-  mutate(ano = factor(ano, levels = c(2019, 2013))) # garante que 2019 fica embaixo
+  mutate(
+    ano = factor(ano, levels = c(2019, 2013)), # garante que 2019 fica embaixo
+    uf = factor(uf,
+                levels = c(setdiff(unique(uf), "Brasil"), "Brasil")) # Brasil por último
+  )
 
 # Criando gráfico
-ggplot(df_plot, aes(x = reorder(uf, prevalencia), 
+ggplot(df_plot, aes(x = uf, 
                     y = prevalencia, 
                     fill = ano)) +
   geom_col(position = position_dodge(width = 0.7), width = 0.8) + # barras mais finas e separadas
