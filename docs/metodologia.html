@@ -1716,9 +1716,9 @@ Implementação do Plano Amostral da Pesquisa Nacional de Saúde no R: um
 estudo de caso sobre a asma no Brasil
 </div>
 <p class="hero-subtitle">
-Documentação técnica dos estimadores, intervalos de confiança,
-indicadores epidemiológicos e interpretação dos resultados da PNS
-2013-2019.
+Relatório técnico dos estimadores, intervalos de confiança, indicadores
+epidemiológicos e interpretação dos resultados da PNS 2013-2019 no
+contexto da asma.
 </p>
 <div class="hero-meta">
 I. Dube; M. E. L. Silva · 21/07/2026 ·
@@ -1726,8 +1726,7 @@ I. Dube; M. E. L. Silva · 21/07/2026 ·
 projeto</a>
 </div>
 <div class="chip-row">
-<p><span class="chip">PNS 2013-2019</span> <span class="chip">Plano
-amostral complexo</span> <span class="chip">Asma no Brasil</span></p>
+<p><span class="chip">Pesquisa Nacional de Saúde</span> <span class="chip">Plano amostral</span> <span class="chip">Asma</span></p>
 </div>
 </div>
 <div id="introdução" class="section level1" number="1">
@@ -2118,9 +2117,15 @@ Minas Gerais, Ceará, Maranhão. A leitura inferencial deve considerar os
 IC 95% de cada barra.
 </p>
 <p>A redução do tabagismo é coerente com a narrativa de queda de fatores
-de risco respiratórios. Ainda assim, a comparação estadual não deve se
-basear apenas na altura das barras: a sobreposição dos intervalos pode
-impedir conclusão estatística sobre mudança local.</p>
+de risco respiratórios. Não obstante, o comportamento dos dados é
+diametralmente oposto à prevalência da doença. Sendo assim, o aumento do
+diangnóstico da doença se dá, sobretudo, pelo aumento de cerca de 41,30%
+de pneumologistas em atividade no Brasil, segundo dados do Conselho
+Federal de Medicina. Ou seja, quanto maior o número de profissionais
+especialistas neste tipo de doença, maior a probabilidade de
+diagnósticos dessa doença. Adicionalmente, a comparação estadual não
+deve se basear apenas na altura das barras: a sobreposição dos
+intervalos pode impedir conclusão estatística sobre mudança local.</p>
 </div>
 <div id="farmácia-popular-e-desembolso" class="section level1" number="7">
 <h1><span class="header-section-number">7</span> Farmácia Popular e
@@ -2194,14 +2199,15 @@ capacidade de manejo da doença.</p>
 <div id="interoperabilidade-omop-e-etl-em-dados-observacionais" class="section level1" number="9">
 <h1><span class="header-section-number">9</span> Interoperabilidade,
 OMOP e ETL em dados observacionais</h1>
-<p>A PNS é uma fonte observacional populacional, não uma base
-assistencial longitudinal. Ainda assim, os códigos deste repositório
-executam uma lógica de ETL: extraem microdados brutos, transformam
-variáveis originais em conceitos analíticos e carregam tabelas finais
-(<code>df_*.csv</code> e <code>df_*.xlsx</code>) aptas para análise,
-visualização e reprodução. Essa disciplina de ETL é central em
-iniciativas de dados observacionais, porque torna explícitas as regras
-de recodificação, denominadores, exclusões e escalas de medida.</p>
+<p>A PNS é uma fonte de dados amostral observacional, se tratando,
+portanto, de uma base assistencial longitudinal. Ainda assim, os códigos
+deste repositório executam uma lógica de ETL: extraem microdados brutos,
+transformam variáveis originais em conceitos analíticos e carregam
+tabelas finais (<code>df_*.csv</code> e <code>df_*.xlsx</code>) aptas
+para análise, visualização e reprodução. Essa abordagem é central em
+iniciativas de dados observacionais, haja vista que torna explícitas as
+regras de recodificação, denominadores, exclusões e escalas de
+medida.</p>
 <p>O OMOP Common Data Model (CDM), mantido pela comunidade OHDSI, propõe
 padronizar estrutura e conteúdo de dados observacionais para permitir
 análises eficientes e evidência reprodutível em múltiplas bases [8,9].
@@ -2224,16 +2230,18 @@ servir como camada populacional de referência para interpretar bases
 clínicas: por exemplo, prevalência populacional, distribuição estadual,
 carga de crises e padrões de uso de medicamentos.</p>
 <p>Uma agenda futura viável é tratar a PNS como fonte complementar a uma
-rede de dados observacionais. O ETL dos microdados geraria tabelas
-analíticas documentadas, enquanto bases clínicas em OMOP poderiam
-avaliar trajetórias de cuidado, prescrição, dispensação, exacerbações
-registradas e utilização de serviços. A interoperabilidade entre essas
-camadas ajudaria a distinguir três fenômenos que aparecem nos
-resultados: aumento do diagnóstico, estabilidade de crises e incerteza
-sobre acesso/uso de medicamentos. O valor principal está menos em forçar
-a PNS para dentro de um modelo clínico e mais em usar os princípios de
-padronização, documentação e reprodutibilidade do OMOP/OHDSI para tornar
-a evidência populacional comparável e auditável [8-10].</p>
+rede de dados observacionais, como o sistema de informações hospitalares
+reportado pelo Sistema Único de Saúde (SUS). O ETL dos microdados
+geraria tabelas analíticas documentadas, enquanto bases clínicas em OMOP
+poderiam avaliar trajetórias de cuidado, prescrição, dispensação,
+exacerbações registradas e utilização de serviços. A interoperabilidade
+entre essas camadas ajudaria a distinguir três fenômenos que aparecem
+nos resultados: aumento do diagnóstico, estabilidade de crises e
+incerteza sobre acesso/uso de medicamentos. O valor principal está menos
+em forçar a PNS para dentro de um modelo clínico e mais em usar os
+princípios de padronização, documentação e reprodutibilidade do
+OMOP/OHDSI para tornar a evidência populacional comparável e auditável
+[8-10].</p>
 </div>
 <div id="síntese-interpretativa" class="section level1" number="10">
 <h1><span class="header-section-number">10</span> Síntese
