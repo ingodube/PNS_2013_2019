@@ -892,3 +892,7 @@ rmarkdown::render("docs/metodologia_pns.Rmd",
 <p id="ref-13" class="reference-entry">[13] KORN, Edward L.; GRAUBARD, Barry I. Confidence intervals for proportions with small expected number of positive counts estimated from survey data. <em>Survey Methodology</em>, v. 24, n. 2, p. 193-201, 1998.</p>
 
 </div>
+
+# Declaração de uso de inteligência artificial
+
+Durante a preparação deste trabalho, foi utilizado o ChatGPT/Codex, da OpenAI, com modelo GPT-5, como ferramenta de apoio à estruturação dos códigos, revisão de consistência, formatação do relatório, organização visual de tabelas e figuras e automação da renderização. O conteúdo científico, a seleção dos indicadores, a interpretação dos resultados, a validação das estimativas e a responsabilidade final pelo trabalho são dos autores. A ferramenta de inteligência artificial não foi utilizada como autora, não substituiu a análise crítica dos autores e não altera a responsabilidade humana sobre a integridade, a precisão e a apresentação das informações.
