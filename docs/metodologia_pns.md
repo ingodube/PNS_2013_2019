@@ -2,7 +2,7 @@
 
 Este repositório usa os microdados da Pesquisa Nacional de Saúde (PNS) por meio do pacote `PNSIBGE`.
 
-Um relatório metodológico completo, com gráficos e interpretações dos outputs locais, está disponível em [`metodologia.html`](metodologia.html). O arquivo-fonte editável desse relatório é [`metodologia_pns.Rmd`](metodologia_pns.Rmd).
+O relatório metodológico completo, com gráficos e interpretações dos outputs locais, está disponível em [`metodologia.html`](metodologia.html). O arquivo-fonte editável desse trabalho é [`metodologia_pns.Rmd`](metodologia_pns.Rmd).
 
 ## Desenho amostral
 
