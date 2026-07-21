@@ -13,20 +13,206 @@ output:
 ---
 
 <style>
-body p {
+:root {
+  --report-blue: #1f4e79;
+  --report-blue-light: #e8f1f8;
+  --report-ink: #1f2933;
+  --report-muted: #52616f;
+  --report-border: #d9e2ec;
+  --report-surface: #ffffff;
+  --report-bg: #f6f8fb;
+}
+body {
+  background: var(--report-bg);
+  color: var(--report-ink);
+  font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  line-height: 1.65;
+}
+.main-container {
+  max-width: 1040px !important;
+  margin-top: 32px;
+  margin-bottom: 48px;
+  padding: 34px 48px 48px;
+  background: var(--report-surface);
+  border: 1px solid var(--report-border);
+  box-shadow: 0 18px 44px rgba(31, 78, 121, 0.08);
+}
+.title.toc-ignore,
+.author,
+.date {
+  display: none;
+}
+h1, h2, h3 {
+  color: var(--report-blue);
+  font-weight: 700;
+  line-height: 1.25;
+}
+h1 {
+  margin-top: 1.8em;
+  padding-top: 0.35em;
+  border-top: 1px solid var(--report-border);
+}
+h2 {
+  margin-top: 1.55em;
+}
+a {
+  color: #1b6ca8;
+}
+body p,
+li {
   text-align: justify;
+}
+.report-hero {
+  margin: 0 0 2.2em;
+  padding: 30px 34px;
+  border-left: 7px solid var(--report-blue);
+  background: linear-gradient(135deg, #f8fbfd 0%, #eef6fb 100%);
+  border-radius: 6px;
+}
+.hero-kicker {
+  color: var(--report-blue);
+  font-size: 0.78em;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.hero-title {
+  margin: 0.25em 0 0.35em;
+  padding: 0;
+  border: 0;
+  color: #163b5c;
+  font-size: 2.08em;
+  font-weight: 800;
+  line-height: 1.28;
+}
+.hero-subtitle {
+  color: #334e68;
+  font-size: 1.08em;
+  margin-bottom: 0.75em;
+}
+.hero-meta {
+  color: var(--report-muted);
+  font-size: 0.94em;
+  margin-bottom: 1em;
+}
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.chip {
+  display: inline-block;
+  padding: 5px 10px;
+  color: #17324d;
+  background: #dcebf7;
+  border: 1px solid #b8d4ea;
+  border-radius: 999px;
+  font-size: 0.86em;
+  font-weight: 700;
+}
+.callout {
+  margin: 1.35em 0;
+  padding: 16px 18px;
+  border-left: 5px solid var(--report-blue);
+  background: #f8fbfd;
+  border-radius: 5px;
+}
+.callout strong {
+  display: block;
+  margin-bottom: 0.35em;
+  color: var(--report-blue);
+  font-size: 0.93em;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+.callout p {
+  margin: 0;
+}
+.callout.estimator {
+  border-left-color: #6b65c9;
+  background: #f6f5ff;
+}
+.callout.warning {
+  border-left-color: #b7791f;
+  background: #fffaf0;
+}
+.callout.interpretation {
+  border-left-color: #2f855a;
+  background: #f0fff4;
 }
 .figure-title {
   text-align: center;
   font-weight: 700;
-  margin: 1.8em 0 0.8em;
+  color: #243b53;
+  margin: 2em 0 0.85em;
 }
 .math.display {
   text-align: center;
 }
+pre {
+  border: 1px solid var(--report-border);
+  border-radius: 5px;
+  background: #f7fafc;
+}
+table,
+.report-table {
+  width: 100%;
+  margin: 1.1em 0 1.7em;
+  border-collapse: collapse;
+  font-size: 0.95em;
+}
+table caption {
+  caption-side: top;
+  color: var(--report-blue);
+  font-weight: 700;
+  text-align: left;
+  margin-bottom: 0.45em;
+}
+table th {
+  background: var(--report-blue-light);
+  color: #17324d;
+  font-weight: 700;
+  border-bottom: 2px solid #b8d4ea;
+}
+table th,
+table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--report-border);
+  vertical-align: top;
+}
+table tr:nth-child(even) td {
+  background: #fafcff;
+}
 .references p,
 .references li {
   text-align: left;
+  font-size: 0.94em;
+  margin-bottom: 0.8em;
+}
+#TOC,
+.tocify {
+  border: 1px solid var(--report-border);
+  border-radius: 5px;
+  box-shadow: 0 10px 24px rgba(31, 78, 121, 0.07);
+}
+#TOC li,
+.tocify li,
+.tocify-item {
+  text-align: left;
+}
+@media (max-width: 768px) {
+  .main-container {
+    margin-top: 0;
+    padding: 22px;
+    border: 0;
+    box-shadow: none;
+  }
+  .report-hero {
+    padding: 22px;
+  }
+  .hero-title {
+    font-size: 1.55em;
+  }
 }
 </style>
 
@@ -84,36 +270,71 @@ exists_local <- function(path) file.exists(file.path(repo_root, path))
 pal_anos <- c("2013" = "#a7a6f2", "2019" = "#ead4a4")
 pal_duas <- c("Medicamento oral" = "#a7a6f2", "Bombinha" = "#ead4a4")
 
+theme_report_plot <- function(base_size = 13) {
+  theme_minimal(base_size = base_size) +
+    theme(
+      text = element_text(color = "#1f2933"),
+      axis.title.x = element_text(color = "#243b53", margin = margin(t = 9)),
+      axis.title.y = element_blank(),
+      axis.text.x = element_text(color = "#52616f"),
+      axis.text.y = element_text(size = 9.5, color = "#243b53"),
+      panel.grid.major.y = element_blank(),
+      panel.grid.minor = element_blank(),
+      panel.grid.major.x = element_line(color = "#e6edf3", linewidth = 0.35),
+      legend.position = "top",
+      legend.justification = "left",
+      legend.text = element_text(color = "#243b53"),
+      plot.margin = margin(8, 14, 8, 8)
+    )
+}
+
+report_kable <- function(x, caption) {
+  knitr::kable(
+    x,
+    caption = caption,
+    format = "html",
+    table.attr = 'class="report-table"'
+  )
+}
+
 plot_year_ic <- function(df, value_col, lower_col, upper_col, y_lab) {
-  df %>%
+  plot_df <- df %>%
     mutate(
       ano = factor(as.character(ano), levels = c("2019", "2013")),
       uf = factor(uf, levels = c(setdiff(unique(uf), "Brasil"), "Brasil"))
-    ) %>%
-    ggplot(aes(x = uf, y = .data[[value_col]], fill = ano)) +
-    geom_col(position = position_dodge(width = 0.7), width = 0.8) +
+    )
+  brasil_pos <- which(levels(plot_df$uf) == "Brasil")
+
+  ggplot(plot_df, aes(x = uf, y = .data[[value_col]], fill = ano)) +
+    geom_col(position = position_dodge(width = 0.7), width = 0.78, color = "white", linewidth = 0.25) +
     geom_errorbar(
       aes(ymin = .data[[lower_col]], ymax = .data[[upper_col]]),
       position = position_dodge(width = 0.9),
-      width = 0.3
+      width = 0.28,
+      linewidth = 0.45,
+      color = "#34495e"
     ) +
+    {if (length(brasil_pos) == 1) geom_vline(xintercept = brasil_pos - 0.5, color = "#8aa4bc", linewidth = 0.35) else NULL} +
     coord_flip() +
     labs(x = NULL, y = y_lab, fill = NULL) +
     scale_fill_manual(values = pal_anos, breaks = c("2013", "2019")) +
-    theme_minimal(base_size = 14) +
-    theme(axis.text.y = element_text(size = 10))
+    scale_y_continuous(expand = expansion(mult = c(0, 0.08))) +
+    theme_report_plot()
 }
 
 plot_single_ic <- function(df, label_col, value_col, lower_col, upper_col, y_lab, fill = "#a7a6f2") {
-  df %>%
-    mutate(label = factor(.data[[label_col]], levels = .data[[label_col]])) %>%
-    ggplot(aes(x = label, y = .data[[value_col]])) +
-    geom_col(fill = fill, width = 0.8) +
-    geom_errorbar(aes(ymin = .data[[lower_col]], ymax = .data[[upper_col]]), width = 0.3) +
+  plot_df <- df %>%
+    mutate(label = factor(.data[[label_col]], levels = .data[[label_col]]))
+  brasil_pos <- which(levels(plot_df$label) == "Brasil")
+
+  ggplot(plot_df, aes(x = label, y = .data[[value_col]])) +
+    geom_col(fill = fill, width = 0.78, color = "white", linewidth = 0.25) +
+    geom_errorbar(aes(ymin = .data[[lower_col]], ymax = .data[[upper_col]]), width = 0.28, linewidth = 0.45, color = "#34495e") +
+    {if (length(brasil_pos) == 1) geom_vline(xintercept = brasil_pos - 0.5, color = "#8aa4bc", linewidth = 0.35) else NULL} +
     coord_flip() +
     labs(x = NULL, y = y_lab) +
-    theme_minimal(base_size = 14) +
-    theme(axis.text.y = element_text(size = 10))
+    scale_y_continuous(expand = expansion(mult = c(0, 0.08))) +
+    theme_report_plot()
 }
 
 fmt_pct <- function(x) format(round(x, 2), decimal.mark = ",", nsmall = 2)
@@ -152,6 +373,18 @@ code_status <- tibble::tibble(
 )
 ```
 
+<div class="report-hero">
+<div class="hero-kicker">Relatório metodológico</div>
+<div class="hero-title">Implementação do Plano Amostral da Pesquisa Nacional de Saúde no R: um estudo de caso sobre a asma no Brasil</div>
+<p class="hero-subtitle">Documentação técnica dos estimadores, intervalos de confiança, indicadores epidemiológicos e interpretação dos resultados da PNS 2013-2019.</p>
+<div class="hero-meta">I. Dube; M. E. L. Silva · `r format(Sys.Date(), '%d/%m/%Y')` · <a href="https://github.com/ingodube/PNS_2013_2019">Repositório do projeto</a></div>
+<div class="chip-row">
+<span class="chip">PNS 2013-2019</span>
+<span class="chip">Plano amostral complexo</span>
+<span class="chip">Asma no Brasil</span>
+</div>
+</div>
+
 # Introdução
 
 Indicadores epidemiológicos são medidas sintéticas que permitem descrever a frequência, a distribuição e a evolução de eventos relacionados à saúde em populações definidas. Prevalências, taxas, médias, proporções de uso de medicamentos e intervalos de confiança não são apenas resultados numéricos: eles organizam a leitura sobre necessidades de saúde, desigualdades territoriais, fatores de risco, acesso ao cuidado e desempenho de políticas públicas. Em pesquisas populacionais, esses indicadores são particularmente relevantes porque permitem transformar respostas individuais em evidências úteis para vigilância epidemiológica, planejamento em saúde e priorização de intervenções.
@@ -160,8 +393,13 @@ A asma é um exemplo claro dessa necessidade. Trata-se de uma condição respira
 
 Este trabalho apresenta a implementação do plano amostral da Pesquisa Nacional de Saúde (PNS) no R como estudo de caso sobre a asma no Brasil entre 2013 e 2019. O objetivo é demonstrar como microdados de inquéritos complexos podem ser convertidos em indicadores válidos, interpretáveis e reprodutíveis quando se respeitam pesos, estratos, unidades primárias de amostragem e procedimentos adequados de estimação da incerteza. A contribuição metodológica central está em explicitar o caminho entre os microdados originais, a construção dos indicadores e a leitura epidemiológica dos resultados.
 
+<div class="callout">
+  <strong>Objetivo metodológico</strong>
+  <p>Documentar de forma reprodutível como os microdados da PNS são transformados em indicadores ponderados sobre diagnóstico de asma, crises, uso de medicamentos, tabagismo e indicadores complementares.</p>
+</div>
+
 ```{r code-status}
-kable(code_status, caption = "Arquivos R documentados neste relatório.")
+report_kable(code_status, caption = "Arquivos R documentados neste relatório.")
 ```
 
 # Fonte dos dados e escopo analítico
@@ -197,6 +435,11 @@ Essas opções evitam falhas em domínios estaduais ou subgrupos com unidades pr
 
 # Estimadores e intervalos de confiança
 
+<div class="callout estimator">
+  <strong>Estimador</strong>
+  <p>As estimativas priorizam proporções ponderadas, taxas por 100 mil habitantes e médias ponderadas, sempre preservando a estrutura de estratos, conglomerados e pesos da PNS.</p>
+</div>
+
 Para variáveis binárias, a proporção ponderada é interpretada como:
 
 $$
@@ -228,6 +471,11 @@ Do ponto de vista estatístico, o intervalo de Wald é uma aproximação normal 
 
 O método beta usado por `survey::svyciprop(method = "beta")` segue a família de soluções recomendadas para proporções estimadas em desenhos amostrais complexos, especialmente quando o número esperado de eventos positivos é pequeno ou quando a proporção se aproxima dos limites da escala [13]. Ele respeita a natureza limitada da proporção, produz limites compatíveis com a escala probabilística e evita a solução inadequada de simplesmente cortar valores negativos ou superiores a 100%.
 
+<div class="callout warning">
+  <strong>Atenção estatística</strong>
+  <p>A leitura visual das barras deve sempre ser combinada com os intervalos de confiança. Diferenças aparentes entre UFs ou anos não devem ser interpretadas como mudança clara quando a incerteza permanece amplamente sobreposta.</p>
+</div>
+
 Do ponto de vista aplicado, o uso do IC beta torna a leitura de política pública mais prudente. A comparação entre 2013 e 2019 deve considerar simultaneamente a magnitude da diferença e a incerteza ao redor das estimativas. Quando os intervalos se sobrepõem, o relatório interpreta a evidência como insuficiente para afirmar mudança estatisticamente clara naquele domínio, mesmo que as barras do gráfico pareçam diferentes. Quando não há sobreposição relevante, a conclusão de aumento ou queda ganha maior sustentação inferencial.
 
 Para médias, como renda deflacionada e dias perdidos, os códigos usam `survey::svymean()`:
@@ -256,12 +504,13 @@ plot_year_ic(
 )
 ```
 
-```{r interp-prev-asma}
+```{r interp-prev-asma, results='asis'}
 asma_2013 <- get_brasil(prev_asma, "prevalencia", "li", "ls", 2013)
 asma_2019 <- get_brasil(prev_asma, "prevalencia", "li", "ls", 2019)
 asma_overlap <- overlap_ci(asma_2013$li, asma_2013$ls, asma_2019$li, asma_2019$ls)
 
 cat(
+  "<p>",
   "No Brasil, a prevalência estimada de diagnóstico médico de asma passou de ",
   fmt_pct(asma_2013$estimativa), "% em 2013 (IC 95%: ",
   fmt_pct(asma_2013$li), " a ", fmt_pct(asma_2013$ls), ") para ",
@@ -270,6 +519,7 @@ cat(
   ifelse(asma_overlap,
          "Os ICs se sobrepõem, portanto a comparação deve ser interpretada com cautela.",
          "Os ICs não se sobrepõem, reforçando a evidência de aumento no período."),
+  "</p>",
   sep = ""
 )
 ```
@@ -292,18 +542,20 @@ plot_year_ic(
 )
 ```
 
-```{r interp-prev-crise}
+```{r interp-prev-crise, results='asis'}
 crise_2013 <- get_brasil(prev_crise, "prevalencia", "li", "ls", 2013)
 crise_2019 <- get_brasil(prev_crise, "prevalencia", "li", "ls", 2019)
 crise_overlap <- overlap_ci(crise_2013$li, crise_2013$ls, crise_2019$li, crise_2019$ls)
 
 cat(
+  "<p>",
   "A ocorrência nacional de crises ficou em ",
   fmt_pct(crise_2013$estimativa), "% em 2013 e ",
   fmt_pct(crise_2019$estimativa), "% em 2019. ",
   ifelse(crise_overlap,
          "A sobreposição dos IC 95% indica ausência de mudança estatisticamente clara.",
          "A ausência de sobreposição dos IC 95% sugere mudança relevante no período."),
+  "</p>",
   sep = ""
 )
 ```
@@ -326,18 +578,20 @@ plot_year_ic(
 )
 ```
 
-```{r interp-medic-asma}
+```{r interp-medic-asma, results='asis'}
 medic_2013 <- get_brasil(medic_asma, "pct_medic_asma", "li", "ls", 2013)
 medic_2019 <- get_brasil(medic_asma, "pct_medic_asma", "li", "ls", 2019)
 medic_overlap <- overlap_ci(medic_2013$li, medic_2013$ls, medic_2019$li, medic_2019$ls)
 
 cat(
+  "<p>",
   "Entre pessoas com diagnóstico médico de asma, o uso de medicamento oral ou bombinha foi de ",
   fmt_pct(medic_2013$estimativa), "% em 2013 e ",
   fmt_pct(medic_2019$estimativa), "% em 2019. ",
   ifelse(medic_overlap,
          "Como os IC 95% se sobrepõem, a queda percentual deve ser lida com cautela.",
          "A ausência de sobreposição sugere mudança estatisticamente clara."),
+  "</p>",
   sep = ""
 )
 ```
@@ -396,7 +650,7 @@ plot_year_ic(
 )
 ```
 
-```{r interp-fumantes}
+```{r interp-fumantes, results='asis'}
 fumantes_uf <- taxa_fumantes %>%
   select(uf, ano, taxa_100k_fumantes, lim_inf_taxa_100k_fumantes, lim_sup_taxa_100k_fumantes) %>%
   pivot_wider(
@@ -408,9 +662,11 @@ fumantes_uf <- taxa_fumantes %>%
 
 quedas <- head(fumantes_uf$uf, 5)
 cat(
+  "<p>",
   "Nos outputs locais, a taxa de fumantes está disponível por UF. As maiores reduções absolutas entre 2013 e 2019 aparecem em: ",
   paste(quedas, collapse = ", "),
   ". A leitura inferencial deve considerar os IC 95% de cada barra.",
+  "</p>",
   sep = ""
 )
 ```
@@ -425,14 +681,23 @@ O arquivo R `Extração PNS - Farmácia Popular.R` estima, para 2019, a proporç
 
 ```{r plot-desembolso}
 if (!is.null(desembolso)) {
-  desembolso %>%
+  plot_desembolso <- desembolso %>%
     mutate(
       tipo_med = factor(tipo_med, levels = c("Bombinha", "Medicamento oral")),
       uf = factor(uf, levels = c(setdiff(unique(uf), "Brasil"), "Brasil"))
-    ) %>%
-    ggplot(aes(x = uf, y = pct_asma_med_pg, fill = tipo_med)) +
-    geom_col(position = position_dodge(width = 0.7), width = 0.8) +
-    geom_errorbar(aes(ymin = li, ymax = ls), position = position_dodge(width = 0.9), width = 0.3) +
+    )
+  brasil_pos <- which(levels(plot_desembolso$uf) == "Brasil")
+
+  ggplot(plot_desembolso, aes(x = uf, y = pct_asma_med_pg, fill = tipo_med)) +
+    geom_col(position = position_dodge(width = 0.7), width = 0.78, color = "white", linewidth = 0.25) +
+    geom_errorbar(
+      aes(ymin = li, ymax = ls),
+      position = position_dodge(width = 0.9),
+      width = 0.28,
+      linewidth = 0.45,
+      color = "#34495e"
+    ) +
+    {if (length(brasil_pos) == 1) geom_vline(xintercept = brasil_pos - 0.5, color = "#8aa4bc", linewidth = 0.35) else NULL} +
     coord_flip() +
     labs(
       x = NULL,
@@ -440,8 +705,8 @@ if (!is.null(desembolso)) {
       fill = NULL
     ) +
     scale_fill_manual(values = pal_duas, breaks = c("Medicamento oral", "Bombinha")) +
-    theme_minimal(base_size = 14) +
-    theme(axis.text.y = element_text(size = 10))
+    scale_y_continuous(expand = expansion(mult = c(0, 0.08))) +
+    theme_report_plot()
 } else {
   cat("O arquivo df_desembolso.xlsx nao esta disponivel localmente. O grafico sera renderizado quando o codigo Extração PNS - Farmácia Popular.R for executado em ambiente com PNSIBGE e writexl instalados.")
 }
@@ -533,6 +798,11 @@ Uma agenda futura viável é tratar a PNS como fonte complementar a uma rede de 
 
 # Síntese interpretativa
 
+<div class="callout interpretation">
+  <strong>Interpretação aplicada</strong>
+  <p>A síntese integra magnitude, direção temporal e incerteza estatística para evitar conclusões baseadas apenas na altura das barras ou em diferenças percentuais isoladas.</p>
+</div>
+
 ```{r sintese-table}
 sintese <- tibble::tibble(
   indicador = c(
@@ -551,7 +821,7 @@ sintese <- tibble::tibble(
   )
 )
 
-kable(sintese, caption = "Leitura integrada dos principais achados.")
+report_kable(sintese, caption = "Leitura integrada dos principais achados.")
 ```
 
 Em conjunto, os resultados indicam aumento do diagnóstico médico de asma entre 2013 e 2019, sem melhora clara nas crises recentes. A estabilidade das crises e a cautela na interpretação do uso de medicamentos sugerem que o manejo da asma depende não apenas de diagnóstico, mas também de acesso, adesão, acompanhamento clínico e intervenções não farmacológicas. A correta implementação do plano amostral complexo é essencial para que essas conclusões sejam comparáveis entre anos e entre Unidades da Federação.

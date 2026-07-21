@@ -29,10 +29,22 @@ description: Format, revise, render, validate, and publish methodological report
 - Justify body paragraphs with CSS such as `body p { text-align: justify; }`.
 - Keep references left-aligned even when body text is justified.
 - Center figure titles and display equations.
+- For methodological reports, prefer a restrained institutional aesthetic:
+  - use a light neutral page background and a white reading surface;
+  - use one primary blue or institutional accent color for headings, links, table headers, and callout borders;
+  - keep the maximum reading width constrained so long paragraphs remain readable.
+- Add a concise opening block when the report is public-facing:
+  - include report type, title, subtitle, authors, date, repository link, and short chips for data source, method, and topic;
+  - avoid marketing language or dashboard-style decoration.
+- Use reusable callout boxes for high-value reading anchors such as methodological objective, estimator, statistical caution, and applied interpretation.
+- Style tables consistently with light borders, subtle header backgrounds, readable spacing, and left-aligned captions.
 - Put figure titles above plots as document text, not inside `ggplot`:
   - `Figura N: descrição do gráfico`
   - use a class such as `.figure-title`;
   - remove `title =` from `labs()` and remove `plot.title` styling from plot themes.
+- Apply one common plotting theme across the report:
+  - keep the existing geoms and data transformations unchanged unless the user asks for analytic changes;
+  - use softer grid lines, legible axis labels, top legends, adequate plot margins, and a consistent visual separator or emphasis for national totals such as `Brasil` when present.
 - Use inline math for mathematical concepts in prose:
   - write `$w_i$`, `$y_i$`, `$x_i$`, `$\hat{p}$`, `$IC_{95\%}$`, `$taxa_{100k}$`;
   - keep function names, column names, and file identifiers in backticks.
