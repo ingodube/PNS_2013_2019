@@ -310,7 +310,6 @@ plot_year_ic <- function(df, value_col, lower_col, upper_col, y_lab) {
       ano = factor(as.character(ano), levels = c("2019", "2013")),
       uf = factor(uf, levels = c(setdiff(unique(uf), "Brasil"), "Brasil"))
     )
-  brasil_pos <- which(levels(plot_df$uf) == "Brasil")
 
   ggplot(plot_df, aes(x = uf, y = .data[[value_col]], fill = ano)) +
     geom_col(position = position_dodge(width = 0.7), width = 0.78, color = "white", linewidth = 0.25) +
@@ -321,7 +320,6 @@ plot_year_ic <- function(df, value_col, lower_col, upper_col, y_lab) {
       linewidth = 0.45,
       color = "#34495e"
     ) +
-    {if (length(brasil_pos) == 1) geom_vline(xintercept = brasil_pos - 0.5, color = "#8aa4bc", linewidth = 0.35) else NULL} +
     coord_flip() +
     labs(x = NULL, y = y_lab, fill = NULL) +
     scale_fill_manual(values = pal_anos, breaks = c("2013", "2019")) +
@@ -332,12 +330,10 @@ plot_year_ic <- function(df, value_col, lower_col, upper_col, y_lab) {
 plot_single_ic <- function(df, label_col, value_col, lower_col, upper_col, y_lab, fill = "#a7a6f2") {
   plot_df <- df %>%
     mutate(label = factor(.data[[label_col]], levels = .data[[label_col]]))
-  brasil_pos <- which(levels(plot_df$label) == "Brasil")
 
   ggplot(plot_df, aes(x = label, y = .data[[value_col]])) +
     geom_col(fill = fill, width = 0.78, color = "white", linewidth = 0.25) +
     geom_errorbar(aes(ymin = .data[[lower_col]], ymax = .data[[upper_col]]), width = 0.28, linewidth = 0.45, color = "#34495e") +
-    {if (length(brasil_pos) == 1) geom_vline(xintercept = brasil_pos - 0.5, color = "#8aa4bc", linewidth = 0.35) else NULL} +
     coord_flip() +
     labs(x = NULL, y = y_lab) +
     scale_y_continuous(expand = expansion(mult = c(0, 0.08))) +
@@ -693,7 +689,6 @@ if (!is.null(desembolso)) {
       tipo_med = factor(tipo_med, levels = c("Bombinha", "Medicamento oral")),
       uf = factor(uf, levels = c(setdiff(unique(uf), "Brasil"), "Brasil"))
     )
-  brasil_pos <- which(levels(plot_desembolso$uf) == "Brasil")
 
   ggplot(plot_desembolso, aes(x = uf, y = pct_asma_med_pg, fill = tipo_med)) +
     geom_col(position = position_dodge(width = 0.7), width = 0.78, color = "white", linewidth = 0.25) +
@@ -704,7 +699,6 @@ if (!is.null(desembolso)) {
       linewidth = 0.45,
       color = "#34495e"
     ) +
-    {if (length(brasil_pos) == 1) geom_vline(xintercept = brasil_pos - 0.5, color = "#8aa4bc", linewidth = 0.35) else NULL} +
     coord_flip() +
     labs(
       x = NULL,
