@@ -1,4 +1,4 @@
-# Metodologia PNS nos scripts de extração
+# Metodologia PNS nos códigos de extração
 
 Este repositório usa os microdados da Pesquisa Nacional de Saúde (PNS) por meio do pacote `PNSIBGE`.
 
@@ -6,7 +6,7 @@ O relatório metodológico completo, com gráficos e interpretações dos output
 
 ## Desenho amostral
 
-Os scripts devem construir o plano amostral com `PNSIBGE::pns_design()` sempre que possível. Para análises do morador selecionado, os dados enviados ao `pns_design()` devem conter o conjunto de variáveis do peso do morador selecionado:
+Os códigos devem construir o plano amostral com `PNSIBGE::pns_design()` sempre que possível. Para análises do morador selecionado, os dados enviados ao `pns_design()` devem conter o conjunto de variáveis do peso do morador selecionado:
 
 - `UPA_PNS`
 - `ID_DOMICILIO`
@@ -18,7 +18,7 @@ Os scripts devem construir o plano amostral com `PNSIBGE::pns_design()` sempre q
 
 Quando a base também contiver os conjuntos de peso domiciliar (`V0028`, `V00281`, `V00282`, `V00283`) ou de antropometria (`V0030`, `V00301`, `V00302`, `V00303`), os helpers locais removem esses campos antes de chamar `pns_design()`. Isso evita que o pacote escolha outro conjunto de pesos antes do peso do morador selecionado.
 
-Os scripts também devem usar:
+As rotinas analíticas também devem usar:
 
 ```r
 options(survey.lonely.psu = "adjust")
@@ -29,9 +29,9 @@ Essas opções são compatíveis com o fluxo usado pelo `PNSIBGE::pns_design()` 
 
 ## Intervalos de confiança
 
-Para proporções binárias, o padrão dos scripts é `survey::svyciprop(method = "beta")` com nível de 95%. Esse método evita os limites fora da escala 0-1 que podem aparecer com intervalos Wald calculados por `svymean()`/`confint()` e é estável em domínios pequenos da PNS.
+Para proporções binárias, o padrão dos códigos é `survey::svyciprop(method = "beta")` com nível de 95%. Esse método evita os limites fora da escala 0-1 que podem aparecer com intervalos Wald calculados por `svymean()`/`confint()` e é estável em domínios pequenos da PNS.
 
-Os scripts não devem truncar manualmente limites superiores em 100%. Se um intervalo de confiança de proporção precisar respeitar a escala percentual, a transformação deve vir do estimador adequado, não de pós-processamento manual.
+Os códigos não devem truncar manualmente limites superiores em 100%. Se um intervalo de confiança de proporção precisar respeitar a escala percentual, a transformação deve vir do estimador adequado, não de pós-processamento manual.
 
 ## Taxas por 100 mil
 

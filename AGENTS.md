@@ -32,5 +32,10 @@ git show --stat --oneline --summary origin/main..main
 ## Arquivos gerados
 
 - Mantenha fora do Git os outputs ja cobertos pelo `.gitignore`: `df_*.csv`, `df_*.xlsx`, `Rplots.pdf`, `~$*.xlsx` e `PNS_2013_2019/`.
-- Versione preferencialmente scripts R, documentacao e configuracoes do projeto.
+- Versione preferencialmente codigos R, documentacao e configuracoes do projeto.
 - Se algum output precisar ser versionado, registre a razao no commit e ajuste o `.gitignore` de forma especifica.
+
+## Skill local
+
+- Para relatorios metodologicos em R Markdown, use a skill repo-local em `.codex/skills/methodology-rmarkdown/`.
+- Essa skill registra as regras de titulo, introducao, texto justificado, legendas de figuras acima dos graficos, equacoes centralizadas, notacao matematica inline, referencias numeradas, linguagem recomendada e validacao antes de publicar.
