@@ -11,7 +11,7 @@ Este repositório documenta e implementa, em linguagem R, procedimentos para ana
 ## Implementação do Plano Amostral
 
 <p align="justify">
-O plano amostral da PNS é probabilístico, estratificado e por conglomerados em múltiplos estágios. Na prática, isso significa que as estimativas não devem ser calculadas como se os microdados viessem de uma amostra aleatória simples. Os scripts deste repositório constroem o desenho amostral com o pacote <code>PNSIBGE</code> e utilizam o pacote <code>survey</code> para incorporar pesos, estratos e unidades primárias de amostragem. Esse cuidado é essencial para produzir estimativas válidas de prevalência, médias, totais, taxas por 100 mil habitantes e intervalos de confiança.
+O plano amostral da PNS é probabilístico, estratificado e por conglomerados em múltiplos estágios. Na prática, isso significa que as estimativas não devem ser calculadas como se os microdados viessem de uma amostra aleatória simples. Os códigos deste repositório constroem o desenho amostral com o pacote <code>PNSIBGE</code> e utilizam o pacote <code>survey</code> para incorporar pesos, estratos e unidades primárias de amostragem. Esse cuidado é essencial para produzir estimativas válidas de prevalência, médias, totais, taxas por 100 mil habitantes e intervalos de confiança.
 </p>
 
 <p align="justify">
@@ -29,7 +29,7 @@ O relatório metodológico descreve detalhadamente os passos de extração, reco
 
 ## Organização Geral
 
-- Scripts R de extração e análise: arquivos `Extração PNS - *.R`.
+- Códigos R de extração e análise: arquivos `Extração PNS - *.R`.
 - Documentação metodológica: `docs/metodologia_pns.Rmd`.
 - Relatório publicado: `docs/metodologia.html`.
 - Pôsteres científicos: `outputs/posters/`.
@@ -37,5 +37,5 @@ O relatório metodológico descreve detalhadamente os passos de extração, reco
 ## Reprodutibilidade
 
 <p align="justify">
-Os arquivos de dados gerados localmente, como <code>df_*.csv</code> e <code>df_*.xlsx</code>, permanecem fora do controle de versão conforme definido no <code>.gitignore</code>. O objetivo é versionar os scripts, a documentação e os produtos finais necessários para leitura e comunicação dos achados, mantendo os outputs intermediários reproduzíveis a partir dos códigos.
+Os arquivos de dados gerados localmente, como <code>df_*.csv</code> e <code>df_*.xlsx</code>, permanecem fora do controle de versão conforme definido no <code>.gitignore</code>. O objetivo é versionar os códigos, a documentação e os produtos finais necessários para leitura e comunicação dos achados, mantendo os outputs intermediários reproduzíveis a partir das rotinas analíticas.
 </p>
