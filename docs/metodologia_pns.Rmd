@@ -376,12 +376,12 @@ code_status <- tibble::tibble(
 <div class="report-hero">
 <div class="hero-kicker">Relatório metodológico</div>
 <div class="hero-title">Implementação do Plano Amostral da Pesquisa Nacional de Saúde no R: um estudo de caso sobre a asma no Brasil</div>
-<p class="hero-subtitle">Documentação técnica dos estimadores, intervalos de confiança, indicadores epidemiológicos e interpretação dos resultados da PNS 2013-2019.</p>
+<p class="hero-subtitle">Relatório técnico dos estimadores, intervalos de confiança, indicadores epidemiológicos e interpretação dos resultados da PNS 2013-2019 no contexto da asma.</p>
 <div class="hero-meta">I. Dube; M. E. L. Silva · `r format(Sys.Date(), '%d/%m/%Y')` · <a href="https://github.com/ingodube/PNS_2013_2019">Repositório do projeto</a></div>
 <div class="chip-row">
-<span class="chip">PNS 2013-2019</span>
-<span class="chip">Plano amostral complexo</span>
-<span class="chip">Asma no Brasil</span>
+<span class="chip">Pesquisa Nacional de Saúde</span>
+<span class="chip">Plano amostral</span>
+<span class="chip">Asma</span>
 </div>
 </div>
 
@@ -671,7 +671,7 @@ cat(
 )
 ```
 
-A redução do tabagismo é coerente com a narrativa de queda de fatores de risco respiratórios. Ainda assim, a comparação estadual não deve se basear apenas na altura das barras: a sobreposição dos intervalos pode impedir conclusão estatística sobre mudança local.
+A redução do tabagismo é coerente com a narrativa de queda de fatores de risco respiratórios. Não obstante, o comportamento dos dados é diametralmente oposto à prevalência da doença. Sendo assim, o aumento do diangnóstico da doença se dá, sobretudo, pelo aumento de cerca de 41,30% de pneumologistas em atividade no Brasil, segundo dados do Conselho Federal de Medicina. Ou seja, quanto maior o número de profissionais especialistas neste tipo de doença, maior a probabilidade de diagnósticos dessa doença. Adicionalmente, a comparação estadual não deve se basear apenas na altura das barras: a sobreposição dos intervalos pode impedir conclusão estatística sobre mudança local.
 
 # Farmácia Popular e desembolso
 
@@ -788,13 +788,13 @@ A renda não é um desfecho de asma, mas contribui para interpretar desigualdade
 
 # Interoperabilidade, OMOP e ETL em dados observacionais
 
-A PNS é uma fonte observacional populacional, não uma base assistencial longitudinal. Ainda assim, os códigos deste repositório executam uma lógica de ETL: extraem microdados brutos, transformam variáveis originais em conceitos analíticos e carregam tabelas finais (`df_*.csv` e `df_*.xlsx`) aptas para análise, visualização e reprodução. Essa disciplina de ETL é central em iniciativas de dados observacionais, porque torna explícitas as regras de recodificação, denominadores, exclusões e escalas de medida.
+A PNS é uma fonte de dados amostral observacional, se tratando, portanto, de uma base assistencial longitudinal. Ainda assim, os códigos deste repositório executam uma lógica de ETL: extraem microdados brutos, transformam variáveis originais em conceitos analíticos e carregam tabelas finais (`df_*.csv` e `df_*.xlsx`) aptas para análise, visualização e reprodução. Essa abordagem é central em iniciativas de dados observacionais, haja vista que torna explícitas as regras de recodificação, denominadores, exclusões e escalas de medida.
 
 O OMOP Common Data Model (CDM), mantido pela comunidade OHDSI, propõe padronizar estrutura e conteúdo de dados observacionais para permitir análises eficientes e evidência reprodutível em múltiplas bases [8,9]. Em bases clínicas, um ETL para OMOP costuma mapear pacientes, visitas, condições, medicamentos, medidas e procedimentos para tabelas e vocabulários padronizados. No caso da PNS, a lógica é diferente: há respondentes de inquérito, variáveis autorreferidas, pesos amostrais, estratos e conglomerados. Portanto, um mapeamento literal para OMOP deve ser feito com cautela, porque o desenho amostral é parte constitutiva da informação e não pode ser descartado sem perda inferencial.
 
 Mesmo com essa limitação, a discussão OMOP/OHDSI é útil para este trabalho. Primeiro, ela explicita a importância de documentar cada transformação, como `Q074` para diagnóstico de asma, `Q076` para crise recente e `P050` para tabagismo. Segundo, reforça a necessidade de vocabulários e conceitos harmonizados quando se deseja comparar inquéritos populacionais com bases assistenciais, como prontuários, dispensação farmacêutica ou sistemas administrativos. Terceiro, mostra que outputs reprodutíveis da PNS podem servir como camada populacional de referência para interpretar bases clínicas: por exemplo, prevalência populacional, distribuição estadual, carga de crises e padrões de uso de medicamentos.
 
-Uma agenda futura viável é tratar a PNS como fonte complementar a uma rede de dados observacionais. O ETL dos microdados geraria tabelas analíticas documentadas, enquanto bases clínicas em OMOP poderiam avaliar trajetórias de cuidado, prescrição, dispensação, exacerbações registradas e utilização de serviços. A interoperabilidade entre essas camadas ajudaria a distinguir três fenômenos que aparecem nos resultados: aumento do diagnóstico, estabilidade de crises e incerteza sobre acesso/uso de medicamentos. O valor principal está menos em forçar a PNS para dentro de um modelo clínico e mais em usar os princípios de padronização, documentação e reprodutibilidade do OMOP/OHDSI para tornar a evidência populacional comparável e auditável [8-10].
+Uma agenda futura viável é tratar a PNS como fonte complementar a uma rede de dados observacionais, como o sistema de informações hospitalares reportado pelo Sistema Único de Saúde (SUS). O ETL dos microdados geraria tabelas analíticas documentadas, enquanto bases clínicas em OMOP poderiam avaliar trajetórias de cuidado, prescrição, dispensação, exacerbações registradas e utilização de serviços. A interoperabilidade entre essas camadas ajudaria a distinguir três fenômenos que aparecem nos resultados: aumento do diagnóstico, estabilidade de crises e incerteza sobre acesso/uso de medicamentos. O valor principal está menos em forçar a PNS para dentro de um modelo clínico e mais em usar os princípios de padronização, documentação e reprodutibilidade do OMOP/OHDSI para tornar a evidência populacional comparável e auditável [8-10].
 
 # Síntese interpretativa
 
