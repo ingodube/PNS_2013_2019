@@ -1,0 +1,532 @@
+---
+title: "Metodologia da PNS 2013-2019: plano amostral, indicadores e interpretações"
+author: "I. Dube; M. E. L. Silva"
+date: "`r format(Sys.Date(), '%d/%m/%Y')`"
+output:
+  html_document:
+    toc: true
+    toc_depth: 3
+    toc_float: true
+    number_sections: true
+    theme: cosmo
+    self_contained: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = FALSE,
+  warning = FALSE,
+  message = FALSE,
+  fig.width = 11,
+  fig.height = 8,
+  dpi = 150
+)
+
+required <- c("dplyr", "tidyr", "ggplot2", "readr", "openxlsx", "knitr", "scales", "stringr")
+missing <- required[!vapply(required, requireNamespace, logical(1), quietly = TRUE)]
+if (length(missing) > 0) {
+  stop("Pacotes R ausentes para renderizar este relatorio: ", paste(missing, collapse = ", "))
+}
+
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(readr)
+library(openxlsx)
+library(knitr)
+library(scales)
+library(stringr)
+
+candidate_roots <- unique(normalizePath(c(file.path(getwd(), ".."), getwd()), mustWork = FALSE))
+repo_root <- candidate_roots[file.exists(file.path(candidate_roots, "Extração PNS - Asma.R"))][1]
+if (is.na(repo_root)) {
+  stop("Nao foi possivel localizar a raiz do repositorio a partir do diretorio de renderizacao.")
+}
+
+script_files <- c(
+  "Extração PNS - Asma.R",
+  "Extração PNS - Crise Asma 12 Meses.R",
+  "Extração PNS - Medicamentos Asma.R",
+  "Extração PNS - Taxa de fumantes ativos.R",
+  "Extração PNS - Farmácia Popular.R",
+  "Extração PNS - Dias Perdidos.R",
+  "Extração PNS - Renda.R"
+)
+
+read_csv_local <- function(path) {
+  readr::read_csv(file.path(repo_root, path), show_col_types = FALSE)
+}
+
+read_xlsx_local <- function(path) {
+  openxlsx::read.xlsx(file.path(repo_root, path))
+}
+
+exists_local <- function(path) file.exists(file.path(repo_root, path))
+
+pal_anos <- c("2013" = "#a7a6f2", "2019" = "#ead4a4")
+pal_duas <- c("Medicamento oral" = "#a7a6f2", "Bombinha" = "#ead4a4")
+
+plot_year_ic <- function(df, value_col, lower_col, upper_col, y_lab, title) {
+  df %>%
+    mutate(
+      ano = factor(as.character(ano), levels = c("2019", "2013")),
+      uf = factor(uf, levels = c(setdiff(unique(uf), "Brasil"), "Brasil"))
+    ) %>%
+    ggplot(aes(x = uf, y = .data[[value_col]], fill = ano)) +
+    geom_col(position = position_dodge(width = 0.7), width = 0.8) +
+    geom_errorbar(
+      aes(ymin = .data[[lower_col]], ymax = .data[[upper_col]]),
+      position = position_dodge(width = 0.9),
+      width = 0.3
+    ) +
+    coord_flip() +
+    labs(x = NULL, y = y_lab, fill = NULL, title = title) +
+    scale_fill_manual(values = pal_anos, breaks = c("2013", "2019")) +
+    theme_minimal(base_size = 14) +
+    theme(axis.text.y = element_text(size = 10), plot.title = element_text(face = "bold"))
+}
+
+plot_single_ic <- function(df, label_col, value_col, lower_col, upper_col, y_lab, title, fill = "#a7a6f2") {
+  df %>%
+    mutate(label = factor(.data[[label_col]], levels = .data[[label_col]])) %>%
+    ggplot(aes(x = label, y = .data[[value_col]])) +
+    geom_col(fill = fill, width = 0.8) +
+    geom_errorbar(aes(ymin = .data[[lower_col]], ymax = .data[[upper_col]]), width = 0.3) +
+    coord_flip() +
+    labs(x = NULL, y = y_lab, title = title) +
+    theme_minimal(base_size = 14) +
+    theme(axis.text.y = element_text(size = 10), plot.title = element_text(face = "bold"))
+}
+
+fmt_pct <- function(x) format(round(x, 2), decimal.mark = ",", nsmall = 2)
+fmt_int <- function(x) format(round(x, 0), big.mark = ".", decimal.mark = ",")
+
+get_brasil <- function(df, value_col, lower_col, upper_col, year, year_col = "ano") {
+  df %>%
+    filter(uf == "Brasil", .data[[year_col]] == year) %>%
+    transmute(
+      estimativa = .data[[value_col]],
+      li = .data[[lower_col]],
+      ls = .data[[upper_col]]
+    ) %>%
+    slice(1)
+}
+
+overlap_ci <- function(a_li, a_ls, b_li, b_ls) {
+  max(a_li, b_li, na.rm = TRUE) <= min(a_ls, b_ls, na.rm = TRUE)
+}
+
+prev_asma <- read_csv_local("df_prev_asma_2013_2019_long.csv")
+prev_crise <- read_csv_local("df_prev_crise_2013_2019_long.csv")
+medic_asma <- read_csv_local("df_medic_asma_2013_2019_long.csv")
+medic_crise <- read_csv_local("df_medic_crise_asma_2013_2019_long.csv")
+taxa_medic <- read_csv_local("df_taxa_medic_asma_2013_2019_long.csv")
+taxa_fumantes <- read_csv_local("df_taxa_fumantes_2013_2019_long.csv")
+
+absenteismo <- read_xlsx_local("df_absenteismo.xlsx")
+dias_perdidos <- read_xlsx_local("df_dias_perdidos.xlsx")
+renda <- read_xlsx_local("df_renda_2019.xlsx")
+desembolso <- if (exists_local("df_desembolso.xlsx")) read_xlsx_local("df_desembolso.xlsx") else NULL
+
+scripts_status <- tibble::tibble(
+  script = script_files,
+  encontrado = file.exists(file.path(repo_root, script_files))
+)
+```
+
+# Objetivo do documento
+
+Este relatório descreve como os scripts do repositório implementam o plano amostral complexo da Pesquisa Nacional de Saúde (PNS), constroem indicadores epidemiológicos e socioeconômicos, estimam intervalos de confiança e produzem os gráficos usados na síntese dos resultados.
+
+A renderização deste HTML usa os arquivos `df_*.csv` e `df_*.xlsx` disponíveis localmente. Essa escolha evita baixar novamente os microdados durante a leitura do relatório e garante consistência com os resultados já usados nos pôsteres e demais saídas do projeto.
+
+Os gráficos foram reconstruídos a partir dos outputs locais com o mesmo padrão visual dos scripts R: `geom_col`, `geom_errorbar`, `coord_flip`, intervalos de confiança de 95% e paleta original em lilás (`#a7a6f2`) e bege (`#ead4a4`).
+
+```{r scripts-status}
+kable(scripts_status, caption = "Scripts R documentados neste relatório.")
+```
+
+# Fonte dos dados e escopo analítico
+
+Os scripts usam microdados da PNS 2013 e 2019 obtidos pelo pacote `PNSIBGE`, com `get_pns(..., design = FALSE, labels = TRUE, selected = TRUE, anthropometry = FALSE)`. A opção `selected = TRUE` indica que as análises se concentram no morador selecionado para o questionário individual, que é o nível adequado para as perguntas de diagnóstico de asma, crises, medicamentos, tabagismo, absenteísmo e renda individual.
+
+A raiz do repositório é tratada como fonte canônica dos scripts. A pasta interna `PNS_2013_2019/` não é usada neste relatório porque está ignorada pelo Git e parece ser uma duplicata local.
+
+# Implementação do plano amostral complexo
+
+Os scripts constroem o desenho amostral com `PNSIBGE::pns_design()`, após manter as variáveis necessárias ao peso do morador selecionado e remover conjuntos concorrentes de pesos domiciliares ou antropométricos. O helper recorrente é:
+
+```{r design-code, echo=TRUE, eval=FALSE}
+cria_design_pns = function(data_pns){
+  data_design = data_pns %>%
+    select(-any_of(c("V0028", "V00281", "V00282", "V00283",
+                     "V0030", "V00301", "V00302", "V00303")))
+
+  pns_design(data_pns = data_design)
+}
+```
+
+As variáveis centrais do desenho incluem `UPA_PNS`, `ID_DOMICILIO`, `V0024`, `V0029`, `V00291`, `V00292` e `V00293`. Em termos substantivos, elas representam a estrutura de conglomerados, estratificação e ponderação necessária para que cada respondente represente adequadamente a população-alvo.
+
+Os scripts também definem:
+
+```{r lonely-psu-code, echo=TRUE, eval=FALSE}
+options(survey.lonely.psu = "adjust")
+options(survey.adjust.domain.lonely = TRUE)
+```
+
+Essas opções evitam falhas em domínios estaduais ou subgrupos com unidades primárias de amostragem solitárias. A consequência prática é manter a estimação possível em recortes pequenos, com tratamento explícito da variância nesses domínios.
+
+# Estimadores e intervalos de confiança
+
+Para variáveis binárias, a proporção ponderada é interpretada como:
+
+$$
+\hat{p} = \frac{\sum_i w_i y_i}{\sum_i w_i}
+$$
+
+em que `w_i` é o peso amostral do morador selecionado e `y_i` é o indicador binário do evento. A estimativa percentual é:
+
+$$
+\% = 100 \times \hat{p}
+$$
+
+Para taxas populacionais por 100 mil habitantes, os scripts estimam a proporção no desenho complexo e depois reescalam:
+
+$$
+taxa_{100k} = 100000 \times \hat{p}
+$$
+
+Os intervalos de confiança de proporções usam:
+
+```{r prop-beta-code, echo=TRUE, eval=FALSE}
+survey::svyciprop(formula_var, design = design_atual,
+                  method = "beta", na.rm = TRUE)
+```
+
+Assim, o `IC95%` é obtido na escala original da proporção pelo método beta e depois convertido para porcentagem ou taxa por 100 mil quando necessário. Essa abordagem evita truncamentos manuais de limites e reduz o risco de intervalos fora da escala 0-1.
+
+Para médias, como renda deflacionada e dias perdidos, os scripts usam `survey::svymean()`:
+
+$$
+\bar{x}_w = \frac{\sum_i w_i x_i}{\sum_i w_i}
+$$
+
+# Indicadores de asma e fatores associados
+
+## Prevalência de diagnóstico médico de asma
+
+O script `Extração PNS - Asma.R` recodifica `Q074` como `asma = 1` para "Sim", `asma = 0` para "Não" e `NA` nos demais casos. As estimativas são calculadas por UF e para o Brasil.
+
+```{r plot-prev-asma}
+plot_year_ic(
+  prev_asma,
+  value_col = "prevalencia",
+  lower_col = "li",
+  upper_col = "ls",
+  y_lab = "Prevalência (%) de diagnóstico médico de asma",
+  title = "Diagnóstico médico de asma, PNS 2013 e 2019"
+)
+```
+
+```{r interp-prev-asma}
+asma_2013 <- get_brasil(prev_asma, "prevalencia", "li", "ls", 2013)
+asma_2019 <- get_brasil(prev_asma, "prevalencia", "li", "ls", 2019)
+asma_overlap <- overlap_ci(asma_2013$li, asma_2013$ls, asma_2019$li, asma_2019$ls)
+
+cat(
+  "No Brasil, a prevalência estimada de diagnóstico médico de asma passou de ",
+  fmt_pct(asma_2013$estimativa), "% em 2013 (IC95%: ",
+  fmt_pct(asma_2013$li), " a ", fmt_pct(asma_2013$ls), ") para ",
+  fmt_pct(asma_2019$estimativa), "% em 2019 (IC95%: ",
+  fmt_pct(asma_2019$li), " a ", fmt_pct(asma_2019$ls), "). ",
+  ifelse(asma_overlap,
+         "Os ICs se sobrepõem, portanto a comparação deve ser interpretada com cautela.",
+         "Os ICs não se sobrepõem, reforçando a evidência de aumento no período."),
+  sep = ""
+)
+```
+
+Esse aumento pode refletir maior ocorrência da doença, melhora no diagnóstico médico ou ambos. A interpretação estadual deve considerar a amplitude e a sobreposição dos intervalos de confiança, especialmente em UFs com menor tamanho efetivo de amostra.
+
+## Crises de asma nos últimos 12 meses
+
+O script `Extração PNS - Crise Asma 12 Meses.R` usa `Q076` para construir `crise_asma_12m`. A estimativa representa a proporção que relatou crise no período de referência.
+
+```{r plot-prev-crise}
+plot_year_ic(
+  prev_crise,
+  value_col = "prevalencia",
+  lower_col = "li",
+  upper_col = "ls",
+  y_lab = "Prevalência (%) de crise de asma nos últimos 12 meses",
+  title = "Crises de asma nos últimos 12 meses, PNS 2013 e 2019"
+)
+```
+
+```{r interp-prev-crise}
+crise_2013 <- get_brasil(prev_crise, "prevalencia", "li", "ls", 2013)
+crise_2019 <- get_brasil(prev_crise, "prevalencia", "li", "ls", 2019)
+crise_overlap <- overlap_ci(crise_2013$li, crise_2013$ls, crise_2019$li, crise_2019$ls)
+
+cat(
+  "A ocorrência nacional de crises ficou em ",
+  fmt_pct(crise_2013$estimativa), "% em 2013 e ",
+  fmt_pct(crise_2019$estimativa), "% em 2019. ",
+  ifelse(crise_overlap,
+         "A sobreposição dos IC95% indica ausência de mudança estatisticamente clara.",
+         "A ausência de sobreposição dos IC95% sugere mudança relevante no período."),
+  sep = ""
+)
+```
+
+A estabilidade das crises, mesmo diante do aumento da prevalência de diagnóstico, sugere que o controle clínico e o acesso continuado ao cuidado permanecem pontos críticos.
+
+## Uso de medicamentos entre pessoas com asma
+
+O script `Extração PNS - Medicamentos Asma.R` harmoniza perguntas distintas entre 2013 e 2019. Em 2013, `Q07701` identifica uso de medicamento. Em 2019, o uso é definido por medicamento oral (`Q07704`) ou bombinha (`Q07708`).
+
+```{r plot-medic-asma}
+plot_year_ic(
+  medic_asma,
+  value_col = "pct_medic_asma",
+  lower_col = "li",
+  upper_col = "ls",
+  y_lab = "(%) de pessoas com asma que usam medicamento oral ou bombinha",
+  title = "Uso de medicamentos para asma, PNS 2013 e 2019"
+)
+```
+
+```{r interp-medic-asma}
+medic_2013 <- get_brasil(medic_asma, "pct_medic_asma", "li", "ls", 2013)
+medic_2019 <- get_brasil(medic_asma, "pct_medic_asma", "li", "ls", 2019)
+medic_overlap <- overlap_ci(medic_2013$li, medic_2013$ls, medic_2019$li, medic_2019$ls)
+
+cat(
+  "Entre pessoas com diagnóstico médico de asma, o uso de medicamento oral ou bombinha foi de ",
+  fmt_pct(medic_2013$estimativa), "% em 2013 e ",
+  fmt_pct(medic_2019$estimativa), "% em 2019. ",
+  ifelse(medic_overlap,
+         "Como os IC95% se sobrepõem, a queda percentual deve ser lida com cautela.",
+         "A ausência de sobreposição sugere mudança estatisticamente clara."),
+  sep = ""
+)
+```
+
+A queda percentual local pode ser influenciada por diferenças de mensuração entre questionários, por mudanças no perfil dos diagnosticados ou por alterações reais no acesso e na adesão ao tratamento.
+
+## Uso de medicamentos entre pessoas com crise recente
+
+Este indicador restringe o denominador a pessoas com crise de asma nos últimos 12 meses e estima a proporção que usava medicamento.
+
+```{r plot-medic-crise}
+plot_year_ic(
+  medic_crise,
+  value_col = "pct_medic_crise_asma",
+  lower_col = "li",
+  upper_col = "ls",
+  y_lab = "(%) de pessoas com crise recente que usam medicamento",
+  title = "Uso de medicamentos entre pessoas com crise de asma, PNS 2013 e 2019"
+)
+```
+
+Esse recorte aproxima a análise do grupo com maior necessidade clínica recente. Diferenças estaduais devem ser interpretadas com cautela porque o subgrupo é menor e os intervalos de confiança tendem a ser mais largos.
+
+## Taxa populacional de uso de medicamentos para asma
+
+O script também estima a taxa por 100 mil habitantes para usuários de medicamentos orais ou bombinhas. Para esse indicador, `NA` em uso de medicamento é tratado como zero no numerador populacional, e a população-alvo recebe denominador unitário (`pop_taxa_medic_asma = 1`).
+
+```{r plot-taxa-medic}
+plot_year_ic(
+  taxa_medic,
+  value_col = "taxa_100k_medic_asma",
+  lower_col = "lim_inf_taxa_100k_medic_asma",
+  upper_col = "lim_sup_taxa_100k_medic_asma",
+  y_lab = "Taxa de usuários por 100 mil habitantes",
+  title = "Taxa populacional de uso de medicamentos para asma"
+)
+```
+
+A taxa populacional complementa a proporção entre asmáticos. Uma proporção menor entre diagnosticados pode coexistir com uma taxa populacional estável quando a prevalência de diagnóstico aumenta.
+
+# Tabagismo
+
+O script `Extração PNS - Taxa de fumantes ativos.R` define fumante atual a partir de `P050`: fumantes diários ou menos que diários recebem `1`; não fumantes atuais recebem `0`; demais respostas permanecem como `NA`. A taxa por 100 mil usa o conjunto de respostas válidas como denominador.
+
+```{r plot-taxa-fumantes}
+plot_year_ic(
+  taxa_fumantes,
+  value_col = "taxa_100k_fumantes",
+  lower_col = "lim_inf_taxa_100k_fumantes",
+  upper_col = "lim_sup_taxa_100k_fumantes",
+  y_lab = "Taxa de fumantes por 100 mil habitantes",
+  title = "Taxa de fumantes ativos por UF, PNS 2013 e 2019"
+)
+```
+
+```{r interp-fumantes}
+fumantes_uf <- taxa_fumantes %>%
+  select(uf, ano, taxa_100k_fumantes, lim_inf_taxa_100k_fumantes, lim_sup_taxa_100k_fumantes) %>%
+  pivot_wider(
+    names_from = ano,
+    values_from = c(taxa_100k_fumantes, lim_inf_taxa_100k_fumantes, lim_sup_taxa_100k_fumantes)
+  ) %>%
+  mutate(delta = taxa_100k_fumantes_2019 - taxa_100k_fumantes_2013) %>%
+  arrange(delta)
+
+quedas <- head(fumantes_uf$uf, 5)
+cat(
+  "Nos outputs locais, a taxa de fumantes está disponível por UF. As maiores reduções absolutas entre 2013 e 2019 aparecem em: ",
+  paste(quedas, collapse = ", "),
+  ". A leitura inferencial deve considerar os IC95% de cada barra.",
+  sep = ""
+)
+```
+
+A redução do tabagismo é coerente com a narrativa de queda de fatores de risco respiratórios. Ainda assim, a comparação estadual não deve se basear apenas na altura das barras: a sobreposição dos intervalos pode impedir conclusão estatística sobre mudança local.
+
+# Farmácia Popular e desembolso
+
+O script `Extração PNS - Farmácia Popular.R` estima, para 2019, a proporção de usuários de medicamentos de asma que fizeram desembolso com medicamento oral (`Q07707`) ou bombinha (`Q07711`). O mesmo script também recodifica acesso via Farmácia Popular e serviço público, mas o output gráfico local planejado é `df_desembolso.xlsx`.
+
+```{r plot-desembolso}
+if (!is.null(desembolso)) {
+  desembolso %>%
+    mutate(
+      tipo_med = factor(tipo_med, levels = c("Bombinha", "Medicamento oral")),
+      uf = factor(uf, levels = c(setdiff(unique(uf), "Brasil"), "Brasil"))
+    ) %>%
+    ggplot(aes(x = uf, y = pct_asma_med_pg, fill = tipo_med)) +
+    geom_col(position = position_dodge(width = 0.7), width = 0.8) +
+    geom_errorbar(aes(ymin = li, ymax = ls), position = position_dodge(width = 0.9), width = 0.3) +
+    coord_flip() +
+    labs(
+      x = NULL,
+      y = "(%) de usuários de medicamentos de asma que fizeram desembolso",
+      fill = NULL,
+      title = "Desembolso com medicamentos de asma, PNS 2019"
+    ) +
+    scale_fill_manual(values = pal_duas, breaks = c("Medicamento oral", "Bombinha")) +
+    theme_minimal(base_size = 14) +
+    theme(axis.text.y = element_text(size = 10), plot.title = element_text(face = "bold"))
+} else {
+  cat("O arquivo df_desembolso.xlsx nao esta disponivel localmente. O grafico sera renderizado quando o script Extração PNS - Farmácia Popular.R for executado em ambiente com PNSIBGE e writexl instalados.")
+}
+```
+
+Esse indicador ajuda a distinguir acesso farmacológico de uso de medicamentos. Se parte relevante dos usuários paga diretamente pelo tratamento, políticas de provisão pública e assistência farmacêutica tornam-se centrais para o manejo da asma.
+
+# Absenteísmo, dias perdidos e renda
+
+## Absenteísmo por motivo de saúde
+
+O script `Extração PNS - Dias Perdidos.R` recodifica `J002` como absenteísmo geral e transforma `J00402` em variáveis indicadoras para causas específicas. Cada causa é estimada por `svyciprop(method = "beta")`.
+
+```{r plot-absenteismo}
+abs_br <- absenteismo %>%
+  filter(uf == "Brasil") %>%
+  arrange(pct)
+
+plot_single_ic(
+  abs_br,
+  label_col = "tipo",
+  value_col = "pct",
+  lower_col = "li",
+  upper_col = "ls",
+  y_lab = "(%)",
+  title = "Absenteísmo por motivo de saúde, Brasil, PNS 2019"
+)
+```
+
+O absenteísmo contextualiza a carga funcional de condições de saúde. A categoria respiratória agrega asma, bronquite e pneumonia, portanto não deve ser interpretada como estimativa isolada de asma.
+
+## Média de dias perdidos
+
+Entre pessoas que relataram cada motivo, o script estima a média ponderada de dias perdidos (`J003`) com `svymean()`.
+
+```{r plot-dias-perdidos}
+dias_plot <- dias_perdidos %>% arrange(media_dias)
+
+plot_single_ic(
+  dias_plot,
+  label_col = "tipo",
+  value_col = "media_dias",
+  lower_col = "li",
+  upper_col = "ls",
+  y_lab = "Média de dias perdidos",
+  title = "Média de dias perdidos por motivo, PNS 2019",
+  fill = "#ead4a4"
+)
+```
+
+Esse resultado quantifica intensidade de impacto entre afetados. Como alguns motivos são raros, intervalos de confiança largos indicam maior incerteza.
+
+## Renda deflacionada
+
+O script `Extração PNS - Renda.R` soma componentes de renda declarada, deflaciona os valores para agosto de 2025 pelo IPCA com `deflateBR` e estima renda média por UF e Brasil com `svymean()`.
+
+```{r plot-renda}
+renda_plot <- renda %>%
+  rename(uf = UF) %>%
+  arrange(renda_def) %>%
+  mutate(uf = factor(uf, levels = uf))
+
+plot_single_ic(
+  renda_plot,
+  label_col = "uf",
+  value_col = "renda_def",
+  lower_col = "ci_l",
+  upper_col = "ci_u",
+  y_lab = "Renda média deflacionada (R$)",
+  title = "Renda média deflacionada por UF, PNS 2019",
+  fill = "#a7a6f2"
+)
+```
+
+A renda não é um desfecho de asma, mas contribui para interpretar desigualdades de acesso, diagnóstico, compra de medicamentos e capacidade de manejo da doença.
+
+# Síntese interpretativa
+
+```{r sintese-table}
+sintese <- tibble::tibble(
+  indicador = c(
+    "Diagnóstico médico de asma",
+    "Crise de asma nos últimos 12 meses",
+    "Uso de medicamento entre asmáticos",
+    "Taxa de fumantes",
+    "Taxa populacional de medicamento para asma"
+  ),
+  leitura = c(
+    paste0("Aumentou de ", fmt_pct(asma_2013$estimativa), "% para ", fmt_pct(asma_2019$estimativa), "% no Brasil."),
+    paste0("Ficou aproximadamente estável: ", fmt_pct(crise_2013$estimativa), "% para ", fmt_pct(crise_2019$estimativa), "% no Brasil."),
+    paste0("Caiu de ", fmt_pct(medic_2013$estimativa), "% para ", fmt_pct(medic_2019$estimativa), "% entre pessoas com asma; interpretar com IC95%."),
+    "Outputs locais mostram queda em várias UFs; a taxa nacional citada no resumo depende do cálculo nacional não presente neste CSV.",
+    "Ajuda a diferenciar uso entre asmáticos de carga populacional total."
+  )
+)
+
+kable(sintese, caption = "Leitura integrada dos principais achados.")
+```
+
+Em conjunto, os resultados indicam aumento do diagnóstico médico de asma entre 2013 e 2019, sem melhora clara nas crises recentes. A estabilidade das crises e a cautela na interpretação do uso de medicamentos sugerem que o manejo da asma depende não apenas de diagnóstico, mas também de acesso, adesão, acompanhamento clínico e intervenções não farmacológicas. A correta implementação do plano amostral complexo é essencial para que essas conclusões sejam comparáveis entre anos e entre Unidades da Federação.
+
+# Limitações operacionais da renderização
+
+Este HTML não baixa microdados e não recalcula os objetos `survey` durante a renderização. Ele documenta a metodologia dos scripts e plota os outputs locais. Para regenerar todos os outputs desde os microdados, o ambiente R precisa ter, além dos pacotes usados neste Rmd, `PNSIBGE`, `survey`, `writexl`, `fastDummies` e `deflateBR`.
+
+Caso `df_desembolso.xlsx` precise ser regenerado, execute o script de Farmácia Popular em ambiente com `PNSIBGE`, `survey` e `writexl` instalados:
+
+```{r farmacia-command, echo=TRUE, eval=FALSE}
+source("Extração PNS - Farmácia Popular.R")
+rmarkdown::render("docs/metodologia_pns.Rmd",
+                  output_file = "metodologia.html",
+                  output_dir = "docs",
+                  clean = TRUE)
+```
+
+# Referências metodológicas
+
+- `PNSIBGE::pns_design()` para criação do objeto de desenho amostral da PNS.
+- `survey::svyciprop(method = "beta")` para proporções e IC95% em amostras complexas.
+- `survey::svymean()` para médias ponderadas e seus intervalos de confiança.
+- Scripts R da raiz do repositório `PNS_2013_2019`, tratados como fonte canônica desta documentação.
