@@ -2,6 +2,8 @@
 
 Este repositório usa os microdados da Pesquisa Nacional de Saúde (PNS) por meio do pacote `PNSIBGE`.
 
+Um relatório metodológico completo, com gráficos e interpretações dos outputs locais, está disponível em [`metodologia.html`](metodologia.html). O arquivo-fonte editável desse relatório é [`metodologia_pns.Rmd`](metodologia_pns.Rmd).
+
 ## Desenho amostral
 
 Os scripts devem construir o plano amostral com `PNSIBGE::pns_design()` sempre que possível. Para análises do morador selecionado, os dados enviados ao `pns_design()` devem conter o conjunto de variáveis do peso do morador selecionado:
