@@ -8,6 +8,24 @@ library(writexl)
 options(survey.lonely.psu = "adjust")
 options(survey.adjust.domain.lonely = TRUE)
 
+fmt_decimal = function(x, digits = 2){
+  ifelse(
+    is.na(x),
+    NA_character_,
+    format(round(x, digits), decimal.mark = ",", nsmall = digits, trim = TRUE)
+  )
+}
+
+formatar_ic_pct = function(estimativa, li, ls){
+  ifelse(
+    is.na(estimativa) | is.na(li) | is.na(ls),
+    NA_character_,
+    paste0(fmt_decimal(estimativa, 2), "% [",
+           fmt_decimal(li, 2), "%; ",
+           fmt_decimal(ls, 2), "%]")
+  )
+}
+
 cria_design_pns = function(data_pns){
   data_design = data_pns %>%
     select(-any_of(c("V0028", "V00281", "V00282", "V00283",
@@ -81,7 +99,8 @@ estima_prop_beta = function(var, label, design){
   
   est_br = estima_uma(design, "Brasil")
   
-  rbind(est_uf, est_br)
+  rbind(est_uf, est_br) %>%
+    mutate(estimativa_ic = formatar_ic_pct(pct_asma_med_pg, li, ls))
 }
 
 variaveis_2019 = c("V0001", "V0024", "UPA_PNS", "ID_DOMICILIO", "V0006_PNS",

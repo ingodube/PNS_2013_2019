@@ -8,6 +8,30 @@ library(deflateBR)
 options(survey.lonely.psu = "adjust")
 options(survey.adjust.domain.lonely = TRUE)
 
+fmt_decimal = function(x, digits = 0, big_mark = TRUE){
+  ifelse(
+    is.na(x),
+    NA_character_,
+    format(
+      round(x, digits),
+      decimal.mark = ",",
+      big.mark = ifelse(big_mark, ".", ""),
+      nsmall = digits,
+      trim = TRUE
+    )
+  )
+}
+
+formatar_ic_media = function(estimativa, li, ls){
+  ifelse(
+    is.na(estimativa) | is.na(li) | is.na(ls),
+    NA_character_,
+    paste0(fmt_decimal(estimativa), " [",
+           fmt_decimal(li), "; ",
+           fmt_decimal(ls), "]")
+  )
+}
+
 cria_design_pns = function(data_pns){
   data_design = data_pns %>%
     select(-any_of(c("V0028", "V00281", "V00282", "V00283",
@@ -43,7 +67,8 @@ estima_media = function(var, design, nome_media){
   est_br = estima_uma(design, "Brasil")
   
   rbind(est_br, est_uf) %>%
-    rename(!!nome_media := media)
+    rename(!!nome_media := media) %>%
+    mutate(estimativa_ic = formatar_ic_media(.data[[nome_media]], ci_l, ci_u))
 }
 
 variaveis_2019 = c("V0001", "V0024", "UPA_PNS", "ID_DOMICILIO", "V0006_PNS",

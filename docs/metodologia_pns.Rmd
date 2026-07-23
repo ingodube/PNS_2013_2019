@@ -146,6 +146,16 @@ li {
   color: #243b53;
   margin: 2em 0 0.85em;
 }
+.source-note {
+  color: var(--report-muted);
+  font-size: 0.88em;
+  margin: -0.45em 0 1.55em;
+}
+.table-source {
+  color: var(--report-muted);
+  font-size: 0.88em;
+  margin: -1.1em 0 1.7em;
+}
 .math.display {
   text-align: center;
 }
@@ -324,6 +334,71 @@ report_kable <- function(x, caption) {
   )
 }
 
+source_note <- function(class = "source-note") {
+  paste0('<p class="', class, '">Fonte: elaborado pelos próprios autores.</p>')
+}
+
+emit_report_table <- function(x, caption) {
+  cat(report_kable(x, caption = caption), "\n", source_note("table-source"), "\n")
+}
+
+fmt_decimal <- function(x, digits = 2, big_mark = FALSE) {
+  ifelse(
+    is.na(x),
+    NA_character_,
+    format(
+      round(x, digits),
+      decimal.mark = ",",
+      big.mark = ifelse(big_mark, ".", ""),
+      nsmall = digits,
+      trim = TRUE
+    )
+  )
+}
+
+fmt_ic <- function(estimate, lower, upper, type = c("pct", "rate", "mean")) {
+  type <- match.arg(type)
+  if (type == "pct") {
+    return(ifelse(
+      is.na(estimate) | is.na(lower) | is.na(upper),
+      NA_character_,
+      paste0(fmt_decimal(estimate, 2), "% [",
+             fmt_decimal(lower, 2), "%; ",
+             fmt_decimal(upper, 2), "%]")
+    ))
+  }
+
+  if (type == "rate") {
+    return(ifelse(
+      is.na(estimate) | is.na(lower) | is.na(upper),
+      NA_character_,
+      paste0(fmt_decimal(estimate, 0, TRUE), " [",
+             fmt_decimal(lower, 0, TRUE), "; ",
+             fmt_decimal(upper, 0, TRUE), "]")
+    ))
+  }
+
+  ifelse(
+    is.na(estimate) | is.na(lower) | is.na(upper),
+    NA_character_,
+    paste0(fmt_decimal(estimate, 1), " [",
+           fmt_decimal(lower, 1), "; ",
+           fmt_decimal(upper, 1), "]")
+  )
+}
+
+make_year_ic_table <- function(df, value_col, lower_col, upper_col, type = "pct", id_col = "uf") {
+  df %>%
+    mutate(
+      ano = as.character(ano),
+      estimativa_ic = fmt_ic(.data[[value_col]], .data[[lower_col]], .data[[upper_col]], type)
+    ) %>%
+    select(.data[[id_col]], ano, estimativa_ic) %>%
+    tidyr::pivot_wider(names_from = ano, values_from = estimativa_ic) %>%
+    arrange(ifelse(.data[[id_col]] == "Brasil", 1, 0), .data[[id_col]]) %>%
+    rename(UF = all_of(id_col))
+}
+
 plot_year_ic <- function(df, value_col, lower_col, upper_col, y_lab) {
   plot_df <- df %>%
     mutate(
@@ -387,6 +462,8 @@ taxa_fumantes <- read_csv_local("df_taxa_fumantes_2013_2019_long.csv")
 
 absenteismo <- read_xlsx_local("df_absenteismo.xlsx")
 dias_perdidos <- read_xlsx_local("df_dias_perdidos.xlsx")
+absenteismo_resp_2013_2019 <- read_xlsx_local("df_absenteismo_respiratorio_2013_2019.xlsx")
+dias_perdidos_resp_2013_2019 <- read_xlsx_local("df_dias_perdidos_respiratorio_2013_2019.xlsx")
 renda <- read_xlsx_local("df_renda_2019.xlsx")
 desembolso <- if (exists_local("df_desembolso.xlsx")) read_xlsx_local("df_desembolso.xlsx") else NULL
 
@@ -421,8 +498,8 @@ Este trabalho apresenta a implementação do plano amostral da Pesquisa Nacional
   <p>Documentar de forma reprodutível como os microdados da PNS são transformados em indicadores ponderados sobre diagnóstico de asma, crises, uso de medicamentos, tabagismo e indicadores complementares.</p>
 </div>
 
-```{r code-status}
-report_kable(code_status, caption = "Arquivos R documentados neste relatório.")
+```{r code-status, results='asis'}
+emit_report_table(code_status, caption = "Arquivos R documentados neste relatório.")
 ```
 
 # Fonte dos dados e escopo analítico
@@ -526,6 +603,14 @@ plot_year_ic(
   y_lab = "Prevalência (%) de diagnóstico médico de asma"
 )
 ```
+`r source_note()`
+
+```{r table-prev-asma, results='asis'}
+emit_report_table(
+  make_year_ic_table(prev_asma, "prevalencia", "li", "ls", type = "pct"),
+  caption = "Prevalência de diagnóstico médico de asma por Unidade da Federação e Brasil, com estimativa e IC 95%."
+)
+```
 
 ```{r interp-prev-asma, results='asis'}
 asma_2013 <- get_brasil(prev_asma, "prevalencia", "li", "ls", 2013)
@@ -564,6 +649,14 @@ plot_year_ic(
   y_lab = "Prevalência (%) de crise de asma nos últimos 12 meses"
 )
 ```
+`r source_note()`
+
+```{r table-prev-crise, results='asis'}
+emit_report_table(
+  make_year_ic_table(prev_crise, "prevalencia", "li", "ls", type = "pct"),
+  caption = "Crise de asma nos últimos 12 meses por Unidade da Federação e Brasil, com estimativa e IC 95%."
+)
+```
 
 ```{r interp-prev-crise, results='asis'}
 crise_2013 <- get_brasil(prev_crise, "prevalencia", "li", "ls", 2013)
@@ -598,6 +691,14 @@ plot_year_ic(
   lower_col = "li",
   upper_col = "ls",
   y_lab = "(%) de pessoas com asma que usam medicamento oral ou bombinha"
+)
+```
+`r source_note()`
+
+```{r table-medic-asma, results='asis'}
+emit_report_table(
+  make_year_ic_table(medic_asma, "pct_medic_asma", "li", "ls", type = "pct"),
+  caption = "Uso de medicamento oral ou bombinha entre pessoas com diagnóstico médico de asma, com estimativa e IC 95%."
 )
 ```
 
@@ -636,6 +737,14 @@ plot_year_ic(
   y_lab = "(%) de pessoas com crise recente que usam medicamento"
 )
 ```
+`r source_note()`
+
+```{r table-medic-crise, results='asis'}
+emit_report_table(
+  make_year_ic_table(medic_crise, "pct_medic_crise_asma", "li", "ls", type = "pct"),
+  caption = "Uso de medicamento oral ou bombinha entre pessoas com crise de asma nos últimos 12 meses, com estimativa e IC 95%."
+)
+```
 
 Esse recorte aproxima a análise do grupo com maior necessidade clínica recente. Diferenças estaduais devem ser interpretadas com cautela porque o subgrupo é menor e os intervalos de confiança tendem a ser mais largos.
 
@@ -654,6 +763,20 @@ plot_year_ic(
   y_lab = "Taxa de usuários por 100 mil habitantes"
 )
 ```
+`r source_note()`
+
+```{r table-taxa-medic, results='asis'}
+emit_report_table(
+  make_year_ic_table(
+    taxa_medic,
+    "taxa_100k_medic_asma",
+    "lim_inf_taxa_100k_medic_asma",
+    "lim_sup_taxa_100k_medic_asma",
+    type = "rate"
+  ),
+  caption = "Taxa populacional de usuários de medicamento oral ou bombinha para asma por 100 mil habitantes, com estimativa e IC 95%."
+)
+```
 
 A taxa populacional complementa a proporção entre asmáticos. Uma proporção menor entre diagnosticados pode coexistir com uma taxa populacional estável quando a prevalência de diagnóstico aumenta.
 
@@ -670,6 +793,20 @@ plot_year_ic(
   lower_col = "lim_inf_taxa_100k_fumantes",
   upper_col = "lim_sup_taxa_100k_fumantes",
   y_lab = "Taxa de fumantes por 100 mil habitantes"
+)
+```
+`r source_note()`
+
+```{r table-taxa-fumantes, results='asis'}
+emit_report_table(
+  make_year_ic_table(
+    taxa_fumantes,
+    "taxa_100k_fumantes",
+    "lim_inf_taxa_100k_fumantes",
+    "lim_sup_taxa_100k_fumantes",
+    type = "rate"
+  ),
+  caption = "Taxa de fumantes ativos por 100 mil habitantes por Unidade da Federação e Brasil, com estimativa e IC 95%."
 )
 ```
 
@@ -732,6 +869,21 @@ if (!is.null(desembolso)) {
   cat("O arquivo df_desembolso.xlsx nao esta disponivel localmente. O grafico sera renderizado quando o codigo Extração PNS - Farmácia Popular.R for executado em ambiente com PNSIBGE e writexl instalados.")
 }
 ```
+`r source_note()`
+
+```{r table-desembolso, results='asis'}
+if (!is.null(desembolso)) {
+  tabela_desembolso <- desembolso %>%
+    mutate(estimativa_ic = fmt_ic(pct_asma_med_pg, li, ls, type = "pct")) %>%
+    select(UF = uf, Medicamento = tipo_med, `Estimativa [IC 95%]` = estimativa_ic) %>%
+    arrange(Medicamento, ifelse(UF == "Brasil", 1, 0), UF)
+
+  emit_report_table(
+    tabela_desembolso,
+    caption = "Proporção de usuários de medicamento oral ou bombinha para asma que fizeram desembolso, com estimativa e IC 95%."
+  )
+}
+```
 
 Esse indicador ajuda a distinguir acesso farmacológico de uso de medicamentos. Se parte relevante dos usuários paga diretamente pelo tratamento, políticas de provisão pública e assistência farmacêutica tornam-se centrais para o manejo da asma.
 
@@ -739,13 +891,13 @@ Esse indicador ajuda a distinguir acesso farmacológico de uso de medicamentos. 
 
 ## Absenteísmo por motivo de saúde
 
-O arquivo R `Extração PNS - Dias Perdidos.R` recodifica `J002` como absenteísmo geral e transforma `J00402` em variáveis indicadoras para causas específicas. Cada causa é estimada por `svyciprop(method = "beta")`.
+O arquivo R `Extração PNS - Dias Perdidos.R` recodifica `J002` como absenteísmo geral e transforma `J00402` em variáveis indicadoras para causas específicas em 2019. A estimativa geral usa o morador selecionado como denominador; já as causas específicas são estimadas entre moradores que deixaram de realizar atividades habituais por motivo de saúde. Cada proporção é estimada com `svyciprop(method = "beta")`.
 
 <p class="figure-title">Figura 8: Absenteísmo por motivo de saúde no Brasil, PNS 2019.</p>
 
 ```{r plot-absenteismo}
 abs_br <- absenteismo %>%
-  filter(uf == "Brasil") %>%
+  filter(uf == "Brasil", !is.na(pct)) %>%
   arrange(pct)
 
 plot_single_ic(
@@ -757,17 +909,31 @@ plot_single_ic(
   y_lab = "(%)"
 )
 ```
+`r source_note()`
 
-O absenteísmo contextualiza a carga funcional de condições de saúde. A categoria respiratória agrega asma, bronquite e pneumonia, portanto não deve ser interpretada como estimativa isolada de asma.
+```{r table-absenteismo-2019, results='asis'}
+tabela_abs_2019 <- abs_br %>%
+  mutate(`Estimativa [IC 95%]` = fmt_ic(pct, li, ls, type = "pct")) %>%
+  select(Indicador = tipo, Denominador = denominador, `Estimativa [IC 95%]`, `Método do IC` = metodo_ic)
+
+emit_report_table(
+  tabela_abs_2019,
+  caption = "Absenteísmo por motivo de saúde no Brasil, PNS 2019, com estimativa e IC 95%."
+)
+```
+
+O absenteísmo contextualiza a carga funcional de condições de saúde. A categoria respiratória agrega asma, bronquite e pneumonia, portanto não deve ser interpretada como estimativa isolada de asma. No gráfico, o valor geral responde à pergunta sobre ter deixado atividades habituais por motivo de saúde; os valores por causa descrevem a composição dos motivos entre os respondentes que tiveram perda de atividades.
 
 ## Média de dias perdidos
 
-Entre pessoas que relataram cada motivo, o método implementado estima a média ponderada de dias perdidos (`J003`) com `svymean()`.
+Entre pessoas que relataram cada motivo, o método implementado estima a média ponderada de dias perdidos (`J003`) com `svymean()` e IC normal.
 
 <p class="figure-title">Figura 9: Média de dias perdidos por motivo de saúde no Brasil, PNS 2019.</p>
 
 ```{r plot-dias-perdidos}
-dias_plot <- dias_perdidos %>% arrange(media_dias)
+dias_plot <- dias_perdidos %>%
+  filter(!is.na(media_dias)) %>%
+  arrange(media_dias)
 
 plot_single_ic(
   dias_plot,
@@ -779,8 +945,73 @@ plot_single_ic(
   fill = "#ead4a4"
 )
 ```
+`r source_note()`
+
+```{r table-dias-perdidos-2019, results='asis'}
+tabela_dias_2019 <- dias_plot %>%
+  mutate(`Estimativa [IC 95%]` = fmt_ic(media_dias, li, ls, type = "mean")) %>%
+  select(Motivo = tipo, `Estimativa [IC 95%]`, `Método do IC` = metodo_ic)
+
+emit_report_table(
+  tabela_dias_2019,
+  caption = "Média de dias perdidos por motivo de saúde no Brasil, PNS 2019, com estimativa e IC 95%."
+)
+```
 
 Esse resultado quantifica intensidade de impacto entre afetados. Como alguns motivos são raros, intervalos de confiança largos indicam maior incerteza.
+
+## Comparação respiratória harmonizada entre 2013 e 2019
+
+A PNS 2013 e a PNS 2019 permitem comparar perda de atividades habituais e dias perdidos por motivo de saúde, mas as categorias do motivo principal não são idênticas. Por isso, este trabalho usa uma aproximação harmonizada e restrita a problemas respiratórios: em 2013, o domínio respiratório é formado pela soma conceitual das respostas `Asma / bronquite / pneumonia` e `Resfriado / gripe` em `J004`; em 2019, usa-se a categoria de `J00402` que reúne `Problemas respiratórios (resfriado/gripe/sinusite/asma/bronquite/pneumonia)`. A comparação, portanto, não estima asma isolada: ela estima um conjunto respiratório que contém asma e aproxima os dois questionários.
+
+```{r table-absenteismo-respiratorio-comparacao, results='asis'}
+tabela_abs_resp <- absenteismo_resp_2013_2019 %>%
+  filter(uf == "Brasil") %>%
+  arrange(ano) %>%
+  select(Ano = ano, Indicador = tipo, Denominador = denominador, `Estimativa [IC 95%]` = estimativa_ic, Harmonização = harmonizacao)
+
+emit_report_table(
+  tabela_abs_resp,
+  caption = "Participação dos problemas respiratórios harmonizados entre moradores que perderam atividades habituais por motivo de saúde, Brasil, PNS 2013 e 2019."
+)
+```
+
+```{r table-dias-respiratorio-comparacao, results='asis'}
+tabela_dias_resp <- dias_perdidos_resp_2013_2019 %>%
+  filter(uf == "Brasil") %>%
+  arrange(ano) %>%
+  select(Ano = ano, Indicador = tipo, Denominador = denominador, `Estimativa [IC 95%]` = estimativa_ic, Harmonização = harmonizacao)
+
+emit_report_table(
+  tabela_dias_resp,
+  caption = "Média de dias perdidos por problemas respiratórios harmonizados, Brasil, PNS 2013 e 2019."
+)
+```
+
+```{r interp-respiratorio-comparacao, results='asis'}
+abs_resp_br <- absenteismo_resp_2013_2019 %>% filter(uf == "Brasil")
+dias_resp_br <- dias_perdidos_resp_2013_2019 %>% filter(uf == "Brasil")
+
+abs_2013 <- abs_resp_br %>% filter(ano == 2013) %>% slice(1)
+abs_2019 <- abs_resp_br %>% filter(ano == 2019) %>% slice(1)
+dias_2013 <- dias_resp_br %>% filter(ano == 2013) %>% slice(1)
+dias_2019 <- dias_resp_br %>% filter(ano == 2019) %>% slice(1)
+
+cat(
+  "<p>",
+  "No domínio respiratório harmonizado, a participação entre os motivos de perda de atividades foi de ",
+  fmt_pct(abs_2013$pct), "% em 2013 (IC 95%: ",
+  fmt_pct(abs_2013$li), " a ", fmt_pct(abs_2013$ls), ") e ",
+  fmt_pct(abs_2019$pct), "% em 2019 (IC 95%: ",
+  fmt_pct(abs_2019$li), " a ", fmt_pct(abs_2019$ls), "). ",
+  "A média de dias perdidos foi de ",
+  fmt_decimal(dias_2013$media_dias, 1), " em 2013 e ",
+  fmt_decimal(dias_2019$media_dias, 1), " em 2019. ",
+  "Como os intervalos são sobrepostos e a harmonização aproxima categorias não idênticas, a leitura deve privilegiar estabilidade aproximada da carga funcional respiratória, não mudança causal entre os anos.",
+  "</p>",
+  sep = ""
+)
+```
 
 ## Renda deflacionada
 
@@ -804,6 +1035,20 @@ plot_single_ic(
   fill = "#a7a6f2"
 )
 ```
+`r source_note()`
+
+```{r table-renda, results='asis'}
+tabela_renda <- renda %>%
+  rename(UF = UF) %>%
+  mutate(`Estimativa [IC 95%]` = fmt_ic(renda_def, ci_l, ci_u, type = "rate")) %>%
+  select(UF, `Estimativa [IC 95%]`) %>%
+  arrange(ifelse(UF == "Brasil", 1, 0), UF)
+
+emit_report_table(
+  tabela_renda,
+  caption = "Renda média deflacionada por Unidade da Federação e Brasil, com estimativa e IC 95%."
+)
+```
 
 A renda não é um desfecho de asma, mas contribui para interpretar desigualdades de acesso, diagnóstico, compra de medicamentos e capacidade de manejo da doença.
 
@@ -824,7 +1069,7 @@ Uma agenda futura viável é tratar a PNS como fonte complementar a uma rede de 
   <p>A síntese integra magnitude, direção temporal e incerteza estatística para evitar conclusões baseadas apenas na altura das barras ou em diferenças percentuais isoladas.</p>
 </div>
 
-```{r sintese-table}
+```{r sintese-table, results='asis'}
 sintese <- tibble::tibble(
   indicador = c(
     "Diagnóstico médico de asma",
@@ -842,7 +1087,7 @@ sintese <- tibble::tibble(
   )
 )
 
-report_kable(sintese, caption = "Leitura integrada dos principais achados.")
+emit_report_table(sintese, caption = "Leitura integrada dos principais achados.")
 ```
 
 Em conjunto, os resultados indicam aumento do diagnóstico médico de asma entre 2013 e 2019, sem melhora clara nas crises recentes. A estabilidade das crises e a cautela na interpretação do uso de medicamentos sugerem que o manejo da asma depende não apenas de diagnóstico, mas também de acesso, adesão, acompanhamento clínico e intervenções não farmacológicas. A correta implementação do plano amostral complexo é essencial para que essas conclusões sejam comparáveis entre anos e entre Unidades da Federação.

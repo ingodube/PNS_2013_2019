@@ -9,6 +9,30 @@ library(writexl)
 options(survey.lonely.psu = "adjust")
 options(survey.adjust.domain.lonely = TRUE)
 
+fmt_decimal = function(x, digits = 0, big_mark = TRUE){
+  ifelse(
+    is.na(x),
+    NA_character_,
+    format(
+      round(x, digits),
+      decimal.mark = ",",
+      big.mark = ifelse(big_mark, ".", ""),
+      nsmall = digits,
+      trim = TRUE
+    )
+  )
+}
+
+formatar_ic_taxa = function(estimativa, li, ls){
+  ifelse(
+    is.na(estimativa) | is.na(li) | is.na(ls),
+    NA_character_,
+    paste0(fmt_decimal(estimativa), " [",
+           fmt_decimal(li), "; ",
+           fmt_decimal(ls), "]")
+  )
+}
+
 cria_design_pns = function(data_pns){
   data_design = data_pns %>%
     select(-any_of(c("V0028", "V00281", "V00282", "V00283",
@@ -70,7 +94,12 @@ estima_taxa_100k_uf = function(var, denom_var, design){
   
   est_br = estima_uma(design, "Brasil")
   
-  rbind(est_uf, est_br)
+  rbind(est_uf, est_br) %>%
+    mutate(estimativa_ic = formatar_ic_taxa(
+      taxa_100k_fumantes,
+      lim_inf_taxa_100k_fumantes,
+      lim_sup_taxa_100k_fumantes
+    ))
 }
 
 variaveis_2019 = c("V0001", "V0024", "UPA_PNS", "ID_DOMICILIO", "V0006_PNS",
