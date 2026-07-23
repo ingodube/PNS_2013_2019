@@ -9,6 +9,40 @@ library(writexl)
 options(survey.lonely.psu = "adjust")
 options(survey.adjust.domain.lonely = TRUE)
 
+fmt_decimal = function(x, digits = 2, big_mark = FALSE){
+  ifelse(
+    is.na(x),
+    NA_character_,
+    format(
+      round(x, digits),
+      decimal.mark = ",",
+      big.mark = ifelse(big_mark, ".", ""),
+      nsmall = digits,
+      trim = TRUE
+    )
+  )
+}
+
+formatar_ic_pct = function(estimativa, li, ls){
+  ifelse(
+    is.na(estimativa) | is.na(li) | is.na(ls),
+    NA_character_,
+    paste0(fmt_decimal(estimativa, 2), "% [",
+           fmt_decimal(li, 2), "%; ",
+           fmt_decimal(ls, 2), "%]")
+  )
+}
+
+formatar_ic_taxa = function(estimativa, li, ls){
+  ifelse(
+    is.na(estimativa) | is.na(li) | is.na(ls),
+    NA_character_,
+    paste0(fmt_decimal(estimativa, 0, TRUE), " [",
+           fmt_decimal(li, 0, TRUE), "; ",
+           fmt_decimal(ls, 0, TRUE), "]")
+  )
+}
+
 cria_design_pns = function(data_pns){
   data_design = data_pns %>%
     select(-any_of(c("V0028", "V00281", "V00282", "V00283",
@@ -81,7 +115,8 @@ estima_prop_beta = function(var, design, pct_col, value_col = var){
   
   rbind(est_uf, est_br) %>%
     rename(!!value_col := valor,
-           !!pct_col := pct)
+           !!pct_col := pct) %>%
+    mutate(estimativa_ic = formatar_ic_pct(.data[[pct_col]], li, ls))
 }
 
 estima_taxa_medic_100k = function(var, denom_var, design){
@@ -137,7 +172,12 @@ estima_taxa_medic_100k = function(var, denom_var, design){
   
   est_br = estima_uma(design, "Brasil")
   
-  rbind(est_uf, est_br)
+  rbind(est_uf, est_br) %>%
+    mutate(estimativa_ic = formatar_ic_taxa(
+      taxa_100k_medic_asma,
+      lim_inf_taxa_100k_medic_asma,
+      lim_sup_taxa_100k_medic_asma
+    ))
 }
 
 variaveis_2019 = c("V0001", "V0024", "UPA_PNS", "ID_DOMICILIO", "V0006_PNS",

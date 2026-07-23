@@ -9,6 +9,24 @@ library(writexl)
 options(survey.lonely.psu = "adjust")
 options(survey.adjust.domain.lonely = TRUE)
 
+fmt_decimal = function(x, digits = 2){
+  ifelse(
+    is.na(x),
+    NA_character_,
+    format(round(x, digits), decimal.mark = ",", nsmall = digits, trim = TRUE)
+  )
+}
+
+formatar_ic_pct = function(estimativa, li, ls){
+  ifelse(
+    is.na(estimativa) | is.na(li) | is.na(ls),
+    NA_character_,
+    paste0(fmt_decimal(estimativa, 2), "% [",
+           fmt_decimal(li, 2), "%; ",
+           fmt_decimal(ls, 2), "%]")
+  )
+}
+
 cria_design_pns = function(data_pns){
   data_design = data_pns %>%
     select(-any_of(c("V0028", "V00281", "V00282", "V00283",
@@ -74,7 +92,8 @@ estima_prop_beta = function(var, design, pct_col){
     mutate(
       !!pct_col := valor * 100,
       li = ci_l * 100,
-      ls = ci_u * 100
+      ls = ci_u * 100,
+      estimativa_ic = formatar_ic_pct(valor * 100, ci_l * 100, ci_u * 100)
     )
 }
 
