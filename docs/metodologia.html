@@ -1499,7 +1499,7 @@ border-radius: 0px;
 <h1 class="title toc-ignore">Implementação do Plano Amostral da Pesquisa
 Nacional de Saúde no R: um estudo de caso sobre a asma no Brasil</h1>
 <h4 class="author">I. Dube; M. E. L. Silva</h4>
-<h4 class="date">23/07/2026</h4>
+<h4 class="date">27/07/2026</h4>
 
 </div>
 
@@ -1758,7 +1758,7 @@ epidemiológicos e interpretação dos resultados da PNS 2013-2019 no
 contexto da asma.
 </p>
 <div class="hero-meta">
-I. Dube; M. E. L. Silva · 23/07/2026 ·
+I. Dube; M. E. L. Silva · 27/07/2026 ·
 <a href="https://github.com/ingodube/PNS_2013_2019">Repositório do
 projeto</a>
 </div>
@@ -1774,31 +1774,36 @@ relacionados à saúde em populações definidas. Prevalências, taxas,
 médias, proporções de uso de medicamentos e intervalos de confiança não
 são apenas resultados numéricos: eles organizam a leitura sobre
 necessidades de saúde, desigualdades territoriais, fatores de risco,
-acesso ao cuidado e desempenho de políticas públicas. Em pesquisas
-populacionais, esses indicadores são particularmente relevantes porque
-permitem transformar respostas individuais em evidências úteis para
-vigilância epidemiológica, planejamento em saúde e priorização de
-intervenções.</p>
-<p>A asma é um exemplo claro dessa necessidade. Trata-se de uma condição
-respiratória crônica que combina diagnóstico médico, sintomas
-recorrentes, crises, manejo farmacológico, exposição a fatores de risco
-e possíveis limitações nas atividades cotidianas. Estimar a prevalência
-de diagnóstico médico de asma, a ocorrência de crises nos últimos 12
-meses, o uso de medicamentos e a distribuição de fatores de risco como
-tabagismo contribui para avaliar se o aumento do diagnóstico vem
-acompanhado de melhor controle clínico e de acesso adequado ao
+acesso ao cuidado e desempenho de políticas públicas. Em pesquisas com
+dados observacionais, esses indicadores são particularmente relevantes,
+haja vista que permitem transformar respostas individuais em evidências
+úteis para vigilância epidemiológica, planejamento em saúde e
+priorização de intervenções.</p>
+<p>A asma é um exemplo claro da necessidade de se fazer um gerenciamento
+responsável desses dados observacionais. Isso se deve por se tratar de
+uma condição respiratória crônica que combina diagnóstico médico,
+sintomas recorrentes, crises, manejo farmacológico, exposição a fatores
+de risco e possíveis limitações nas atividades cotidianas. Estimar a
+prevalência de diagnóstico médico de asma, a ocorrência de crises nos
+últimos 12 meses, o uso de medicamentos e a distribuição de fatores de
+risco como tabagismo contribui para avaliar se o aumento do diagnóstico
+vem acompanhado de melhor controle clínico e de acesso adequado ao
 tratamento.</p>
 <p>Este trabalho apresenta a implementação do plano amostral da Pesquisa
 Nacional de Saúde (PNS) no R como estudo de caso sobre a asma no Brasil
 entre 2013 e 2019. O objetivo é demonstrar como microdados de inquéritos
 complexos podem ser convertidos em indicadores válidos, interpretáveis e
 reprodutíveis quando se respeitam pesos, estratos, unidades primárias de
-amostragem e procedimentos adequados de estimação da incerteza. A
-contribuição metodológica central está em explicitar o caminho entre os
-microdados originais, a construção dos indicadores e a leitura
-epidemiológica dos resultados.</p>
+amostragem e procedimentos adequados de estimação da incerteza. Não
+obstante, também propõe-se uma exposição de todas as limitações e
+desafios de se utilizar dados amostrais quando não se tem, ou não se
+pode obter, uma base de dados populacional. A contribuição metodológica
+central deste trabalho está em explicitar o caminho entre os microdados
+originais, a construção dos indicadores e a leitura epidemiológica dos
+resultados, permitindo maior transparência e reprodutibilidade do
+procedimento adotado.</p>
 <div class="callout">
-<strong>Objetivo metodológico</strong>
+<strong>Objetivo do ponto de vista Estatístico</strong>
 <p>
 Documentar de forma reprodutível como os microdados da PNS são
 transformados em indicadores ponderados sobre diagnóstico de asma,
@@ -1897,9 +1902,6 @@ grandes regiões, Unidades da Federação e outros domínios
 morador selecionado para o questionário individual, que é o nível
 adequado para as perguntas de diagnóstico de asma, crises, medicamentos,
 tabagismo, absenteísmo e renda individual.</p>
-<p>A raiz do repositório é tratada como fonte canônica dos arquivos R. A
-pasta interna <code>PNS_2013_2019/</code> não é usada neste relatório
-porque está ignorada pelo Git e parece ser uma duplicata local.</p>
 </div>
 <div id="implementação-do-plano-amostral-complexo" class="section level1" number="3">
 <h1><span class="header-section-number">3</span> Implementação do plano
@@ -1911,8 +1913,8 @@ domiciliares ou antropométricos. Esse cuidado operacional se conecta
 diretamente ao desenho descrito para a PNS 2013: a inferência não deve
 tratar os microdados como amostra aleatória simples, pois a variância
 depende dos estratos, das unidades primárias de amostragem e dos pesos
-calibrados <a class="ref-link" href="#ref-2">[2]</a>. A rotina
-recorrente é:</p>
+calibrados <a class="ref-link" href="#ref-2">[2]</a>. A rotina utilizada
+foi:</p>
 <pre class="r"><code>cria_design_pns = function(data_pns){
   data_design = data_pns %&gt;%
     select(-any_of(c(&quot;V0028&quot;, &quot;V00281&quot;, &quot;V00282&quot;, &quot;V00283&quot;,
@@ -1952,16 +1954,16 @@ como:</p>
 <p><span class="math display">\[
 \hat{p} = \frac{\sum_i w_i y_i}{\sum_i w_i}
 \]</span></p>
-<p>em que <span class="math inline">\(w_i\)</span> é o peso amostral do
-morador selecionado e <span class="math inline">\(y_i\)</span> é o
-indicador binário do evento. A estimativa percentual é:</p>
+<p>em que <span class="math inline">\(w_i\)</span> é o peso amostral
+transformado do i-ésimo morador selecionado e <span class="math inline">\(y_i\)</span> é o indicador binário do evento para
+o i-ésimo indivíduo. A estimativa percentual é:</p>
 <p><span class="math display">\[
-\% = 100 \times \hat{p}
+\hat{p_{\%}} = 100 \times \hat{p}
 \]</span></p>
-<p>Para taxas populacionais por 100 mil habitantes, o método estima a
-proporção no desenho complexo e depois reescala:</p>
+<p>Da mesma forma, para taxas populacionais por 100 mil habitantes, o
+método estima a proporção no desenho complexo e depois reescala:</p>
 <p><span class="math display">\[
-taxa_{100k} = 100000 \times \hat{p}
+\hat{{p}_{100k}} = 100000 \times \hat{p}
 \]</span></p>
 <p>Os intervalos de confiança de proporções usam:</p>
 <pre class="r"><code>survey::svyciprop(formula_var, design = design_atual,
@@ -1980,9 +1982,10 @@ Wald para proporções binomiais pode apresentar comportamento errático de
 cobertura, inclusive em tamanhos amostrais que frequentemente seriam
 considerados suficientes por regras práticas usuais
 <a class="ref-link" href="#ref-12">[12]</a>. Nos indicadores deste
-trabalho, essas situações aparecem em recortes estaduais, no subgrupo de
-pessoas com diagnóstico médico de asma e, de forma ainda mais marcada,
-no subgrupo de pessoas com crise recente.</p>
+trabalho, essas situações aparecem em recortes estaduais, cujos tamanhos
+amostrais são naturalmente menores, no subgrupo de pessoas com
+diagnóstico médico de asma e, de forma ainda mais marcada, no subgrupo
+de pessoas com crise recente.</p>
 <p>O método beta usado por
 <code>survey::svyciprop(method = &quot;beta&quot;)</code> segue a família de
 soluções recomendadas para proporções estimadas em desenhos amostrais
@@ -1998,43 +2001,45 @@ valores negativos ou superiores a 100%.</p>
 A leitura visual das barras deve sempre ser combinada com os intervalos
 de confiança. Diferenças aparentes entre UFs ou anos não devem ser
 interpretadas como mudança clara quando a incerteza permanece amplamente
-sobreposta.
+sobreposta. Ou seja, se existe sobreposição dos intervalos de confiança,
+tecnicamente não existem evidências suficientes para afirmar que houve
+variação significativa de um ano para o outro.
 </p>
 </div>
 <p>Do ponto de vista aplicado, o uso do IC beta torna a leitura de
-política pública mais prudente. A comparação entre 2013 e 2019 deve
-considerar simultaneamente a magnitude da diferença e a incerteza ao
-redor das estimativas. Quando os intervalos se sobrepõem, o relatório
-interpreta a evidência como insuficiente para afirmar mudança
-estatisticamente clara naquele domínio, mesmo que as barras do gráfico
-pareçam diferentes. Quando não há sobreposição relevante, a conclusão de
-aumento ou queda ganha maior sustentação inferencial.</p>
-<p>Para médias, como renda deflacionada e dias perdidos, os códigos usam
+política pública mais prudente. A comparação entre os anos de 2013 e
+2019 deve considerar simultaneamente a magnitude da diferença e a
+incerteza ao redor das estimativas. Para estimar médias, como renda
+deflacionada e dias perdidos, os códigos usam
 <code>survey::svymean()</code>:</p>
 <p><span class="math display">\[
-\bar{x}_w = \frac{\sum_i w_i x_i}{\sum_i w_i}
+\bar{x} = \frac{\sum_i w_i x_i}{\sum_i w_i}
 \]</span></p>
+<p>em que <span class="math inline">\(x_i\)</span> é uma variável
+contínua do i-ésimo morador selecionado e <span class="math inline">\(w_i\)</span> é o peso já calibrado pelo plano
+amostral da PNS para o i-ésimo indivíduo.</p>
 </div>
 <div id="indicadores-de-asma-e-fatores-associados" class="section level1" number="5">
 <h1><span class="header-section-number">5</span> Indicadores de asma e
 fatores associados</h1>
-<p>A asma é uma doença respiratória crônica de grande relevância para
-vigilância em saúde, com impacto sobre sintomas, crises, qualidade de
-vida e uso de serviços. O Global Asthma Report 2022 reforça que a
-mensuração populacional é necessária para orientar políticas de
-prevenção, diagnóstico, acesso a tratamento e controle de sintomas
-<a class="ref-link" href="#ref-1">[1]</a>. No Brasil, a PNS 2013 já
-havia estimado a prevalência de diagnóstico médico de asma em adultos e
-mostrado diferenças por sexo, idade, escolaridade, região e presença de
-plano de saúde <a class="ref-link" href="#ref-4">[4]</a>. Estudos
-complementares sobre tendência da asma autorreferida entre 2003 e 2013
-também apontam crescimento do diagnóstico em adultos, sugerindo que os
-resultados de 2013-2019 devem ser interpretados como parte de uma
-trajetória mais longa de mudança na detecção, acesso e perfil
-epidemiológico <a class="ref-link" href="#ref-6">[6]</a>. Para
-comparação internacional, levantamentos globais em adultos mostram
-grande variação entre países e reforçam que tabagismo, tratamento e
-diagnóstico precisam ser analisados conjuntamente
+<p>Conforme destacado na introdução, a asma é uma doença respiratória
+crônica de grande relevância para vigilância em saúde, com impacto sobre
+sintomas, crises, qualidade de vida e uso de serviços. O Global Asthma
+Report 2022 reforça que a mensuração populacional é necessária para
+orientar políticas de prevenção, diagnóstico, acesso a tratamento e
+controle de sintomas <a class="ref-link" href="#ref-1">[1]</a>. No
+Brasil, a PNS 2013 já havia estimado a prevalência de diagnóstico médico
+de asma em adultos e mostrado diferenças por sexo, idade, escolaridade,
+região e presença de plano de saúde
+<a class="ref-link" href="#ref-4">[4]</a>. Estudos complementares sobre
+tendência da asma autorreferida entre 2003 e 2013 também apontam
+crescimento do diagnóstico em adultos, sugerindo que os resultados de
+2013-2019 devem ser interpretados como parte de uma trajetória mais
+longa de mudança na detecção, acesso e perfil epidemiológico
+<a class="ref-link" href="#ref-6">[6]</a>. Para comparação
+internacional, levantamentos globais em adultos mostram grande variação
+entre países e reforçam que tabagismo, tratamento e diagnóstico precisam
+ser analisados conjuntamente
 <a class="ref-link" href="#ref-7">[7]</a>.</p>
 <div id="prevalência-de-diagnóstico-médico-de-asma" class="section level2" number="5.1">
 <h2><span class="header-section-number">5.1</span> Prevalência de
@@ -2392,10 +2397,10 @@ período.
 <p>Esse aumento pode refletir maior ocorrência da doença, melhora no
 diagnóstico médico ou ambos. A interpretação estadual deve considerar a
 amplitude e a sobreposição dos intervalos de confiança, especialmente em
-UFs com menor tamanho efetivo de amostra. Como o diagnóstico médico
-depende de acesso ao cuidado, diferenças estaduais podem refletir tanto
-carga epidemiológica quanto desigualdades de acesso a consulta,
-investigação clínica e registro do diagnóstico
+UFs com menor tamanho efetivo de amostra, o que leva a maiores ICs. Como
+o diagnóstico médico depende de acesso ao cuidado, diferenças estaduais
+podem refletir tanto carga epidemiológica quanto desigualdades de acesso
+a consulta, investigação clínica e registro do diagnóstico
 <a class="ref-link" href="#ref-4">[4]</a>,
 <a class="ref-link" href="#ref-6">[6]</a>.</p>
 </div>
@@ -4167,11 +4172,11 @@ IC 95% de cada barra.
 <p>A redução do tabagismo é coerente com a narrativa de queda de fatores
 de risco respiratórios. Não obstante, o comportamento dos dados é
 diametralmente oposto à prevalência da doença. Sendo assim, o aumento do
-diangnóstico da doença se dá, sobretudo, pelo aumento de cerca de 41,30%
-de pneumologistas em atividade no Brasil, segundo dados do Conselho
-Federal de Medicina. Ou seja, quanto maior o número de profissionais
-especialistas neste tipo de doença, maior a probabilidade de
-diagnósticos dessa doença. Adicionalmente, a comparação estadual não
+diangnóstico da doença pode se dar, sobretudo, pelo aumento de cerca de
+41,30% de pneumologistas em atividade no Brasil, segundo dados do
+Conselho Federal de Medicina. Ou seja, quanto maior o número de
+profissionais especialistas neste tipo de doença, maior a probabilidade
+de diagnósticos dessa doença. Adicionalmente, a comparação estadual não
 deve se basear apenas na altura das barras: a sobreposição dos
 intervalos pode impedir conclusão estatística sobre mudança local.</p>
 </div>
