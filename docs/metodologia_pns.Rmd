@@ -151,10 +151,22 @@ li {
   font-size: 0.88em;
   margin: -0.45em 0 1.55em;
 }
+.source-after-note {
+  color: var(--report-muted);
+  font-size: 0.88em;
+  margin: 0.1em 0 1.55em;
+}
 .table-source {
   color: var(--report-muted);
   font-size: 0.88em;
-  margin: -1.1em 0 1.7em;
+  margin: 0.1em 0 1.7em;
+}
+.table-note,
+.figure-note {
+  color: var(--report-muted);
+  font-size: 0.88em;
+  margin: 0.1em 0 0.2em;
+  text-align: left;
 }
 .math.display {
   text-align: center;
@@ -167,7 +179,7 @@ pre {
 table,
 .report-table {
   width: 100%;
-  margin: 1.1em 0 1.7em;
+  margin: 1.1em 0 0.65em;
   border-collapse: collapse;
   font-size: 0.95em;
 }
@@ -338,8 +350,22 @@ source_note <- function(class = "source-note") {
   paste0('<p class="', class, '">Fonte: elaborado pelos próprios autores.</p>')
 }
 
-emit_report_table <- function(x, caption) {
-  cat(report_kable(x, caption = caption), "\n", source_note("table-source"), "\n")
+report_note <- function(note, class = "table-note") {
+  if (is.null(note) || is.na(note) || !nzchar(note)) {
+    return("")
+  }
+  paste0('<p class="', class, '">Nota: ', note, '</p>')
+}
+
+emit_report_table <- function(x, caption, note = NULL) {
+  cat(
+    report_kable(x, caption = caption),
+    "\n",
+    report_note(note, "table-note"),
+    "\n",
+    source_note("table-source"),
+    "\n"
+  )
 }
 
 fmt_decimal <- function(x, digits = 2, big_mark = FALSE) {
@@ -400,10 +426,16 @@ make_year_ic_table <- function(df, value_col, lower_col, upper_col, type = "pct"
 }
 
 plot_year_ic <- function(df, value_col, lower_col, upper_col, y_lab) {
+  uf_levels <- df %>%
+    distinct(uf) %>%
+    mutate(ordem = ifelse(uf == "Brasil", 1, 0)) %>%
+    arrange(ordem, uf) %>%
+    pull(uf)
+
   plot_df <- df %>%
     mutate(
       ano = factor(as.character(ano), levels = c("2019", "2013")),
-      uf = factor(uf, levels = c(setdiff(unique(uf), "Brasil"), "Brasil"))
+      uf = factor(uf, levels = rev(uf_levels))
     )
 
   ggplot(plot_df, aes(x = uf, y = .data[[value_col]], fill = ano)) +
@@ -606,7 +638,7 @@ plot_year_ic(
 ```{r table-prev-asma, results='asis'}
 emit_report_table(
   make_year_ic_table(prev_asma, "prevalencia", "li", "ls", type = "pct"),
-  caption = "Prevalência de diagnóstico médico de asma por Unidade da Federação e Brasil, com estimativa e IC 95%."
+  caption = "Tabela 1: Prevalência de diagnóstico médico de asma por Unidade da Federação e Brasil."
 )
 ```
 
@@ -652,7 +684,7 @@ plot_year_ic(
 ```{r table-prev-crise, results='asis'}
 emit_report_table(
   make_year_ic_table(prev_crise, "prevalencia", "li", "ls", type = "pct"),
-  caption = "Crise de asma nos últimos 12 meses por Unidade da Federação e Brasil, com estimativa e IC 95%."
+  caption = "Tabela 2: Crise de asma nos últimos 12 meses por Unidade da Federação e Brasil."
 )
 ```
 
@@ -696,7 +728,7 @@ plot_year_ic(
 ```{r table-medic-asma, results='asis'}
 emit_report_table(
   make_year_ic_table(medic_asma, "pct_medic_asma", "li", "ls", type = "pct"),
-  caption = "Uso de medicamento oral ou bombinha entre pessoas com diagnóstico médico de asma, com estimativa e IC 95%."
+  caption = "Tabela 3: Uso de medicamento oral ou bombinha entre pessoas com diagnóstico médico de asma."
 )
 ```
 
@@ -740,7 +772,7 @@ plot_year_ic(
 ```{r table-medic-crise, results='asis'}
 emit_report_table(
   make_year_ic_table(medic_crise, "pct_medic_crise_asma", "li", "ls", type = "pct"),
-  caption = "Uso de medicamento oral ou bombinha entre pessoas com crise de asma nos últimos 12 meses, com estimativa e IC 95%."
+  caption = "Tabela 4: Uso de medicamento oral ou bombinha entre pessoas com crise de asma nos últimos 12 meses."
 )
 ```
 
@@ -772,7 +804,7 @@ emit_report_table(
     "lim_sup_taxa_100k_medic_asma",
     type = "rate"
   ),
-  caption = "Taxa populacional de usuários de medicamento oral ou bombinha para asma por 100 mil habitantes, com estimativa e IC 95%."
+  caption = "Tabela 5: Taxa populacional de usuários de medicamento oral ou bombinha para asma por 100 mil habitantes."
 )
 ```
 
@@ -804,7 +836,7 @@ emit_report_table(
     "lim_sup_taxa_100k_fumantes",
     type = "rate"
   ),
-  caption = "Taxa de fumantes ativos por 100 mil habitantes por Unidade da Federação e Brasil, com estimativa e IC 95%."
+  caption = "Tabela 6: Taxa de fumantes ativos por 100 mil habitantes por Unidade da Federação e Brasil."
 )
 ```
 
@@ -839,10 +871,16 @@ O arquivo R `Extração PNS - Farmácia Popular.R` estima, para 2019, a proporç
 
 ```{r plot-desembolso}
 if (!is.null(desembolso)) {
+  uf_desembolso_levels <- desembolso %>%
+    distinct(uf) %>%
+    mutate(ordem = ifelse(uf == "Brasil", 1, 0)) %>%
+    arrange(ordem, uf) %>%
+    pull(uf)
+
   plot_desembolso <- desembolso %>%
     mutate(
       tipo_med = factor(tipo_med, levels = c("Bombinha", "Medicamento oral")),
-      uf = factor(uf, levels = c(setdiff(unique(uf), "Brasil"), "Brasil"))
+      uf = factor(uf, levels = rev(uf_desembolso_levels))
     )
 
   ggplot(plot_desembolso, aes(x = uf, y = pct_asma_med_pg, fill = tipo_med)) +
@@ -878,7 +916,7 @@ if (!is.null(desembolso)) {
 
   emit_report_table(
     tabela_desembolso,
-    caption = "Proporção de usuários de medicamento oral ou bombinha para asma que fizeram desembolso, com estimativa e IC 95%."
+    caption = "Tabela 7: Proporção de usuários de medicamento oral ou bombinha para asma que fizeram desembolso."
   )
 }
 ```
@@ -912,11 +950,12 @@ plot_single_ic(
 ```{r table-absenteismo-2019, results='asis'}
 tabela_abs_2019 <- abs_br %>%
   mutate(`Estimativa [IC 95%]` = fmt_ic(pct, li, ls, type = "pct")) %>%
-  select(Indicador = tipo, Denominador = denominador, `Estimativa [IC 95%]`, `Método do IC` = metodo_ic)
+  select(Indicador = tipo, `Estimativa [IC 95%]`)
 
 emit_report_table(
   tabela_abs_2019,
-  caption = "Absenteísmo por motivo de saúde no Brasil, PNS 2019, com estimativa e IC 95%."
+  caption = "Tabela 8: Absenteísmo por motivo de saúde no Brasil, PNS 2019.",
+  note = "Denominador: para o indicador geral, moradores selecionados com resposta válida sobre perda de atividades habituais; para motivos específicos, moradores que perderam atividades habituais por motivo de saúde. Método do IC: beta via <code>survey::svyciprop(method = \"beta\")</code>."
 )
 ```
 
@@ -948,11 +987,12 @@ plot_single_ic(
 ```{r table-dias-perdidos-2019, results='asis'}
 tabela_dias_2019 <- dias_plot %>%
   mutate(`Estimativa [IC 95%]` = fmt_ic(media_dias, li, ls, type = "mean")) %>%
-  select(Motivo = tipo, `Estimativa [IC 95%]`, `Método do IC` = metodo_ic)
+  select(Motivo = tipo, `Estimativa [IC 95%]`)
 
 emit_report_table(
   tabela_dias_2019,
-  caption = "Média de dias perdidos por motivo de saúde no Brasil, PNS 2019, com estimativa e IC 95%."
+  caption = "Tabela 9: Média de dias perdidos por motivo de saúde no Brasil, PNS 2019.",
+  note = "Método do IC: aproximação normal via <code>survey::svymean()</code>."
 )
 ```
 
@@ -966,11 +1006,12 @@ A PNS 2013 e a PNS 2019 permitem comparar perda de atividades habituais e dias p
 tabela_abs_resp <- absenteismo_resp_2013_2019 %>%
   filter(uf == "Brasil") %>%
   arrange(ano) %>%
-  select(Ano = ano, Indicador = tipo, Denominador = denominador, `Estimativa [IC 95%]` = estimativa_ic, Harmonização = harmonizacao)
+  select(Ano = ano, `Estimativa [IC 95%]` = estimativa_ic)
 
 emit_report_table(
   tabela_abs_resp,
-  caption = "Participação dos problemas respiratórios harmonizados entre moradores que perderam atividades habituais por motivo de saúde, Brasil, PNS 2013 e 2019."
+  caption = "Tabela 10: Participação dos problemas respiratórios harmonizados entre moradores que perderam atividades habituais por motivo de saúde, Brasil, PNS 2013 e 2019.",
+  note = "Indicador: participação dos problemas respiratórios harmonizados entre moradores que perderam atividades habituais por motivo de saúde. Denominador: moradores selecionados que perderam atividades habituais por motivo de saúde. Harmonização: em 2013, soma conceitual das categorias <code>Asma / bronquite / pneumonia</code> e <code>Resfriado / gripe</code>; em 2019, categoria de problemas respiratórios que inclui resfriado, gripe, sinusite, asma, bronquite e pneumonia. Método do IC: beta via <code>survey::svyciprop(method = \"beta\")</code>."
 )
 ```
 
@@ -978,11 +1019,12 @@ emit_report_table(
 tabela_dias_resp <- dias_perdidos_resp_2013_2019 %>%
   filter(uf == "Brasil") %>%
   arrange(ano) %>%
-  select(Ano = ano, Indicador = tipo, Denominador = denominador, `Estimativa [IC 95%]` = estimativa_ic, Harmonização = harmonizacao)
+  select(Ano = ano, `Estimativa [IC 95%]` = estimativa_ic)
 
 emit_report_table(
   tabela_dias_resp,
-  caption = "Média de dias perdidos por problemas respiratórios harmonizados, Brasil, PNS 2013 e 2019."
+  caption = "Tabela 11: Média de dias perdidos por problemas respiratórios harmonizados, Brasil, PNS 2013 e 2019.",
+  note = "Indicador: média de dias perdidos por problemas respiratórios harmonizados entre moradores que perderam atividades habituais por motivo de saúde. Denominador: moradores selecionados que perderam atividades habituais por motivo de saúde. Harmonização: em 2013, soma conceitual das categorias <code>Asma / bronquite / pneumonia</code> e <code>Resfriado / gripe</code>; em 2019, categoria de problemas respiratórios que inclui resfriado, gripe, sinusite, asma, bronquite e pneumonia. Método do IC: aproximação normal via <code>survey::svymean()</code>."
 )
 ```
 
@@ -1033,7 +1075,8 @@ plot_single_ic(
   fill = "#a7a6f2"
 )
 ```
-`r source_note()`
+`r report_note("valores deflacionados a preços de agosto de 2025 pelo IPCA.", "figure-note")`
+`r source_note("source-after-note")`
 
 ```{r table-renda, results='asis'}
 tabela_renda <- renda %>%
@@ -1044,7 +1087,8 @@ tabela_renda <- renda %>%
 
 emit_report_table(
   tabela_renda,
-  caption = "Renda média deflacionada por Unidade da Federação e Brasil, com estimativa e IC 95%."
+  caption = "Tabela 12: Renda média deflacionada por Unidade da Federação e Brasil.",
+  note = "Valores deflacionados a preços de agosto de 2025 pelo IPCA."
 )
 ```
 
@@ -1085,7 +1129,7 @@ sintese <- tibble::tibble(
   )
 )
 
-emit_report_table(sintese, caption = "Leitura integrada dos principais achados.")
+emit_report_table(sintese, caption = "Tabela 13: Leitura integrada dos principais achados.")
 ```
 
 Em conjunto, os resultados indicam aumento do diagnóstico médico de asma entre 2013 e 2019, sem melhora clara nas crises recentes. A estabilidade das crises e a cautela na interpretação do uso de medicamentos sugerem que o manejo da asma depende não apenas de diagnóstico, mas também de acesso, adesão, acompanhamento clínico e intervenções não farmacológicas. A correta implementação do plano amostral complexo é essencial para que essas conclusões sejam comparáveis entre anos e entre Unidades da Federação.
