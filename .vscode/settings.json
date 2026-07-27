@@ -1,11 +1,26 @@
 {
   "editor.wordWrap": "on",
+  "editor.wordWrapOverride1": "on",
+  "editor.wordWrapOverride2": "on",
   "editor.wrappingIndent": "same",
   "editor.wordWrapColumn": 100,
+  "editor.minimap.enabled": false,
+  "editor.rulers": [
+    100
+  ],
+  "[r]": {
+    "editor.wordWrap": "on",
+    "editor.wordWrapOverride1": "on",
+    "editor.wordWrapOverride2": "on"
+  },
   "[rmd]": {
-    "editor.wordWrap": "on"
+    "editor.wordWrap": "on",
+    "editor.wordWrapOverride1": "on",
+    "editor.wordWrapOverride2": "on"
   },
   "[markdown]": {
-    "editor.wordWrap": "on"
+    "editor.wordWrap": "on",
+    "editor.wordWrapOverride1": "on",
+    "editor.wordWrapOverride2": "on"
   }
 }
