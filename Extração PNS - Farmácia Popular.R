@@ -40,7 +40,7 @@ estima_prop_beta = function(var, label, design){
   estima_uma = function(design_atual, uf_atual){
     est = tryCatch(
       svyciprop(formula_var, design = design_atual,
-                method = "beta", na.rm = TRUE),
+                method = "beta", level = 0.95, na.rm = TRUE),
       error = function(e) NULL
     )
     
@@ -100,7 +100,11 @@ estima_prop_beta = function(var, label, design){
   est_br = estima_uma(design, "Brasil")
   
   rbind(est_uf, est_br) %>%
-    mutate(estimativa_ic = formatar_ic_pct(pct_asma_med_pg, li, ls))
+    mutate(
+      uf = as.character(uf),
+      estimativa_ic = formatar_ic_pct(pct_asma_med_pg, li, ls)
+    ) %>%
+    arrange(if_else(uf == "Brasil", 1L, 0L), uf)
 }
 
 variaveis_2019 = c("V0001", "V0024", "UPA_PNS", "ID_DOMICILIO", "V0006_PNS",
@@ -175,7 +179,8 @@ asma_oral_pg = estima_prop_beta("asma_oral_pg", "Medicamento oral", design_pns20
 asma_bombinha_pg = estima_prop_beta("asma_bombinha_pg", "Bombinha", design_pns2019)
 
 # Juntando tudo
-df_desembolso = rbind(asma_oral_pg, asma_bombinha_pg)
+df_desembolso = rbind(asma_oral_pg, asma_bombinha_pg) %>%
+  arrange(tipo_med, if_else(uf == "Brasil", 1L, 0L), uf)
 
 # Salvando a base de dados
 write_xlsx(df_desembolso, path = "df_desembolso.xlsx")

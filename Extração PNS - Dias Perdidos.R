@@ -56,7 +56,7 @@ estima_prop_beta = function(var, label, design){
   estima_uma = function(design_atual, uf_atual){
     est = tryCatch(
       svyciprop(formula_var, design = design_atual,
-                method = "beta", na.rm = TRUE),
+                method = "beta", level = 0.95, na.rm = TRUE),
       error = function(e) NULL
     )
 
@@ -106,8 +106,12 @@ estima_prop_beta = function(var, label, design){
 
   est_br = estima_uma(design, "Brasil")
 
-  rbind(est_br, est_uf) %>%
-    mutate(estimativa_ic = formatar_ic_pct(pct, li, ls))
+  rbind(est_uf, est_br) %>%
+    mutate(
+      uf = as.character(uf),
+      estimativa_ic = formatar_ic_pct(pct, li, ls)
+    ) %>%
+    arrange(if_else(uf == "Brasil", 1L, 0L), uf)
 }
 
 estima_media_dias = function(var, label, design, day_var = "J003"){
@@ -132,7 +136,7 @@ estima_media_dias = function(var, label, design, day_var = "J003"){
       ))
     }
 
-    ci = tryCatch(as.numeric(confint(est)), error = function(e) c(NA_real_, NA_real_))
+    ci = tryCatch(as.numeric(confint(est, level = 0.95)), error = function(e) c(NA_real_, NA_real_))
     valor = as.numeric(coef(est))[1]
 
     data.frame(
@@ -156,8 +160,12 @@ estima_media_dias = function(var, label, design, day_var = "J003"){
 
   est_br = estima_uma(design, "Brasil")
 
-  rbind(est_br, est_uf) %>%
-    mutate(estimativa_ic = formatar_ic_media(media_dias, li, ls))
+  rbind(est_uf, est_br) %>%
+    mutate(
+      uf = as.character(uf),
+      estimativa_ic = formatar_ic_media(media_dias, li, ls)
+    ) %>%
+    arrange(if_else(uf == "Brasil", 1L, 0L), uf)
 }
 
 variaveis_2019 = c("V0001", "V0024", "UPA_PNS", "ID_DOMICILIO", "V0006_PNS",

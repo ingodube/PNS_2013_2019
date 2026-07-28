@@ -45,13 +45,14 @@ estima_media = function(var, design, nome_media){
   
   estima_uma = function(design_atual, uf_atual){
     est = svymean(formula_var, design = design_atual, na.rm = TRUE)
-    ci = as.numeric(confint(est))
+    ci = as.numeric(confint(est, level = 0.95))
     
     data.frame(
       UF = uf_atual,
       media = as.numeric(coef(est))[1],
       ci_l = ci[1],
-      ci_u = ci[2]
+      ci_u = ci[2],
+      metodo_ic = "normal"
     )
   }
   
@@ -66,9 +67,11 @@ estima_media = function(var, design, nome_media){
   
   est_br = estima_uma(design, "Brasil")
   
-  rbind(est_br, est_uf) %>%
+  rbind(est_uf, est_br) %>%
+    mutate(UF = as.character(UF)) %>%
     rename(!!nome_media := media) %>%
-    mutate(estimativa_ic = formatar_ic_media(.data[[nome_media]], ci_l, ci_u))
+    mutate(estimativa_ic = formatar_ic_media(.data[[nome_media]], ci_l, ci_u)) %>%
+    arrange(if_else(UF == "Brasil", 1L, 0L), UF)
 }
 
 variaveis_2019 = c("V0001", "V0024", "UPA_PNS", "ID_DOMICILIO", "V0006_PNS",
