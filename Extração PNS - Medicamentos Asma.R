@@ -57,7 +57,7 @@ estima_prop_beta = function(var, design, pct_col, value_col = var){
   estima_uma = function(design_atual, uf_atual){
     est = tryCatch(
       svyciprop(formula_var, design = design_atual,
-                method = "beta", na.rm = TRUE),
+                method = "beta", level = 0.95, na.rm = TRUE),
       error = function(e) NULL
     )
     
@@ -114,9 +114,11 @@ estima_prop_beta = function(var, design, pct_col, value_col = var){
   est_br = estima_uma(design, "Brasil")
   
   rbind(est_uf, est_br) %>%
+    mutate(uf = as.character(uf)) %>%
     rename(!!value_col := valor,
            !!pct_col := pct) %>%
-    mutate(estimativa_ic = formatar_ic_pct(.data[[pct_col]], li, ls))
+    mutate(estimativa_ic = formatar_ic_pct(.data[[pct_col]], li, ls)) %>%
+    arrange(if_else(uf == "Brasil", 1L, 0L), uf)
 }
 
 estima_taxa_medic_100k = function(var, denom_var, design){
@@ -126,10 +128,10 @@ estima_taxa_medic_100k = function(var, denom_var, design){
   estima_uma = function(design_atual, uf_atual){
     total = svytotal(formula_var, design = design_atual, na.rm = TRUE)
     total_pop = svytotal(formula_denom, design = design_atual, na.rm = TRUE)
-    ci_total = as.numeric(confint(total))
+    ci_total = as.numeric(confint(total, level = 0.95))
     taxa = tryCatch(
       svyciprop(formula_var, design = design_atual,
-                method = "beta", na.rm = TRUE),
+                method = "beta", level = 0.95, na.rm = TRUE),
       error = function(e) NULL
     )
     
@@ -173,11 +175,15 @@ estima_taxa_medic_100k = function(var, denom_var, design){
   est_br = estima_uma(design, "Brasil")
   
   rbind(est_uf, est_br) %>%
-    mutate(estimativa_ic = formatar_ic_taxa(
-      taxa_100k_medic_asma,
-      lim_inf_taxa_100k_medic_asma,
-      lim_sup_taxa_100k_medic_asma
-    ))
+    mutate(
+      uf = as.character(uf),
+      estimativa_ic = formatar_ic_taxa(
+        taxa_100k_medic_asma,
+        lim_inf_taxa_100k_medic_asma,
+        lim_sup_taxa_100k_medic_asma
+      )
+    ) %>%
+    arrange(if_else(uf == "Brasil", 1L, 0L), uf)
 }
 
 variaveis_2019 = c("V0001", "V0024", "UPA_PNS", "ID_DOMICILIO", "V0006_PNS",
@@ -281,11 +287,11 @@ write.csv(medic_asma_2013_2019, file = "df_medic_asma_2013_2019_long.csv", row.n
 
 # Transformando no formato wide
 medic_asma_2013_2019_wide = medic_asma_2013_2019 %>%
-  select(uf, ano, pct_medic_asma) %>%
+  select(uf, ano, pct_medic_asma, li, ls, metodo_ic, estimativa_ic) %>%
   pivot_wider(
     names_from = ano,
-    values_from = pct_medic_asma,
-    names_prefix = "pct_medic_asma_"
+    values_from = c(pct_medic_asma, li, ls, metodo_ic, estimativa_ic),
+    names_glue = "{.value}_{ano}"
   )
 
 # Salvando a base no formato wide
@@ -340,11 +346,11 @@ write.csv(medic_crise_asma_2013_2019, file = "df_medic_crise_asma_2013_2019_long
 
 # Transformando no formato wide
 medic_crise_asma_2013_2019_wide = medic_crise_asma_2013_2019 %>%
-  select(uf, ano, pct_medic_crise_asma) %>%
+  select(uf, ano, pct_medic_crise_asma, li, ls, metodo_ic, estimativa_ic) %>%
   pivot_wider(
     names_from = ano,
-    values_from = pct_medic_crise_asma,
-    names_prefix = "pct_medic_crise_asma_"
+    values_from = c(pct_medic_crise_asma, li, ls, metodo_ic, estimativa_ic),
+    names_glue = "{.value}_{ano}"
   )
 
 # Salvando a base no formato wide
@@ -399,25 +405,23 @@ df_taxa_medic_asma_2013_2019 = rbind(
 write.csv(df_taxa_medic_asma_2013_2019, file = "df_taxa_medic_asma_2013_2019_long.csv", row.names = FALSE)
 
 # Transformando no formato wide
-taxa_medic_asma_2013_2019_wide1 = df_taxa_medic_asma_2013_2019 %>%
-  select(uf, ano, total_medic_asma) %>%
+taxa_medic_asma_2013_2019_wide = df_taxa_medic_asma_2013_2019 %>%
+  select(
+    uf, ano, total_medic_asma, lim_inf_total_medic_asma,
+    lim_sup_total_medic_asma, total_pop, taxa_100k_medic_asma,
+    lim_inf_taxa_100k_medic_asma, lim_sup_taxa_100k_medic_asma,
+    metodo_ic, estimativa_ic
+  ) %>%
   pivot_wider(
     names_from = ano,
-    values_from = total_medic_asma,
-    names_prefix = "total_medic_asma_"
+    values_from = c(
+      total_medic_asma, lim_inf_total_medic_asma,
+      lim_sup_total_medic_asma, total_pop, taxa_100k_medic_asma,
+      lim_inf_taxa_100k_medic_asma, lim_sup_taxa_100k_medic_asma,
+      metodo_ic, estimativa_ic
+    ),
+    names_glue = "{.value}_{ano}"
   )
-
-# Transformando no formato wide
-taxa_medic_asma_2013_2019_wide2 = df_taxa_medic_asma_2013_2019 %>%
-  select(uf, ano, taxa_100k_medic_asma) %>%
-  pivot_wider(
-    names_from = ano,
-    values_from = taxa_100k_medic_asma,
-    names_prefix = "taxa_100k_medic_asma_"
-  )
-
-taxa_medic_asma_2013_2019_wide = merge(taxa_medic_asma_2013_2019_wide1, taxa_medic_asma_2013_2019_wide2,
-                                       by.x = "uf", by.y = "uf")
 
 # Salvando a base no formato wide
 write_xlsx(taxa_medic_asma_2013_2019_wide, path = "df_taxa_medic_asma_2013_2019_wide.xlsx")

@@ -41,7 +41,7 @@ estima_prop_beta = function(var, design, pct_col){
   estima_uma = function(design_atual, uf_atual){
     est = tryCatch(
       svyciprop(formula_var, design = design_atual,
-                method = "beta", na.rm = TRUE),
+                method = "beta", level = 0.95, na.rm = TRUE),
       error = function(e) NULL
     )
     
@@ -90,11 +90,13 @@ estima_prop_beta = function(var, design, pct_col){
   
   rbind(est_uf, est_br) %>%
     mutate(
+      uf = as.character(uf),
       !!pct_col := valor * 100,
       li = ci_l * 100,
       ls = ci_u * 100,
       estimativa_ic = formatar_ic_pct(valor * 100, ci_l * 100, ci_u * 100)
-    )
+    ) %>%
+    arrange(if_else(uf == "Brasil", 1L, 0L), uf)
 }
 
 variaveis_2019 = c("V0001", "V0024", "UPA_PNS", "ID_DOMICILIO", "V0006_PNS",
@@ -141,11 +143,11 @@ write.csv(prev_crise_2013_2019, file = "df_prev_crise_2013_2019_long.csv", row.n
 
 # Transformando no formato wide
 prev_crise_2013_2019_wide = prev_crise_2013_2019 %>%
-  select(uf, ano, prevalencia) %>%
+  select(uf, ano, prevalencia, li, ls, metodo_ic, estimativa_ic) %>%
   pivot_wider(
     names_from = ano,
-    values_from = prevalencia,
-    names_prefix = "prevalencia_"
+    values_from = c(prevalencia, li, ls, metodo_ic, estimativa_ic),
+    names_glue = "{.value}_{ano}"
   )
 
 # Salvando a base no formato wide

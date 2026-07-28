@@ -48,10 +48,10 @@ estima_taxa_100k_uf = function(var, denom_var, design){
   estima_uma = function(design_atual, uf_atual){
     total = svytotal(formula_var, design = design_atual, na.rm = TRUE)
     total_pop = svytotal(formula_denom, design = design_atual, na.rm = TRUE)
-    ci_total = as.numeric(confint(total))
+    ci_total = as.numeric(confint(total, level = 0.95))
     taxa = tryCatch(
       svyciprop(formula_var, design = design_atual,
-                method = "beta", na.rm = TRUE),
+                method = "beta", level = 0.95, na.rm = TRUE),
       error = function(e) NULL
     )
     
@@ -95,11 +95,15 @@ estima_taxa_100k_uf = function(var, denom_var, design){
   est_br = estima_uma(design, "Brasil")
   
   rbind(est_uf, est_br) %>%
-    mutate(estimativa_ic = formatar_ic_taxa(
-      taxa_100k_fumantes,
-      lim_inf_taxa_100k_fumantes,
-      lim_sup_taxa_100k_fumantes
-    ))
+    mutate(
+      uf = as.character(uf),
+      estimativa_ic = formatar_ic_taxa(
+        taxa_100k_fumantes,
+        lim_inf_taxa_100k_fumantes,
+        lim_sup_taxa_100k_fumantes
+      )
+    ) %>%
+    arrange(if_else(uf == "Brasil", 1L, 0L), uf)
 }
 
 variaveis_2019 = c("V0001", "V0024", "UPA_PNS", "ID_DOMICILIO", "V0006_PNS",
@@ -166,18 +170,29 @@ df_população_2013_2019_wide = df_taxa_fumantes_2013_2019 %>%
     names_from = ano,
     values_from = total_pop,
     names_prefix = "total_pop_"
-  )
+  ) %>%
+  arrange(if_else(uf == "Brasil", 1L, 0L), uf)
 
 # Salvando a base no formato wide
 write_xlsx(df_população_2013_2019_wide, path = "df_população_2013_2019_wide.xlsx")
 
 # Transformando no formato wide
 df_taxa_fumantes_2013_2019_wide = df_taxa_fumantes_2013_2019 %>%
-  select(uf, ano, taxa_100k_fumantes) %>%
+  select(
+    uf, ano, total_fumantes, lim_inf_total_fumantes,
+    lim_sup_total_fumantes, total_pop, taxa_100k_fumantes,
+    lim_inf_taxa_100k_fumantes, lim_sup_taxa_100k_fumantes,
+    metodo_ic, estimativa_ic
+  ) %>%
   pivot_wider(
     names_from = ano,
-    values_from = taxa_100k_fumantes,
-    names_prefix = "taxa_100k_fumantes_"
+    values_from = c(
+      total_fumantes, lim_inf_total_fumantes,
+      lim_sup_total_fumantes, total_pop, taxa_100k_fumantes,
+      lim_inf_taxa_100k_fumantes, lim_sup_taxa_100k_fumantes,
+      metodo_ic, estimativa_ic
+    ),
+    names_glue = "{.value}_{ano}"
   )
 
 # Salvando a base no formato wide
