@@ -2,7 +2,7 @@
 
 Data da validação: 29/07/2026 (America/Bahia)
 
-Resultado geral local: **PASS**
+Resultado geral: **PASS**
 
 ## Artefatos e integridade
 
@@ -12,8 +12,9 @@ Resultado geral local: **PASS**
 - Entrada do site: `docs/index.html`, com redirecionamento para `metodologia.html`
 - Gerador: `tools/publication_standard.py`
 - Git blob canônico: `1b13ab21178c7b3b913f96e2ca589dd31115ac94`
-- SHA-256 canônico: `f18e3d802c47740b5601c8107ed58eb8944e066c0afb4398ee44389a7a001bcf`
-- SHA-256 da publicação: `0971b418b030083516ff42f7c1708f2019d3b0063d8322ca0446eae6c466b229`
+- SHA-256 canônico no diretório de trabalho: `f18e3d802c47740b5601c8107ed58eb8944e066c0afb4398ee44389a7a001bcf`
+- SHA-256 canônico publicado, após normalização de fim de linha pelo Git: `834b84b70b3608343372f36bb87506ca634bf089df0b76906fdb37e43997c8d5`
+- SHA-256 local e publicado da página: `0971b418b030083516ff42f7c1708f2019d3b0063d8322ca0446eae6c466b229`
 - Renderização do R Markdown com Pandoc 3.8.3: PASS
 - Geração determinística do wrapper contra `docs/metodologia.html`: PASS
 - URLs primária e fallback configuradas para `metodologia_canonico.html`: PASS
@@ -67,4 +68,5 @@ Em todas as larguras, não houve erro de console nem elemento fora do papel. O s
 - Endereço preservado: `https://ingodube.github.io/PNS_2013_2019/metodologia.html`
 - O redirecionamento de `docs/index.html` e o QR code existente não precisam ser alterados.
 - A cópia canônica embutida foi validada por `file://`, evitando falha de carregamento local.
-- A confirmação da nova versão no GitHub Pages será executada após o push.
+- GitHub Pages após o push: HTTP 200, 13 tabelas, 10 figuras, quatro cards, nenhum erro de console e ausência de sangramento em 390 px: PASS.
+- O SHA-256 do wrapper servido pelo GitHub Pages coincide exatamente com o arquivo local: PASS.
