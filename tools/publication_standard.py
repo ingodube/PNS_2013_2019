@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import base64
 import hashlib
 import html
 from html.parser import HTMLParser
@@ -334,12 +335,12 @@ TEMPLATE = r'''<!doctype html>
     }
 
     figure.publication-figure figcaption {
-      margin: 0.65rem 0 0;
+      margin: 0 0 0.65rem;
       color: var(--muted);
       font-family: var(--ui-font);
       font-size: 0.78rem;
       line-height: 1.45;
-      text-align: left;
+      text-align: center;
       overflow-wrap: anywhere;
     }
 
@@ -354,8 +355,11 @@ TEMPLATE = r'''<!doctype html>
       font-family: var(--ui-font);
       font-size: 0.76rem;
       line-height: 1.45;
-      text-align: left !important;
+      text-align: justify !important;
     }
+
+    .footnotes p,
+    .footnotes li { text-align: justify !important; }
 
     pre,
     code {
@@ -378,7 +382,7 @@ TEMPLATE = r'''<!doctype html>
     }
 
     code { white-space: pre-wrap; }
-    .references p, .references li { text-align: left; }
+    .references p, .references li { text-align: justify; }
 
     .loading,
     .load-error {
@@ -404,7 +408,7 @@ TEMPLATE = r'''<!doctype html>
       body { font-size: 16px; }
       .page { padding: 1.35rem 0.9rem 2.5rem; }
       .article-header h1 { font-size: clamp(1.85rem, 10vw, 2.45rem); }
-      .article-content p { text-align: left; hyphens: none; }
+      .article-content p { text-align: justify; hyphens: none; }
       .references p, .references li { padding-left: 0; text-indent: 0; }
       pre { white-space: pre-wrap; overflow-x: hidden; }
       pre code { white-space: pre-wrap; }
@@ -437,10 +441,19 @@ TEMPLATE = r'''<!doctype html>
 
       const DEFAULT_SOURCES = [__SOURCE_URL__, __FALLBACK_URL__];
       const REPOSITORY_URL = __REPOSITORY_URL__;
+      const INLINE_SOURCE_B64 = '__INLINE_SOURCE_B64__';
       const params = new URLSearchParams(window.location.search);
-      const sources = params.get('source') ? [params.get('source')] : DEFAULT_SOURCES;
+      const sourceOverride = params.get('source');
+      const sources = sourceOverride
+        ? [sourceOverride]
+        : (window.location.protocol === 'file:' ? [] : DEFAULT_SOURCES);
       const page = document.getElementById('page');
       const cleanText = value => (value || '').replace(/\s+/g, ' ').trim();
+
+      function decodeInlineSource() {
+        const bytes = Uint8Array.from(atob(INLINE_SOURCE_B64), character => character.charCodeAt(0));
+        return new TextDecoder('utf-8').decode(bytes);
+      }
 
       async function fetchFirstAvailable(urls) {
         let lastError;
@@ -452,6 +465,9 @@ TEMPLATE = r'''<!doctype html>
           } catch (error) {
             lastError = error;
           }
+        }
+        if (INLINE_SOURCE_B64) {
+          return { markup: decodeInlineSource(), url: 'inline' };
         }
         throw lastError || new Error('Não foi possível obter o documento canônico.');
       }
@@ -535,7 +551,7 @@ TEMPLATE = r'''<!doctype html>
           figcaption.id = captionId;
           while (caption.firstChild) figcaption.appendChild(caption.firstChild);
           caption.before(figure);
-          figure.append(imageContainer, figcaption);
+          figure.append(figcaption, imageContainer);
           caption.remove();
           if (!cleanText(image.alt)) image.alt = captionText;
           image.loading = 'lazy';
@@ -724,7 +740,7 @@ def git_blob_sha(data: bytes) -> str:
     ).hexdigest()
 
 
-def validate_input(path: Path, expected_blob: str | None) -> str:
+def validate_input(path: Path, expected_blob: str | None) -> tuple[bytes, str]:
     data = path.read_bytes()
     try:
         text = data.decode("utf-8")
@@ -737,14 +753,21 @@ def validate_input(path: Path, expected_blob: str | None) -> str:
     blob = git_blob_sha(data)
     if expected_blob and blob.lower() != expected_blob.lower():
         raise ValueError(f"Input Git blob mismatch: expected {expected_blob}, found {blob}")
-    return blob
+    return data, blob
 
 
-def render(source_url: str, fallback_url: str, repository_url: str, shell_title: str) -> bytes:
+def render(
+    source_url: str,
+    fallback_url: str,
+    repository_url: str,
+    shell_title: str,
+    inline_source: bytes = b"",
+) -> bytes:
     output = TEMPLATE
     output = output.replace("__SOURCE_URL__", json.dumps(source_url, ensure_ascii=False))
     output = output.replace("__FALLBACK_URL__", json.dumps(fallback_url, ensure_ascii=False))
     output = output.replace("__REPOSITORY_URL__", json.dumps(repository_url, ensure_ascii=False))
+    output = output.replace("__INLINE_SOURCE_B64__", base64.b64encode(inline_source).decode("ascii"))
     output = output.replace("__SHELL_TITLE__", html.escape(shell_title, quote=False))
     return output.encode("utf-8")
 
@@ -770,8 +793,14 @@ def main() -> int:
     if input_path == output_path:
         raise ValueError("Input and output must differ to prevent a self-fetch loop.")
 
-    input_blob = validate_input(input_path, args.expected_input_blob)
-    output = render(args.source_url, args.fallback_url, args.repository_url, args.shell_title)
+    input_data, input_blob = validate_input(input_path, args.expected_input_blob)
+    output = render(
+        args.source_url,
+        args.fallback_url,
+        args.repository_url,
+        args.shell_title,
+        input_data,
+    )
     output_sha256 = hashlib.sha256(output).hexdigest()
 
     if args.validate_against and output != args.validate_against.read_bytes():
