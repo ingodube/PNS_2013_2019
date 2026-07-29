@@ -1,41 +1,52 @@
 # Pesquisa Nacional de Saúde 2013-2019: Asma, Plano Amostral e Indicadores
 
 <p align="justify">
-A Pesquisa Nacional de Saúde (PNS) é um dos principais inquéritos domiciliares realizados no Brasil, conduzido pelo Instituto Brasileiro de Geografia e Estatística (IBGE) em parceria com o Ministério da Saúde. A pesquisa produz informações sobre condições de saúde, doenças crônicas, estilo de vida, acesso e utilização dos serviços de saúde, medicamentos, bem-estar e desigualdades sociais. Por sua abrangência nacional e por seu desenho amostral complexo, a PNS é uma fonte central para a vigilância epidemiológica e para a formulação de políticas públicas orientadas por evidências.
+A Pesquisa Nacional de Saúde (PNS), conduzida pelo Instituto Brasileiro de Geografia e Estatística em parceria com o Ministério da Saúde, é um inquérito domiciliar de abrangência nacional com desenho amostral complexo. Este repositório documenta e implementa, em R, procedimentos para analisar indicadores relacionados à asma no Brasil em 2013 e 2019, incorporando pesos, estratos e unidades primárias de amostragem.
 </p>
 
 <p align="justify">
-Este repositório documenta e implementa, em linguagem R, procedimentos para analisar a evolução de indicadores relacionados à asma no Brasil entre 2013 e 2019. O trabalho tem como objetivo estimar a prevalência de diagnóstico médico de asma, a ocorrência de crises nos últimos 12 meses, o uso de medicamentos orais ou bombinhas, taxas populacionais por 100 mil habitantes, fatores de risco como tabagismo e indicadores complementares de acesso, absenteísmo, dias perdidos e renda. A proposta é tornar o fluxo analítico transparente, auditável e reprodutível.
+As rotinas estimam prevalência de diagnóstico médico de asma, ocorrência de crises nos últimos 12 meses, uso de medicamentos orais ou bombinhas, taxas populacionais, tabagismo, desembolso, absenteísmo, dias perdidos e renda. O objetivo é manter o fluxo analítico transparente, auditável e reproduzível, com intervalos de confiança compatíveis com o plano amostral da PNS.
 </p>
 
-## Implementação do Plano Amostral
+## Produtos principais
+
+- [Relatório metodológico publicado](https://ingodube.github.io/PNS_2013_2019/metodologia.html)
+- [Pôster científico](poster/poster_pns_asma_morrison.pdf)
+- [Fonte editável do relatório](docs/metodologia_pns.Rmd)
+
+## Organização do repositório
+
+```text
+PNS_2013_2019/
+├── Códigos/              # rotinas R de extração, tratamento e estimação
+├── Tabelas tratadas/     # CSV e XLSX validados usados pelo relatório
+├── poster/               # versão vigente do pôster científico
+├── docs/                 # fonte, artefatos e página publicada do relatório
+├── tools/                # gerador do wrapper editorial
+├── AGENTS.md             # orientações duráveis para manutenção
+└── README.md
+```
+
+## Implementação do plano amostral
 
 <p align="justify">
-O plano amostral da PNS é probabilístico, estratificado e por conglomerados em múltiplos estágios. Na prática, isso significa que as estimativas não devem ser calculadas como se os microdados viessem de uma amostra aleatória simples. Os códigos deste repositório constroem o desenho amostral com o pacote <code>PNSIBGE</code> e utilizam o pacote <code>survey</code> para incorporar pesos, estratos e unidades primárias de amostragem. Esse cuidado é essencial para produzir estimativas válidas de prevalência, médias, totais, taxas por 100 mil habitantes e intervalos de confiança.
+Os códigos constroem o desenho amostral com o pacote <code>PNSIBGE</code> e utilizam o pacote <code>survey</code> para incorporar pesos, estratos e conglomerados. Para proporções binárias, o fluxo utiliza <code>survey::svyciprop(method = "beta")</code>, produzindo intervalos de confiança de 95% que respeitam os limites naturais das proporções e oferecem leitura mais prudente em domínios pequenos.
 </p>
-
-<p align="justify">
-Para proporções binárias, como diagnóstico médico de asma, crise recente, uso de medicamentos e tabagismo, os códigos utilizam <code>survey::svyciprop(method = "beta")</code>. O uso do intervalo de confiança beta é importante porque respeita os limites naturais das proporções entre 0 e 1, evita truncamentos manuais e oferece leitura mais prudente em domínios pequenos, como Unidades da Federação e subgrupos de pessoas com asma. Os resultados são apresentados com intervalos de confiança de 95%, permitindo avaliar a magnitude das estimativas e a incerteza associada.
-</p>
-
-## Relatório Metodológico
-
-<p align="justify">
-O relatório metodológico descreve detalhadamente os passos de extração, recodificação das variáveis, construção dos indicadores, implementação do desenho amostral complexo, cálculo dos intervalos de confiança, produção dos gráficos e interpretação dos resultados. O trabalho também discute interoperabilidade de dados observacionais, ETL, OMOP/OHDSI e a utilidade da PNS como camada populacional de referência para análises em saúde.
-</p>
-
-**Acesse o relatório:**  
-[https://ingodube.github.io/PNS_2013_2019/metodologia.html](https://ingodube.github.io/PNS_2013_2019/metodologia.html)
-
-## Organização Geral
-
-- Códigos R de extração e análise: arquivos `Extração PNS - *.R`.
-- Documentação metodológica: `docs/metodologia_pns.Rmd`.
-- Relatório publicado: `docs/metodologia.html`.
-- Pôsteres científicos: `outputs/posters/`.
 
 ## Reprodutibilidade
 
-<p align="justify">
-Os arquivos de dados gerados localmente, como <code>df_*.csv</code> e <code>df_*.xlsx</code>, permanecem fora do controle de versão conforme definido no <code>.gitignore</code>. O objetivo é versionar os códigos, a documentação e os produtos finais necessários para leitura e comunicação dos achados, mantendo os outputs intermediários reproduzíveis a partir das rotinas analíticas.
-</p>
+Execute os códigos a partir da raiz do repositório. Cada arquivo em [`Códigos/`](Códigos/) localiza essa raiz, cria `Tabelas tratadas/` quando necessário e grava os resultados diretamente nessa pasta. Um exemplo de execução é:
+
+```r
+source(file.path("Códigos", "Extração PNS - Asma.R"))
+```
+
+As rotinas dependem, conforme o indicador, dos pacotes `PNSIBGE`, `survey`, `dplyr`, `tidyr`, `ggplot2`, `writexl` e `deflateBR`. Os microdados brutos não são incluídos no repositório e são obtidos pelos mecanismos documentados nos próprios códigos.
+
+## Política para dados tratados
+
+Os CSV e XLSX de [`Tabelas tratadas/`](Tabelas%20tratadas/) são produtos analíticos validados e permanecem versionados porque alimentam diretamente o relatório metodológico. Arquivos temporários, bloqueios do Excel, `Rplots.pdf`, cópias locais de trabalho e tabelas geradas acidentalmente na raiz permanecem fora do Git conforme o `.gitignore`.
+
+## Relatório metodológico
+
+O relatório descreve a extração, a recodificação das variáveis, a construção dos indicadores, a implementação do desenho amostral, o cálculo dos intervalos de confiança e a interpretação dos resultados. O endereço público permanece estável para preservar referências externas e o QR code do pôster.
