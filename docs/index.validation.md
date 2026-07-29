@@ -81,4 +81,8 @@ Em todas as larguras, o relatório apresentou 13 tabelas, 10 figuras, quatro blo
 - Endereço preservado: `https://ingodube.github.io/PNS_2013_2019/metodologia.html`.
 - O QR code existente não precisa ser alterado.
 - A cópia canônica embutida foi validada por `file://`.
-- A nova versão pública e o link do PDF serão confirmados após o push.
+- GitHub Pages após o push: HTTP 200, 13 tabelas, 10 figuras, quatro cards e quatro blocos de código, sem erro de console ou falha de carregamento — PASS.
+- Inspeção pública em 390 px: `clientWidth = scrollWidth = 390`, sangramento 0, nenhum elemento fora do viewport e sumário abrindo e fechando — PASS.
+- Alinhamento entre cabeçalhos e valores nas 13 tabelas publicadas: PASS.
+- SHA-256 do wrapper servido pelo GitHub Pages idêntico ao arquivo local: PASS.
+- PDF no GitHub: HTTP 200, 1.389.213 bytes e SHA-256 idêntico ao anexo original — PASS.
