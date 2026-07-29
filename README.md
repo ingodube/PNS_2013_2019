@@ -12,20 +12,6 @@ As rotinas estimam prevalência de diagnóstico médico de asma, ocorrência de 
 
 - [Relatório metodológico publicado](https://ingodube.github.io/PNS_2013_2019/metodologia.html)
 - [Pôster científico](poster/poster_pns_asma_morrison.pdf)
-- [Fonte editável do relatório](docs/metodologia_pns.Rmd)
-
-## Organização do repositório
-
-```text
-PNS_2013_2019/
-├── Códigos/              # rotinas R de extração, tratamento e estimação
-├── Tabelas tratadas/     # CSV e XLSX validados usados pelo relatório
-├── poster/               # versão vigente do pôster científico
-├── docs/                 # fonte, artefatos e página publicada do relatório
-├── tools/                # gerador do wrapper editorial
-├── AGENTS.md             # orientações duráveis para manutenção
-└── README.md
-```
 
 ## Implementação do plano amostral
 
@@ -35,18 +21,20 @@ Os códigos constroem o desenho amostral com o pacote <code>PNSIBGE</code> e uti
 
 ## Reprodutibilidade
 
-Execute os códigos a partir da raiz do repositório. Cada arquivo em [`Códigos/`](Códigos/) localiza essa raiz, cria `Tabelas tratadas/` quando necessário e grava os resultados diretamente nessa pasta. Um exemplo de execução é:
+<p align="justify">
+Execute os códigos a partir da raiz do repositório. Cada arquivo em <a href="Códigos/">Códigos/</a> localiza essa raiz, cria <code>Tabelas tratadas/</code> quando necessário e grava os resultados diretamente nessa pasta. Um exemplo de execução é:
+</p>
 
 ```r
 source(file.path("Códigos", "Extração PNS - Asma.R"))
 ```
 
-As rotinas dependem, conforme o indicador, dos pacotes `PNSIBGE`, `survey`, `dplyr`, `tidyr`, `ggplot2`, `writexl` e `deflateBR`. Os microdados brutos não são incluídos no repositório e são obtidos pelos mecanismos documentados nos próprios códigos.
-
-## Política para dados tratados
-
-Os CSV e XLSX de [`Tabelas tratadas/`](Tabelas%20tratadas/) são produtos analíticos validados e permanecem versionados porque alimentam diretamente o relatório metodológico. Arquivos temporários, bloqueios do Excel, `Rplots.pdf`, cópias locais de trabalho e tabelas geradas acidentalmente na raiz permanecem fora do Git conforme o `.gitignore`.
+<p align="justify">
+As rotinas dependem, conforme o indicador, dos pacotes <code>PNSIBGE</code>, <code>survey</code>, <code>dplyr</code>, <code>tidyr</code>, <code>ggplot2</code>, <code>writexl</code> e <code>deflateBR</code>. Os microdados brutos não são incluídos no repositório e são obtidos pelos mecanismos documentados nos próprios códigos.
+</p>
 
 ## Relatório metodológico
 
+<p align="justify">
 O relatório descreve a extração, a recodificação das variáveis, a construção dos indicadores, a implementação do desenho amostral, o cálculo dos intervalos de confiança e a interpretação dos resultados. O endereço público permanece estável para preservar referências externas e o QR code do pôster.
+</p>
