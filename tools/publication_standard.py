@@ -1,10 +1,33 @@
-<!doctype html>
+#!/usr/bin/env python3
+"""Generate the content-preserving publication wrapper for a canonical HTML report."""
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import html
+from html.parser import HTMLParser
+import json
+from pathlib import Path
+import sys
+
+
+DEFAULT_SOURCE = "https://raw.githubusercontent.com/ingodube/PNS_2013_2019/main/docs/metodologia_canonico.html"
+DEFAULT_FALLBACK = "https://ingodube.github.io/PNS_2013_2019/metodologia_canonico.html"
+DEFAULT_REPOSITORY = "https://github.com/ingodube/PNS_2013_2019"
+DEFAULT_TITLE = (
+    "Implementação do Plano Amostral da Pesquisa Nacional de Saúde no R: "
+    "um estudo de caso sobre a asma no Brasil"
+)
+
+
+TEMPLATE = r'''<!doctype html>
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" href="data:,">
-  <title>Implementação do Plano Amostral da Pesquisa Nacional de Saúde no R: um estudo de caso sobre a asma no Brasil</title>
+  <title>__SHELL_TITLE__</title>
   <style>
     :root {
       color-scheme: light;
@@ -412,8 +435,8 @@
     (() => {
       'use strict';
 
-      const DEFAULT_SOURCES = ["https://raw.githubusercontent.com/ingodube/PNS_2013_2019/main/docs/metodologia_canonico.html", "https://ingodube.github.io/PNS_2013_2019/metodologia_canonico.html"];
-      const REPOSITORY_URL = "https://github.com/ingodube/PNS_2013_2019";
+      const DEFAULT_SOURCES = [__SOURCE_URL__, __FALLBACK_URL__];
+      const REPOSITORY_URL = __REPOSITORY_URL__;
       const params = new URLSearchParams(window.location.search);
       const sources = params.get('source') ? [params.get('source')] : DEFAULT_SOURCES;
       const page = document.getElementById('page');
@@ -677,3 +700,102 @@
   </script>
 </body>
 </html>
+'''
+
+
+class HTMLProbe(HTMLParser):
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=True)
+        self.html = 0
+        self.body = 0
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        if tag.lower() == "html":
+            self.html += 1
+        elif tag.lower() == "body":
+            self.body += 1
+
+
+def git_blob_sha(data: bytes) -> str:
+    """Match Git's text normalization for the repository's CRLF working tree."""
+    normalized = data.replace(b"\r\n", b"\n")
+    return hashlib.sha1(
+        f"blob {len(normalized)}\0".encode("ascii") + normalized
+    ).hexdigest()
+
+
+def validate_input(path: Path, expected_blob: str | None) -> str:
+    data = path.read_bytes()
+    try:
+        text = data.decode("utf-8")
+    except UnicodeDecodeError as exc:
+        raise ValueError(f"Input must be UTF-8 HTML: {path}") from exc
+    probe = HTMLProbe()
+    probe.feed(text)
+    if (probe.html, probe.body) != (1, 1):
+        raise ValueError(f"Input must contain one html and one body element: {path}")
+    blob = git_blob_sha(data)
+    if expected_blob and blob.lower() != expected_blob.lower():
+        raise ValueError(f"Input Git blob mismatch: expected {expected_blob}, found {blob}")
+    return blob
+
+
+def render(source_url: str, fallback_url: str, repository_url: str, shell_title: str) -> bytes:
+    output = TEMPLATE
+    output = output.replace("__SOURCE_URL__", json.dumps(source_url, ensure_ascii=False))
+    output = output.replace("__FALLBACK_URL__", json.dumps(fallback_url, ensure_ascii=False))
+    output = output.replace("__REPOSITORY_URL__", json.dumps(repository_url, ensure_ascii=False))
+    output = output.replace("__SHELL_TITLE__", html.escape(shell_title, quote=False))
+    return output.encode("utf-8")
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("input_html", type=Path)
+    parser.add_argument("output_html", type=Path)
+    parser.add_argument("--source-url", default=DEFAULT_SOURCE)
+    parser.add_argument("--fallback-url", default=DEFAULT_FALLBACK)
+    parser.add_argument("--repository-url", default=DEFAULT_REPOSITORY)
+    parser.add_argument("--shell-title", default=DEFAULT_TITLE)
+    parser.add_argument("--expected-input-blob")
+    parser.add_argument("--validate-against", type=Path)
+    parser.add_argument("--expected-output-sha256")
+    return parser.parse_args()
+
+
+def main() -> int:
+    args = parse_args()
+    input_path = args.input_html.resolve()
+    output_path = args.output_html.resolve()
+    if input_path == output_path:
+        raise ValueError("Input and output must differ to prevent a self-fetch loop.")
+
+    input_blob = validate_input(input_path, args.expected_input_blob)
+    output = render(args.source_url, args.fallback_url, args.repository_url, args.shell_title)
+    output_sha256 = hashlib.sha256(output).hexdigest()
+
+    if args.validate_against and output != args.validate_against.read_bytes():
+        reference_sha = hashlib.sha256(args.validate_against.read_bytes()).hexdigest()
+        raise ValueError(
+            f"Generated output differs from reference: generated={output_sha256}, reference={reference_sha}"
+        )
+    if args.expected_output_sha256 and output_sha256.lower() != args.expected_output_sha256.lower():
+        raise ValueError(
+            f"Generated SHA-256 mismatch: expected {args.expected_output_sha256}, found {output_sha256}"
+        )
+
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_bytes(output)
+    print(f"input_git_blob={input_blob}")
+    print(f"output_sha256={output_sha256}")
+    print(f"output_bytes={len(output)}")
+    print(f"output={output_path}")
+    return 0
+
+
+if __name__ == "__main__":
+    try:
+        raise SystemExit(main())
+    except (OSError, ValueError) as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        raise SystemExit(2)
