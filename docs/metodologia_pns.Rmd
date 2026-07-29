@@ -21,6 +21,7 @@ output:
   --report-border: #d9e2ec;
   --report-surface: #ffffff;
   --report-bg: #f6f8fb;
+  --report-accent: #e65b2c;
 }
 body {
   background: var(--report-bg);
@@ -113,37 +114,28 @@ li {
 .callout {
   margin: 1.35em 0;
   padding: 16px 18px;
-  border-left: 5px solid var(--report-blue);
-  background: #f8fbfd;
-  border-radius: 5px;
+  border: 1px solid var(--report-border);
+  border-left: 5px solid var(--report-accent);
+  background: #f8f7f4;
+  border-radius: 3px;
 }
 .callout strong {
   display: block;
   margin-bottom: 0.35em;
-  color: var(--report-blue);
+  color: #3d3f42;
+  font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   font-size: 0.93em;
   letter-spacing: 0.03em;
-  text-transform: uppercase;
 }
 .callout p {
   margin: 0;
-}
-.callout.estimator {
-  border-left-color: #6b65c9;
-  background: #f6f5ff;
-}
-.callout.warning {
-  border-left-color: #b7791f;
-  background: #fffaf0;
-}
-.callout.interpretation {
-  border-left-color: #2f855a;
-  background: #f0fff4;
+  text-align: justify;
 }
 .figure-title {
   text-align: center;
   font-weight: 700;
   color: #243b53;
+  font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   margin: 2em 0 0.85em;
 }
 .source-note {
@@ -185,9 +177,10 @@ table,
 }
 table caption {
   caption-side: top;
-  color: var(--report-blue);
+  color: #243b53;
+  font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   font-weight: 700;
-  text-align: left;
+  text-align: center;
   margin-bottom: 0.45em;
 }
 table th {
@@ -200,7 +193,12 @@ table th,
 table td {
   padding: 8px 10px;
   border-bottom: 1px solid var(--report-border);
+  text-align: center !important;
   vertical-align: top;
+}
+table th:first-child,
+table td:first-child {
+  text-align: left !important;
 }
 table tr:nth-child(even) td {
   background: #fafcff;
@@ -295,16 +293,6 @@ repo_root <- candidate_roots[file.exists(file.path(candidate_roots, "Extração 
 if (is.na(repo_root)) {
   stop("Nao foi possivel localizar a raiz do repositorio a partir do diretorio de renderizacao.")
 }
-
-code_files <- c(
-  "Extração PNS - Asma.R",
-  "Extração PNS - Crise Asma 12 Meses.R",
-  "Extração PNS - Medicamentos Asma.R",
-  "Extração PNS - Taxa de fumantes ativos.R",
-  "Extração PNS - Farmácia Popular.R",
-  "Extração PNS - Dias Perdidos.R",
-  "Extração PNS - Renda.R"
-)
 
 read_csv_local <- function(path) {
   readr::read_csv(file.path(repo_root, path), show_col_types = FALSE)
@@ -499,10 +487,6 @@ dias_perdidos_resp_2013_2019 <- read_xlsx_local("df_dias_perdidos_respiratorio_2
 renda <- read_xlsx_local("df_renda_2019.xlsx")
 desembolso <- if (exists_local("df_desembolso.xlsx")) read_xlsx_local("df_desembolso.xlsx") else NULL
 
-code_status <- tibble::tibble(
-  arquivo_r = code_files,
-  encontrado = file.exists(file.path(repo_root, code_files))
-)
 ```
 
 <div class="report-hero">
@@ -529,10 +513,6 @@ Este trabalho apresenta a implementação do plano amostral da Pesquisa Nacional
   <strong>Objetivo do ponto de vista Estatístico</strong>
   <p>Documentar de forma reprodutível como os microdados da PNS são transformados em indicadores ponderados sobre diagnóstico de asma, crises, uso de medicamentos, tabagismo e indicadores complementares.</p>
 </div>
-
-```{r code-status, results='asis'}
-emit_report_table(code_status, caption = "Arquivos R documentados neste relatório.")
-```
 
 # Fonte dos dados e escopo analítico
 
@@ -638,7 +618,7 @@ plot_year_ic(
 ```{r table-prev-asma, results='asis'}
 emit_report_table(
   make_year_ic_table(prev_asma, "prevalencia", "li", "ls", type = "pct"),
-  caption = "Tabela 1: Prevalência de diagnóstico médico de asma por Unidade da Federação e Brasil."
+  caption = "Tabela 1: Prevalência de diagnóstico médico de asma por Unidade da Federação e Brasil, PNS 2013 e 2019."
 )
 ```
 
@@ -684,7 +664,7 @@ plot_year_ic(
 ```{r table-prev-crise, results='asis'}
 emit_report_table(
   make_year_ic_table(prev_crise, "prevalencia", "li", "ls", type = "pct"),
-  caption = "Tabela 2: Crise de asma nos últimos 12 meses por Unidade da Federação e Brasil."
+  caption = "Tabela 2: Crise de asma nos últimos 12 meses por Unidade da Federação e Brasil, PNS 2013 e 2019."
 )
 ```
 
@@ -728,7 +708,7 @@ plot_year_ic(
 ```{r table-medic-asma, results='asis'}
 emit_report_table(
   make_year_ic_table(medic_asma, "pct_medic_asma", "li", "ls", type = "pct"),
-  caption = "Tabela 3: Uso de medicamento oral ou bombinha entre pessoas com diagnóstico médico de asma."
+  caption = "Tabela 3: Uso de medicamento oral ou bombinha entre pessoas com diagnóstico médico de asma, PNS 2013 e 2019."
 )
 ```
 
@@ -772,7 +752,7 @@ plot_year_ic(
 ```{r table-medic-crise, results='asis'}
 emit_report_table(
   make_year_ic_table(medic_crise, "pct_medic_crise_asma", "li", "ls", type = "pct"),
-  caption = "Tabela 4: Uso de medicamento oral ou bombinha entre pessoas com crise de asma nos últimos 12 meses."
+  caption = "Tabela 4: Uso de medicamento oral ou bombinha entre pessoas com crise de asma nos últimos 12 meses, PNS 2013 e 2019."
 )
 ```
 
@@ -804,7 +784,7 @@ emit_report_table(
     "lim_sup_taxa_100k_medic_asma",
     type = "rate"
   ),
-  caption = "Tabela 5: Taxa populacional de usuários de medicamento oral ou bombinha para asma por 100 mil habitantes."
+  caption = "Tabela 5: Taxa populacional de usuários de medicamento oral ou bombinha para asma por 100 mil habitantes, PNS 2013 e 2019."
 )
 ```
 
@@ -817,8 +797,11 @@ O arquivo R `Extração PNS - Taxa de fumantes ativos.R` define fumante atual a 
 <p class="figure-title">Figura 6: Taxa de fumantes ativos por 100 mil habitantes por Unidade da Federação, PNS 2013 e 2019.</p>
 
 ```{r plot-taxa-fumantes}
+taxa_fumantes_exibicao <- taxa_fumantes %>%
+  filter(uf != "Brasil")
+
 plot_year_ic(
-  taxa_fumantes,
+  taxa_fumantes_exibicao,
   value_col = "taxa_100k_fumantes",
   lower_col = "lim_inf_taxa_100k_fumantes",
   upper_col = "lim_sup_taxa_100k_fumantes",
@@ -830,18 +813,18 @@ plot_year_ic(
 ```{r table-taxa-fumantes, results='asis'}
 emit_report_table(
   make_year_ic_table(
-    taxa_fumantes,
+    taxa_fumantes_exibicao,
     "taxa_100k_fumantes",
     "lim_inf_taxa_100k_fumantes",
     "lim_sup_taxa_100k_fumantes",
     type = "rate"
   ),
-  caption = "Tabela 6: Taxa de fumantes ativos por 100 mil habitantes por Unidade da Federação e Brasil."
+  caption = "Tabela 6: Taxa de fumantes ativos por 100 mil habitantes por Unidade da Federação e Brasil, PNS 2013 e 2019."
 )
 ```
 
 ```{r interp-fumantes, results='asis'}
-fumantes_uf <- taxa_fumantes %>%
+fumantes_uf <- taxa_fumantes_exibicao %>%
   select(uf, ano, taxa_100k_fumantes, lim_inf_taxa_100k_fumantes, lim_sup_taxa_100k_fumantes) %>%
   pivot_wider(
     names_from = ano,
@@ -916,7 +899,7 @@ if (!is.null(desembolso)) {
 
   emit_report_table(
     tabela_desembolso,
-    caption = "Tabela 7: Proporção de usuários de medicamento oral ou bombinha para asma que fizeram desembolso."
+    caption = "Tabela 7: Proporção de usuários de medicamento oral ou bombinha para asma que fizeram desembolso, PNS 2019."
   )
 }
 ```
@@ -1087,7 +1070,7 @@ tabela_renda <- renda %>%
 
 emit_report_table(
   tabela_renda,
-  caption = "Tabela 12: Renda média deflacionada por Unidade da Federação e Brasil.",
+  caption = "Tabela 12: Renda média deflacionada por Unidade da Federação e Brasil, PNS 2019.",
   note = "Valores deflacionados a preços de agosto de 2025 pelo IPCA."
 )
 ```
@@ -1113,14 +1096,14 @@ Uma agenda futura viável é tratar a PNS como fonte complementar a uma rede de 
 
 ```{r sintese-table, results='asis'}
 sintese <- tibble::tibble(
-  indicador = c(
+  Indicador = c(
     "Diagnóstico médico de asma",
     "Crise de asma nos últimos 12 meses",
     "Uso de medicamento entre asmáticos",
     "Taxa de fumantes",
     "Taxa populacional de medicamento para asma"
   ),
-  leitura = c(
+  Leitura = c(
     paste0("Aumentou de ", fmt_pct(asma_2013$estimativa), "% para ", fmt_pct(asma_2019$estimativa), "% no Brasil."),
     paste0("Ficou aproximadamente estável: ", fmt_pct(crise_2013$estimativa), "% para ", fmt_pct(crise_2019$estimativa), "% no Brasil."),
     paste0("Caiu de ", fmt_pct(medic_2013$estimativa), "% para ", fmt_pct(medic_2019$estimativa), "% entre pessoas com asma; interpretar com IC 95%."),
@@ -1129,7 +1112,7 @@ sintese <- tibble::tibble(
   )
 )
 
-emit_report_table(sintese, caption = "Tabela 13: Leitura integrada dos principais achados.")
+emit_report_table(sintese, caption = "Tabela 13: Leitura integrada dos principais achados, PNS 2013 e 2019.")
 ```
 
 Em conjunto, os resultados indicam aumento do diagnóstico médico de asma entre 2013 e 2019, sem melhora clara nas crises recentes. A estabilidade das crises e a cautela na interpretação do uso de medicamentos sugerem que o manejo da asma depende não apenas de diagnóstico, mas também de acesso, adesão, acompanhamento clínico e intervenções não farmacológicas. A correta implementação do plano amostral complexo é essencial para que essas conclusões sejam comparáveis entre anos e entre Unidades da Federação.
@@ -1180,6 +1163,6 @@ rmarkdown::render("docs/metodologia_pns.Rmd",
 
 </div>
 
-# Declaração de uso de inteligência artificial
+# Declaração de uso de inteligência artificial {.toc-ignore}
 
 Durante a preparação deste trabalho, foi utilizado o ChatGPT/Codex, da OpenAI, com modelo GPT-5, como ferramenta de apoio à estruturação dos códigos, revisão de consistência, formatação do relatório, organização visual de tabelas e figuras e automação da renderização. O conteúdo científico, a seleção dos indicadores, a interpretação dos resultados, a validação das estimativas e a responsabilidade final pelo trabalho são dos autores. A ferramenta de inteligência artificial não foi utilizada como autora, não substituiu a análise crítica dos autores e não altera a responsabilidade humana sobre a integridade, a precisão e a apresentação das informações.
