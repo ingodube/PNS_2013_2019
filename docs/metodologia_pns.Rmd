@@ -289,20 +289,21 @@ library(scales)
 library(stringr)
 
 candidate_roots <- unique(normalizePath(c(file.path(getwd(), ".."), getwd()), mustWork = FALSE))
-repo_root <- candidate_roots[file.exists(file.path(candidate_roots, "Extração PNS - Asma.R"))][1]
+repo_root <- candidate_roots[file.exists(file.path(candidate_roots, "Códigos", "Extração PNS - Asma.R"))][1]
 if (is.na(repo_root)) {
   stop("Nao foi possivel localizar a raiz do repositorio a partir do diretorio de renderizacao.")
 }
+tables_dir <- file.path(repo_root, "Tabelas tratadas")
 
 read_csv_local <- function(path) {
-  readr::read_csv(file.path(repo_root, path), show_col_types = FALSE)
+  readr::read_csv(file.path(tables_dir, path), show_col_types = FALSE)
 }
 
 read_xlsx_local <- function(path) {
-  openxlsx::read.xlsx(file.path(repo_root, path))
+  openxlsx::read.xlsx(file.path(tables_dir, path))
 }
 
-exists_local <- function(path) file.exists(file.path(repo_root, path))
+exists_local <- function(path) file.exists(file.path(tables_dir, path))
 
 pal_anos <- c("2013" = "#a7a6f2", "2019" = "#ead4a4")
 pal_duas <- c("Medicamento oral" = "#a7a6f2", "Bombinha" = "#ead4a4")
@@ -1124,7 +1125,7 @@ Este relatório não baixa microdados e não recalcula os objetos `survey` duran
 Caso `df_desembolso.xlsx` precise ser regenerado, execute o código de Farmácia Popular em ambiente com `PNSIBGE`, `survey` e `writexl` instalados:
 
 ```{r farmacia-command, echo=TRUE, eval=FALSE}
-source("Extração PNS - Farmácia Popular.R")
+source(file.path("Códigos", "Extração PNS - Farmácia Popular.R"))
 rmarkdown::render("docs/metodologia_pns.Rmd",
                   output_file = "metodologia.html",
                   output_dir = "docs",
