@@ -256,23 +256,26 @@ TEMPLATE = r'''<!doctype html>
     }
 
     .callout {
-      margin: 1.15rem 0;
-      padding: 0;
-      border: 0;
-      background: transparent;
+      margin: 1.35rem 0;
+      padding: 0.9rem 1rem;
+      border: 1px solid var(--rule);
+      border-left: 5px solid var(--accent);
+      border-radius: 3px;
+      background: #f8f7f4;
     }
 
     .callout strong {
-      display: inline;
+      display: block;
+      margin-bottom: 0.35rem;
       color: var(--ink);
       font-family: var(--ui-font);
       font-size: 0.88rem;
       font-weight: 700;
-      letter-spacing: 0;
+      letter-spacing: 0.02em;
       text-transform: none;
     }
 
-    .callout p { display: inline; margin: 0; }
+    .callout p { margin: 0; text-align: justify; }
 
     .table-scroll,
     .math.display,
@@ -300,8 +303,9 @@ TEMPLATE = r'''<!doctype html>
       caption-side: top;
       margin: 0 0 0.45rem;
       color: var(--ink);
+      font-family: var(--ui-font);
       font-weight: 700;
-      text-align: left;
+      text-align: center;
     }
 
     table th,
@@ -310,13 +314,16 @@ TEMPLATE = r'''<!doctype html>
       border: 0;
       border-bottom: 1px solid var(--rule);
       background: var(--paper);
-      text-align: left;
+      text-align: center;
       vertical-align: top;
     }
 
     table thead th { border-top: 1px solid var(--ink); border-bottom-color: var(--ink); }
     table tbody tr:last-child td { border-bottom-color: var(--ink); }
-    table .numeric-cell { text-align: right; font-variant-numeric: tabular-nums; }
+    table th:first-child,
+    table td:first-child { text-align: left; }
+    table th:not(:first-child),
+    table td:not(:first-child) { font-variant-numeric: tabular-nums; }
 
     figure.publication-figure {
       width: 100%;
@@ -339,6 +346,7 @@ TEMPLATE = r'''<!doctype html>
       color: var(--muted);
       font-family: var(--ui-font);
       font-size: 0.78rem;
+      font-weight: 700;
       line-height: 1.45;
       text-align: center;
       overflow-wrap: anywhere;
@@ -498,14 +506,12 @@ TEMPLATE = r'''<!doctype html>
         });
       }
 
-      function markNumericCells(root) {
+      function alignTableColumns(root) {
         root.querySelectorAll('table').forEach(table => {
           [...table.rows].forEach(row => {
-            [...row.cells].forEach(cell => {
-              const value = cleanText(cell.textContent);
-              if (/^[−+-]?(?:\d{1,3}(?:[. ]\d{3})*|\d+)(?:[,.]\d+)?(?:%|\s*–\s*[\d,.]+)?$/.test(value)) {
-                cell.classList.add('numeric-cell');
-              }
+            [...row.cells].forEach((cell, index) => {
+              cell.classList.toggle('first-column', index === 0);
+              cell.classList.toggle('centered-column', index > 0);
             });
           });
         });
@@ -584,7 +590,10 @@ TEMPLATE = r'''<!doctype html>
       function buildToc(headings) {
         const list = document.createElement('ol');
         list.className = 'toc-list';
-        headings.forEach(heading => {
+        headings.filter(heading => (
+          !heading.classList.contains('toc-ignore') &&
+          !heading.closest('.toc-ignore')
+        )).forEach(heading => {
           const item = document.createElement('li');
           const link = document.createElement('a');
           item.className = `toc-level-${heading.tagName.slice(1)}`;
@@ -662,7 +671,7 @@ TEMPLATE = r'''<!doctype html>
           .forEach(node => node.remove());
         markBreakableLinks(sourceContent);
         preserveMathSource(sourceContent);
-        markNumericCells(sourceContent);
+        alignTableColumns(sourceContent);
         rebuildFigures(sourceContent);
         wrapTables(sourceContent);
 
