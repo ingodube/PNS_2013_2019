@@ -31,9 +31,11 @@ git show --stat --oneline --summary origin/main..main
 
 ## Arquivos gerados
 
-- Mantenha fora do Git os outputs ja cobertos pelo `.gitignore`: `df_*.csv`, `df_*.xlsx`, `Rplots.pdf`, `~$*.xlsx` e `PNS_2013_2019/`.
-- Versione preferencialmente codigos R, documentacao e configuracoes do projeto.
-- Se algum output precisar ser versionado, registre a razao no commit e ajuste o `.gitignore` de forma especifica.
+- Mantenha todos os codigos R em `Códigos/` e todas as tabelas analiticas tratadas em `Tabelas tratadas/`.
+- Os CSV e XLSX de `Tabelas tratadas/` sao produtos validados e intencionalmente versionados para permitir a renderizacao do relatorio sem recalcular os microdados.
+- Mantenha fora do Git arquivos `df_*.csv` e `df_*.xlsx` criados por engano na raiz, alem de `Rplots.pdf`, `~$*.xlsx` e copias locais em `PNS_2013_2019/`.
+- O unico poster vigente deve ficar em `poster/poster_pns_asma_morrison.pdf`.
+- Nao recrie `outputs/posters/`; versoes anteriores permanecem recuperaveis pelo historico do Git.
 
 ## Skill local
 

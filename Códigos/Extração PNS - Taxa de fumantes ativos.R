@@ -9,6 +9,17 @@ library(writexl)
 options(survey.lonely.psu = "adjust")
 options(survey.adjust.domain.lonely = TRUE)
 
+candidate_roots = unique(normalizePath(c(getwd(), file.path(getwd(), "..")), mustWork = FALSE))
+repo_root = candidate_roots[
+  file.exists(file.path(candidate_roots, "README.md")) &
+    dir.exists(file.path(candidate_roots, "Códigos"))
+][1]
+if (is.na(repo_root)) {
+  stop("Não foi possível localizar a raiz do repositório.")
+}
+tabelas_dir = file.path(repo_root, "Tabelas tratadas")
+dir.create(tabelas_dir, recursive = TRUE, showWarnings = FALSE)
+
 fmt_decimal = function(x, digits = 0, big_mark = TRUE){
   ifelse(
     is.na(x),
@@ -160,7 +171,7 @@ df_taxa_fumantes_2019$ano = rep(2019, nrow(df_taxa_fumantes_2019))
 df_taxa_fumantes_2013_2019 = rbind(df_taxa_fumantes_2013, df_taxa_fumantes_2019)
 
 # Salvando a base no formato long
-write.csv(df_taxa_fumantes_2013_2019, file = "df_taxa_fumantes_2013_2019_long.csv", row.names = FALSE)
+write.csv(df_taxa_fumantes_2013_2019, file = file.path(tabelas_dir, "df_taxa_fumantes_2013_2019_long.csv"), row.names = FALSE)
 
 
 # Transformando a população projetada em formato wide
@@ -174,7 +185,7 @@ df_população_2013_2019_wide = df_taxa_fumantes_2013_2019 %>%
   arrange(if_else(uf == "Brasil", 1L, 0L), uf)
 
 # Salvando a base no formato wide
-write_xlsx(df_população_2013_2019_wide, path = "df_população_2013_2019_wide.xlsx")
+write_xlsx(df_população_2013_2019_wide, path = file.path(tabelas_dir, "df_população_2013_2019_wide.xlsx"))
 
 # Transformando no formato wide
 df_taxa_fumantes_2013_2019_wide = df_taxa_fumantes_2013_2019 %>%
@@ -196,7 +207,7 @@ df_taxa_fumantes_2013_2019_wide = df_taxa_fumantes_2013_2019 %>%
   )
 
 # Salvando a base no formato wide
-write_xlsx(df_taxa_fumantes_2013_2019_wide, path = "df_taxa_fumantes_2013_2019_wide.xlsx")
+write_xlsx(df_taxa_fumantes_2013_2019_wide, path = file.path(tabelas_dir, "df_taxa_fumantes_2013_2019_wide.xlsx"))
 
 # Corrigindo a base de dados
 df_plot = df_taxa_fumantes_2013_2019 %>%
