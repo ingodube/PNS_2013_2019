@@ -8,6 +8,17 @@ library(writexl)
 options(survey.lonely.psu = "adjust")
 options(survey.adjust.domain.lonely = TRUE)
 
+candidate_roots = unique(normalizePath(c(getwd(), file.path(getwd(), "..")), mustWork = FALSE))
+repo_root = candidate_roots[
+  file.exists(file.path(candidate_roots, "README.md")) &
+    dir.exists(file.path(candidate_roots, "Códigos"))
+][1]
+if (is.na(repo_root)) {
+  stop("Não foi possível localizar a raiz do repositório.")
+}
+tabelas_dir = file.path(repo_root, "Tabelas tratadas")
+dir.create(tabelas_dir, recursive = TRUE, showWarnings = FALSE)
+
 fmt_decimal = function(x, digits = 2, big_mark = FALSE){
   ifelse(
     is.na(x),
@@ -282,7 +293,7 @@ df_final = do.call(rbind, lista_resultados) %>%
                               "Morador selecionado",
                               "Moradores que deixaram de realizar atividades habituais por motivo de saúde"))
 
-write_xlsx(df_final, path = "df_absenteismo.xlsx")
+write_xlsx(df_final, path = file.path(tabelas_dir, "df_absenteismo.xlsx"))
 
 lista_resultados = mapply(
   estima_media_dias,
@@ -296,7 +307,7 @@ df_dias_perdidos = do.call(rbind, lista_resultados) %>%
   filter(uf == "Brasil") %>%
   select(tipo, media_dias, li, ls, metodo_ic, estimativa_ic)
 
-write_xlsx(df_dias_perdidos, path = "df_dias_perdidos.xlsx")
+write_xlsx(df_dias_perdidos, path = file.path(tabelas_dir, "df_dias_perdidos.xlsx"))
 
 df_absenteismo_respiratorio_2013_2019 = bind_rows(
   estima_prop_beta("respiratorio_harmonizado", "Respiratório harmonizado", design_pns2013) %>%
@@ -313,7 +324,7 @@ df_absenteismo_respiratorio_2013_2019 = bind_rows(
   )
 
 write_xlsx(df_absenteismo_respiratorio_2013_2019,
-           path = "df_absenteismo_respiratorio_2013_2019.xlsx")
+           path = file.path(tabelas_dir, "df_absenteismo_respiratorio_2013_2019.xlsx"))
 
 df_dias_perdidos_respiratorio_2013_2019 = bind_rows(
   estima_media_dias("respiratorio_harmonizado", "Respiratório harmonizado", design_pns2013) %>%
@@ -330,4 +341,4 @@ df_dias_perdidos_respiratorio_2013_2019 = bind_rows(
   )
 
 write_xlsx(df_dias_perdidos_respiratorio_2013_2019,
-           path = "df_dias_perdidos_respiratorio_2013_2019.xlsx")
+           path = file.path(tabelas_dir, "df_dias_perdidos_respiratorio_2013_2019.xlsx"))

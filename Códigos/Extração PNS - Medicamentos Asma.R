@@ -9,6 +9,17 @@ library(writexl)
 options(survey.lonely.psu = "adjust")
 options(survey.adjust.domain.lonely = TRUE)
 
+candidate_roots = unique(normalizePath(c(getwd(), file.path(getwd(), "..")), mustWork = FALSE))
+repo_root = candidate_roots[
+  file.exists(file.path(candidate_roots, "README.md")) &
+    dir.exists(file.path(candidate_roots, "Códigos"))
+][1]
+if (is.na(repo_root)) {
+  stop("Não foi possível localizar a raiz do repositório.")
+}
+tabelas_dir = file.path(repo_root, "Tabelas tratadas")
+dir.create(tabelas_dir, recursive = TRUE, showWarnings = FALSE)
+
 fmt_decimal = function(x, digits = 2, big_mark = FALSE){
   ifelse(
     is.na(x),
@@ -283,7 +294,7 @@ medic_asma_2019$ano = 2019
 medic_asma_2013_2019 = rbind(medic_asma_2013, medic_asma_2019)
 
 # Salvando a base no formato long
-write.csv(medic_asma_2013_2019, file = "df_medic_asma_2013_2019_long.csv", row.names = FALSE)
+write.csv(medic_asma_2013_2019, file = file.path(tabelas_dir, "df_medic_asma_2013_2019_long.csv"), row.names = FALSE)
 
 # Transformando no formato wide
 medic_asma_2013_2019_wide = medic_asma_2013_2019 %>%
@@ -295,7 +306,7 @@ medic_asma_2013_2019_wide = medic_asma_2013_2019 %>%
   )
 
 # Salvando a base no formato wide
-write_xlsx(medic_asma_2013_2019_wide, path = "df_medic_asma_2013_2019_wide.xlsx")
+write_xlsx(medic_asma_2013_2019_wide, path = file.path(tabelas_dir, "df_medic_asma_2013_2019_wide.xlsx"))
 
 # Corrigindo a base de dados
 df_plot = medic_asma_2013_2019 %>%
@@ -342,7 +353,7 @@ medic_crise_asma_2019$ano = 2019
 medic_crise_asma_2013_2019 = rbind(medic_crise_asma_2013, medic_crise_asma_2019)
 
 # Salvando a base no formato long
-write.csv(medic_crise_asma_2013_2019, file = "df_medic_crise_asma_2013_2019_long.csv", row.names = FALSE)
+write.csv(medic_crise_asma_2013_2019, file = file.path(tabelas_dir, "df_medic_crise_asma_2013_2019_long.csv"), row.names = FALSE)
 
 # Transformando no formato wide
 medic_crise_asma_2013_2019_wide = medic_crise_asma_2013_2019 %>%
@@ -354,7 +365,7 @@ medic_crise_asma_2013_2019_wide = medic_crise_asma_2013_2019 %>%
   )
 
 # Salvando a base no formato wide
-write_xlsx(medic_crise_asma_2013_2019_wide, path = "df_medic_crise_asma_2013_2019_wide.xlsx")
+write_xlsx(medic_crise_asma_2013_2019_wide, path = file.path(tabelas_dir, "df_medic_crise_asma_2013_2019_wide.xlsx"))
 
 # Corrigindo a base de dados
 df_plot = medic_crise_asma_2013_2019 %>%
@@ -402,7 +413,7 @@ df_taxa_medic_asma_2013_2019 = rbind(
 )
 
 # Salvando a base no formato long
-write.csv(df_taxa_medic_asma_2013_2019, file = "df_taxa_medic_asma_2013_2019_long.csv", row.names = FALSE)
+write.csv(df_taxa_medic_asma_2013_2019, file = file.path(tabelas_dir, "df_taxa_medic_asma_2013_2019_long.csv"), row.names = FALSE)
 
 # Transformando no formato wide
 taxa_medic_asma_2013_2019_wide = df_taxa_medic_asma_2013_2019 %>%
@@ -424,7 +435,7 @@ taxa_medic_asma_2013_2019_wide = df_taxa_medic_asma_2013_2019 %>%
   )
 
 # Salvando a base no formato wide
-write_xlsx(taxa_medic_asma_2013_2019_wide, path = "df_taxa_medic_asma_2013_2019_wide.xlsx")
+write_xlsx(taxa_medic_asma_2013_2019_wide, path = file.path(tabelas_dir, "df_taxa_medic_asma_2013_2019_wide.xlsx"))
 
 # Corrigindo a base de dados
 df_plot = df_taxa_medic_asma_2013_2019 %>%

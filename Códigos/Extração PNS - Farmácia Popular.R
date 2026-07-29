@@ -8,6 +8,17 @@ library(writexl)
 options(survey.lonely.psu = "adjust")
 options(survey.adjust.domain.lonely = TRUE)
 
+candidate_roots = unique(normalizePath(c(getwd(), file.path(getwd(), "..")), mustWork = FALSE))
+repo_root = candidate_roots[
+  file.exists(file.path(candidate_roots, "README.md")) &
+    dir.exists(file.path(candidate_roots, "Códigos"))
+][1]
+if (is.na(repo_root)) {
+  stop("Não foi possível localizar a raiz do repositório.")
+}
+tabelas_dir = file.path(repo_root, "Tabelas tratadas")
+dir.create(tabelas_dir, recursive = TRUE, showWarnings = FALSE)
+
 fmt_decimal = function(x, digits = 2){
   ifelse(
     is.na(x),
@@ -183,7 +194,7 @@ df_desembolso = rbind(asma_oral_pg, asma_bombinha_pg) %>%
   arrange(tipo_med, if_else(uf == "Brasil", 1L, 0L), uf)
 
 # Salvando a base de dados
-write_xlsx(df_desembolso, path = "df_desembolso.xlsx")
+write_xlsx(df_desembolso, path = file.path(tabelas_dir, "df_desembolso.xlsx"))
 
 # Gerando o gráfico
 df_plot = df_desembolso %>%

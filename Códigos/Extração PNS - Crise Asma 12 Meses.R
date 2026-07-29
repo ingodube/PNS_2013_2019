@@ -9,6 +9,17 @@ library(writexl)
 options(survey.lonely.psu = "adjust")
 options(survey.adjust.domain.lonely = TRUE)
 
+candidate_roots = unique(normalizePath(c(getwd(), file.path(getwd(), "..")), mustWork = FALSE))
+repo_root = candidate_roots[
+  file.exists(file.path(candidate_roots, "README.md")) &
+    dir.exists(file.path(candidate_roots, "Códigos"))
+][1]
+if (is.na(repo_root)) {
+  stop("Não foi possível localizar a raiz do repositório.")
+}
+tabelas_dir = file.path(repo_root, "Tabelas tratadas")
+dir.create(tabelas_dir, recursive = TRUE, showWarnings = FALSE)
+
 fmt_decimal = function(x, digits = 2){
   ifelse(
     is.na(x),
@@ -100,16 +111,17 @@ estima_prop_beta = function(var, design, pct_col){
 }
 
 variaveis_2019 = c("V0001", "V0024", "UPA_PNS", "ID_DOMICILIO", "V0006_PNS",
-                   "V0025A", "V0025B", "Q074",
+                   "V0025A", "V0025B", "Q076",
                    "V0028", "V0029", "V0030", "V00281", "V00282", "V00291",
                    "V00292", "V00283", "V00293", "V00301", "V00302", "V00303")
 
 pns2019 = get_pns(year = 2019, vars = variaveis_2019,
-                   design = FALSE, labels = TRUE, selected = TRUE,
-                   anthropometry = FALSE)
+                  design = FALSE, labels = TRUE, selected = TRUE,
+                  anthropometry = FALSE)
+
 
 variaveis_2013 = c("V0001", "V0024", "UPA_PNS", "ID_DOMICILIO", "V0006_PNS",
-                   "V0025","Q074", "V0028", "V0029", "V00281", "V00282", "V00291",
+                   "V0025", "Q076", "V0028", "V0029", "V00281", "V00282", "V00291",
                    "V00292", "V00283", "V00293")
 
 pns2013 = get_pns(year = 2013, vars = variaveis_2013,
@@ -118,30 +130,30 @@ pns2013 = get_pns(year = 2013, vars = variaveis_2013,
 
 # Tratando os dados
 pns2013 = pns2013 %>%
-  mutate(asma = ifelse(Q074 == "Sim", 1, ifelse(Q074 == "Não", 0, NA)))
+  mutate(crise_asma_12m = ifelse(Q076 == "Sim", 1, ifelse(Q076 == "Não", 0, NA)))
 
 pns2019 = pns2019 %>%
-  mutate(asma = ifelse(Q074 == "Sim", 1, ifelse(Q074 == "Não", 0, NA)))
+  mutate(crise_asma_12m = ifelse(Q076 == "Sim", 1, ifelse(Q076 == "Não", 0, NA)))
 
 # Definindo o desenho amostral para MORADOR SELECIONADO
 design_pns2013 = cria_design_pns(pns2013)
 design_pns2019 = cria_design_pns(pns2019)
 
-# Prevalência (%) por UF
-prev_asma_2013 = estima_prop_beta("asma", design_pns2013, "prevalencia")
-prev_asma_2013$ano = rep(2013, nrow(prev_asma_2013))
+# Prevalência de crises de asma nos últimos 12 meses
+prev_crise_2013 = estima_prop_beta("crise_asma_12m", design_pns2013, "prevalencia")
+prev_crise_2013$ano = 2013
 
-prev_asma_2019 = estima_prop_beta("asma", design_pns2019, "prevalencia")
-prev_asma_2019$ano = rep(2019, nrow(prev_asma_2019))
+prev_crise_2019 = estima_prop_beta("crise_asma_12m", design_pns2019, "prevalencia")
+prev_crise_2019$ano = 2019
 
-# Juntando as tabelas
-prev_asma_2013_2019 = rbind(prev_asma_2013, prev_asma_2019)
+# Juntando crises
+prev_crise_2013_2019 = rbind(prev_crise_2013, prev_crise_2019)
 
 # Salvando a base no formato long
-write.csv(prev_asma_2013_2019, file = "df_prev_asma_2013_2019_long.csv", row.names = FALSE)
+write.csv(prev_crise_2013_2019, file = file.path(tabelas_dir, "df_prev_crise_2013_2019_long.csv"), row.names = FALSE)
 
 # Transformando no formato wide
-prev_asma_2013_2019_wide = prev_asma_2013_2019 %>%
+prev_crise_2013_2019_wide = prev_crise_2013_2019 %>%
   select(uf, ano, prevalencia, li, ls, metodo_ic, estimativa_ic) %>%
   pivot_wider(
     names_from = ano,
@@ -150,13 +162,13 @@ prev_asma_2013_2019_wide = prev_asma_2013_2019 %>%
   )
 
 # Salvando a base no formato wide
-write_xlsx(prev_asma_2013_2019_wide, path = "df_prev_asma_2013_2019_wide.xlsx")
+write_xlsx(prev_crise_2013_2019_wide, path = file.path(tabelas_dir, "df_prev_crise_2013_2019_wide.xlsx"))
 
 # Corrigindo a base de dados
-df_plot = prev_asma_2013_2019 %>%
+df_plot = prev_crise_2013_2019 %>%
   mutate(
-    ano = factor(ano, levels = c(2019, 2013)), # garante que 2019 fica embaixo
-    uf = factor(uf,
+    ano = factor(ano, levels = c(2019, 2013)),  # garante ordem das cores
+    uf = factor(uf, 
                 levels = c(setdiff(unique(uf), "Brasil"), "Brasil")) # Brasil por último
   )
 
@@ -164,14 +176,12 @@ df_plot = prev_asma_2013_2019 %>%
 ggplot(df_plot, aes(x = uf, 
                     y = prevalencia, 
                     fill = ano)) +
-  geom_col(position = position_dodge(width = 0.7), width = 0.8) + # barras mais finas e separadas
-  geom_errorbar(aes(ymin = li,
-                    ymax = ls),
-                position = position_dodge(width = 0.9), 
-                width = 0.3) +
+  geom_col(position = position_dodge(width = 0.7), width = 0.8) +
+  geom_errorbar(aes(ymin = li, ymax = ls),
+                position = position_dodge(width = 0.9), width = 0.3) +
   coord_flip() +
   labs(x = NULL,
-       y = "Prevalência (%) de diagnóstico médico de asma",
+       y = "Prevalência (%) de crises asmáticas nos últimos 12 meses.",
        fill = NULL) +
   scale_fill_manual(values = c("2013" = "#a7a6f2", "2019" = "#ead4a4"),
                     breaks = c("2013", "2019")) + 
