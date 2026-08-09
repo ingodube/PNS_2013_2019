@@ -20,11 +20,12 @@ Resultado geral local: **PASS**
 | Artefato | SHA-256 / Git blob |
 |---|---|
 | HTML anterior usado como baseline | `1548a4877956544f2235009d6de48f2eca7f3fd3c5dd43df3d5b4cef1b384357` |
-| `docs/metodologia.html` | `585f686b1fae4aa63d9c27e002fe7eb28496050b28808b109761963f80454231` |
-| Git blob de `docs/metodologia.html` | `a6cceddb10e02a00afa19c15b2d7bb2d010fe56d` |
+| `docs/metodologia.html` | `cba2e22014035b421e9c43886dd7dea0d44cef5ddd00eb1c5987ad7b328d1fc0` |
+| Git blob de `docs/metodologia.html` | `153a1882aa657e3f635be65972570120e291943a` |
 | `docs/metodologia_pns.Rmd` | `2a141d0bb138c6f1677f04dc1d6735395afdfeeaf10f3812204eaeacb2adbca2` |
-| Template Pandoc | `06140b9d75089ebc70b39d44e0f08bb26fdbe84c0a7d13c7a9545b6c1959a6de` |
+| Template Pandoc | `4df20e07e97cdbd35036042e8ae6c6084de5ea8199180ac2d3ed1cff56ccc324` |
 | CSS editorial | `87df8f2f540aba1373925c7ebb1bc46b086013c43782e63b20a81037e0d2ee95` |
+| Script de renderização | `4202f893085e12a74c3d4e57d99cdcde5bc518e836021fe3642e1f15ac0f4672` |
 
 Hashes SHA-256 dos pixels decodificados das dez figuras, na ordem documental:
 

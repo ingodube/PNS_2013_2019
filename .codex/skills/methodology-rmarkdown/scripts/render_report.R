@@ -71,6 +71,8 @@ rmarkdown::render(
 
 rendered_lines <- readLines(output_path, encoding = "UTF-8", warn = FALSE)
 rendered_lines <- sub("[[:blank:]]+$", "", rendered_lines)
-writeLines(rendered_lines, output_path, useBytes = TRUE)
+output_connection <- file(output_path, open = "wb")
+writeLines(rendered_lines, output_connection, sep = "\n", useBytes = TRUE)
+close(output_connection)
 
 message("Relatório renderizado em ", output_path)
