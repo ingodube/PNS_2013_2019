@@ -1,0 +1,4 @@
+interface:
+  display_name: "Produzir relatório técnico"
+  short_description: "Renderiza e valida relatórios metodológicos"
+  default_prompt: "Use $methodology-rmarkdown para formatar, renderizar e validar um relatório técnico preservando seu conteúdo científico."

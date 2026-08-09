@@ -1,88 +1,100 @@
-# Validação da organização e do padrão de publicação
+# Validação do relatório metodológico
 
-Data da validação: 29/07/2026 (America/Bahia)
+Data da validação local: 09/08/2026 (America/Bahia)
 
 Resultado geral local: **PASS**
 
-## Organização do repositório
+## Pipeline de publicação
+
+- Fonte editável: `docs/metodologia_pns.Rmd`.
+- Saída pública direta e autocontida: `docs/metodologia.html`.
+- Redirecionamento preservado: `docs/index.html` → `metodologia.html`.
+- Endereço preservado: `https://ingodube.github.io/PNS_2013_2019/metodologia.html`.
+- Renderização: R 4.6.1 e Pandoc 3.8.3, com MathML, `theme: null`, template e CSS próprios.
+- Pipeline anterior removido: `tools/publication_standard.py` e `docs/metodologia_canonico.html`.
+- Dependências externas de apresentação: 0 — PASS.
+- Geração determinística em duas renderizações consecutivas: PASS.
+
+## Integridade e hashes
+
+| Artefato | SHA-256 / Git blob |
+|---|---|
+| HTML anterior usado como baseline | `1548a4877956544f2235009d6de48f2eca7f3fd3c5dd43df3d5b4cef1b384357` |
+| `docs/metodologia.html` | `585f686b1fae4aa63d9c27e002fe7eb28496050b28808b109761963f80454231` |
+| Git blob de `docs/metodologia.html` | `a6cceddb10e02a00afa19c15b2d7bb2d010fe56d` |
+| `docs/metodologia_pns.Rmd` | `2a141d0bb138c6f1677f04dc1d6735395afdfeeaf10f3812204eaeacb2adbca2` |
+| Template Pandoc | `06140b9d75089ebc70b39d44e0f08bb26fdbe84c0a7d13c7a9545b6c1959a6de` |
+| CSS editorial | `87df8f2f540aba1373925c7ebb1bc46b086013c43782e63b20a81037e0d2ee95` |
+
+Hashes SHA-256 dos pixels decodificados das dez figuras, na ordem documental:
+
+1. `8328f3fe4f56b4d1a53c35957402abd350b007f8cce6e21226bfe2490b3ffd33`
+2. `cf8bf599cd665dadfca7ba4e93a5b6cf6a50d86f7c25d2425e398aabb88c6b97`
+3. `3dc9e39b64ef5303839be324dc72dce85dd46d658f75c117cbd04b868e6e3543`
+4. `95610c279c698ba24a48def9dbec963aa6dccf725e100895401c75bc00063092`
+5. `bb1a0ea748a09e72ab155fd0959abe74e981748b5063a83f0dabce4326d003a7`
+6. `b93a9acf6593a117353d440140e54b9ce7b796dfe21e3b9416fbcb848dc69d24`
+7. `35430388e0550621f002cbba84afbe3a20864d52a9e6c50a36cbc3342fbfffe9`
+8. `b6034d6d062baebc611a2c0f14e4c4d368913ab11c3ecad42ca381ed44c7e017`
+9. `1a43dd5abbe2421a153d347cc5c02a84d04c5169086a974760b07332c0acbaab`
+10. `1440959a479de9279d8e2556a43f2efb5f08e4ac1c4a6b12c5d79a07b6a4389a`
+
+## Autoria, citações e navegação
 
 | Verificação | Resultado |
 |---|---|
-| Códigos R exclusivamente em `Códigos/` | 7 arquivos — PASS |
-| Dados tratados exclusivamente em `Tabelas tratadas/` | 6 CSV e 13 XLSX — PASS |
-| Arquivos R, CSV ou XLSX soltos na raiz | 0 — PASS |
-| Conteúdo de `poster/` | somente `poster_pns_asma_morrison.pdf` — PASS |
-| Pasta antiga `outputs/` | ausente — PASS |
-| Pasta local duplicada `PNS_2013_2019/` | arquivada fora do repositório — PASS |
-| Política entre `.gitignore`, `AGENTS.md` e README | harmonizada — PASS |
+| Blocos de autoria estruturada | exatamente 2 — PASS |
+| Credenciais e e-mail de Ingo Dube Souza | correspondência literal — PASS |
+| Credenciais de Maria Eduarda de Lima e Silva | correspondência literal, sem e-mail inventado — PASS |
+| Data visível do relatório | `29/07/2026`, preservada — PASS |
+| Referências | 13, sem numeração e em ordem alfabética — PASS |
+| Citações numéricas residuais no texto | 0 — PASS |
+| IDs de referências | 13 semânticos e únicos — PASS |
+| IDs de figuras e tabelas | 10 `fig-*` e 13 `tab-*`, únicos — PASS |
+| Destinos internos ausentes | 0 — PASS |
+| Links do sumário | 21 destinos únicos — PASS |
+| Numeração do sumário e corpo | correspondência integral — PASS |
+| Declaração de IA | presente no corpo e ausente do sumário — PASS |
+| Realce visual de `:target` | PASS |
 
-Os três códigos locais divergentes e o `Rplots.pdf` foram preservados em arquivo externo antes da limpeza. As quatro apresentações PPTX removidas continuam recuperáveis pelo histórico do Git.
+## Preservação científica
 
-## Códigos e tabelas
-
-- Análise sintática dos sete arquivos R: PASS.
-- Localização da raiz a partir da raiz do projeto ou de `Códigos/`: PASS.
-- Escritas `write.csv()` e `write_xlsx()` direcionadas para `Tabelas tratadas/`: PASS.
-- Leitura do relatório direcionada para `Tabelas tratadas/`: PASS.
-- Exemplo de execução atualizado para `source(file.path("Códigos", ...))`: PASS.
-- `df_população_2013_2019_wide.xlsx` incorporado ao conjunto versionado: PASS.
-
-## Pôster
-
-- Arquivo: `poster/poster_pns_asma_morrison.pdf`.
-- SHA-256: `2e360c8de9d1e094ca81859c32d8502d0e3c3dfc245d8e8d4fc911db018e79e3`.
-- Uma página, sem criptografia: PASS.
-- Renderização visual sem cortes, sobreposições ou glifos corrompidos: PASS.
-- Igualdade binária com o anexo original: PASS.
-
-## Artefatos do relatório
-
-- Fonte editável: `docs/metodologia_pns.Rmd`.
-- Fonte canônica: `docs/metodologia_canonico.html`.
-- Página pública: `docs/metodologia.html`.
-- Git blob canônico: `51949fe0cbffd41be172980879bd4e01f522951e`.
-- SHA-256 canônico no diretório de trabalho: `1548a4877956544f2235009d6de48f2eca7f3fd3c5dd43df3d5b4cef1b384357`.
-- SHA-256 canônico após normalização de fim de linha pelo Git: `971d97c80e057266bab25928f290be9803032df61dfc2be6e11c1bbd30df1fe8`.
-- SHA-256 do wrapper: `6a473ac3235a96895e5d3588b1aa26b6f2dd60ee6e7075553ce6513da2ca0ff4`.
-- Renderização com Pandoc 3.8.3: PASS.
-- Geração determinística do wrapper: PASS.
-
-## Preservação do relatório
-
-| Item | Versão anterior | Nova versão | Resultado |
+| Item | Baseline | Nova saída | Resultado |
 |---|---:|---:|---|
-| Tabelas analíticas | 13 | 13 | PASS |
-| Células das tabelas | iguais | iguais | PASS |
+| Tabelas | 13 | 13 | PASS |
+| Células de tabelas | 836 | 836, igualdade textual e de ordem | PASS |
 | Figuras | 10 | 10 | PASS |
-| Pixels das figuras | iguais | iguais | PASS |
-| Links | 27 | 27 | PASS |
+| Pixels das figuras | 10 hashes | 10 hashes idênticos | PASS |
 | Blocos de código | 4 | 4 | PASS |
-| Expressões matemáticas em TeX | 9 | 9 | PASS |
-| Referências | 13 | 13 | PASS |
-| Cards metodológicos | 4 | 4 | PASS |
+| Blocos científicos de código | 3 | 3 idênticos | PASS |
+| Exemplo operacional de renderização | pipeline antigo | comando da skill | alteração autorizada |
+| Expressões matemáticas | 9 | 9 em MathML | PASS |
+| Links externos anteriores | 10 | 10 preservados | PASS |
+| Novo link de autoria | — | `mailto:ingo.dube@ufba.br` | alteração autorizada |
+| Avisos metodológicos | 4 | 4 como prosa integrada | PASS |
 
-A única alteração visível no conteúdo do relatório é o caminho operacional necessário no exemplo de `source()`. Textos científicos, células, links, fórmulas, referências, títulos, figuras e ordem documental permaneceram inalterados.
+As diferenças textuais aceitas foram limitadas à autoria completa, às citações autor-data, à ordenação alfabética e retirada da numeração bibliográfica, às ligações internas e ao exemplo operacional do novo pipeline. Dados, células, fórmulas, campos bibliográficos, afirmações científicas, figuras e sua ordem foram preservados.
 
-## Validação responsiva no Microsoft Edge
+## Validação visual e responsiva no Microsoft Edge
 
-| Largura | `clientWidth` | `scrollWidth` | Sangramento | Sumário | Resultado |
-|---:|---:|---:|---:|---|---|
-| 320 px | 320 | 320 | 0 | abre e fecha | PASS |
-| 360 px | 360 | 360 | 0 | abre e fecha | PASS |
-| 390 px | 390 | 390 | 0 | abre e fecha | PASS |
-| 768 px | 768 | 768 | 0 | abre e fecha | PASS |
-| 1024 px | 1024 | 1024 | 0 | aberto no desktop | PASS |
-| 1440 px | 1440 | 1440 | 0 | aberto no desktop | PASS |
+| Largura | `clientWidth` | `scrollWidth` | Sangramento | Colunas do sumário | Abre/fecha | Resultado |
+|---:|---:|---:|---:|---:|---|---|
+| 320 px | 320 | 320 | 0 | 1 | PASS | PASS |
+| 360 px | 360 | 360 | 0 | 1 | PASS | PASS |
+| 390 px | 390 | 390 | 0 | 1 | PASS | PASS |
+| 768 px | 768 | 768 | 0 | 1 | PASS | PASS |
+| 1024 px | 1024 | 1024 | 0 | 2 | n/a (desktop) | PASS |
+| 1440 px | 1440 | 1440 | 0 | 2 | n/a (desktop) | PASS |
 
-Em todas as larguras, o relatório apresentou 13 tabelas, 10 figuras, quatro blocos de código e quatro cards, sem erro de console, falha de carregamento, elemento fora do papel ou desalinhamento de títulos e colunas.
+Em todas as larguras: zero elementos fora do papel; sumário contido; títulos de figuras e tabelas acima dos objetos; cabeçalhos alinhados como os valores de cada coluna; fontes, notas, texto e referências justificados; tabelas limitadas aos próprios contêineres; quatro blocos de código; 13 tabelas; dez figuras; 13 referências; e zero erro de console.
 
-## Interface pública
+## Validação da skill
 
-- Endereço preservado: `https://ingodube.github.io/PNS_2013_2019/metodologia.html`.
-- O QR code existente não precisa ser alterado.
-- A cópia canônica embutida foi validada por `file://`.
-- GitHub Pages após o push: HTTP 200, 13 tabelas, 10 figuras, quatro cards e quatro blocos de código, sem erro de console ou falha de carregamento — PASS.
-- Inspeção pública em 390 px: `clientWidth = scrollWidth = 390`, sangramento 0, nenhum elemento fora do viewport e sumário abrindo e fechando — PASS.
-- Alinhamento entre cabeçalhos e valores nas 13 tabelas publicadas: PASS.
-- SHA-256 do wrapper servido pelo GitHub Pages idêntico ao arquivo local: PASS.
-- PDF no GitHub: HTTP 200, 1.389.213 bytes e SHA-256 idêntico ao anexo original — PASS.
+- `quick_validate.py`: PASS.
+- Fixture estático: PASS.
+- Análise sintática de Python, Node.js e R: PASS.
+- Validação parametrizada contra o HTML baseline: PASS.
+
+## GitHub Pages
+
+Validação pública pendente do primeiro push desta versão. Após a publicação, este registro deve confirmar HTTP 200, igualdade do SHA-256 servido e os testes em 390 e 1440 px.

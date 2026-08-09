@@ -40,4 +40,5 @@ git show --stat --oneline --summary origin/main..main
 ## Skill local
 
 - Para relatorios metodologicos em R Markdown, use a skill repo-local em `.codex/skills/methodology-rmarkdown/`.
-- Essa skill registra as regras de titulo, introducao, texto justificado, legendas de figuras acima dos graficos, equacoes centralizadas, notacao matematica inline, referencias numeradas, linguagem recomendada e validacao antes de publicar.
+- Essa skill registra autoria estruturada, metadados, padrão visual CRM, texto e notas justificados, títulos de figuras e tabelas acima dos objetos, MathML, citações autor-data, referências e IDs semânticos, renderização Pandoc direta e validação antes de publicar.
+- Renderize `docs/metodologia_pns.Rmd` diretamente em `docs/metodologia.html` com `.codex/skills/methodology-rmarkdown/scripts/render_report.R`; não recrie o antigo wrapper JavaScript nem uma cópia canônica intermediária.

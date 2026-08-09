@@ -3,3 +3,5 @@ Rplots.pdf
 /df_*.xlsx
 ~$*.xlsx
 PNS_2013_2019/
+__pycache__/
+*.py[cod]
