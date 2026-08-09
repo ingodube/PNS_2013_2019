@@ -98,4 +98,10 @@ Em todas as larguras: zero elementos fora do papel; sumário contido; títulos d
 
 ## GitHub Pages
 
-Validação pública pendente do primeiro push desta versão. Após a publicação, este registro deve confirmar HTTP 200, igualdade do SHA-256 servido e os testes em 390 e 1440 px.
+- Commit publicado e validado: `95854c0`.
+- Resposta de `https://ingodube.github.io/PNS_2013_2019/metodologia.html`: HTTP 200 — PASS.
+- SHA-256 servido: `cba2e22014035b421e9c43886dd7dea0d44cef5ddd00eb1c5987ad7b328d1fc0`, idêntico ao arquivo local — PASS.
+- 390 px: `clientWidth = scrollWidth = 390`, sangramento 0, zero elementos fora do papel, uma coluna no sumário e abertura/fechamento funcional — PASS.
+- 1440 px: `clientWidth = scrollWidth = 1440`, sangramento 0, zero elementos fora do papel e duas colunas no sumário — PASS.
+- Nas duas larguras públicas: 13 tabelas, dez figuras, quatro blocos de código, 13 referências, títulos acima dos objetos, alinhamento de tabelas, justificação e realce dos destinos — PASS.
+- O endereço público não mudou; o QR code existente permanece válido.
