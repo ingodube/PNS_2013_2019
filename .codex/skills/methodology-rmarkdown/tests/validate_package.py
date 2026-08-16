@@ -25,7 +25,8 @@ def main() -> int:
             "--expected-code-blocks", "1",
             "--expected-references", "1",
             "--author-date",
-            "--required-text", "Texto técnico.",
+            "--expected-lang", "en",
+            "--required-text", "Technical text.",
         ],
         check=True,
     )

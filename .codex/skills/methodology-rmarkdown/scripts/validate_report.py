@@ -97,6 +97,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--baseline-html", type=Path)
     parser.add_argument("--allow-code-block-change", action="append", type=int, default=[])
     parser.add_argument("--author-date", action="store_true")
+    parser.add_argument("--expected-lang")
     return parser.parse_args()
 
 
@@ -126,7 +127,20 @@ def main() -> int:
     require("report-header" in probe.classes, "report-header missing", failures)
     require("report-toc" in probe.classes, "report-toc missing", failures)
     require("report-content" in probe.classes, "report-content missing", failures)
+    require("language-switcher" in probe.classes, "language-switcher missing", failures)
     require("data:image" in text, "HTML is not self-contained with embedded images", failures)
+    require(len(re.findall(r'hreflang="(?:en|pt-BR)"', text)) >= 4, "language alternate links missing", failures)
+    require(
+        len(re.findall(r'<a\b[^>]*\baria-current="page"', text)) == 1,
+        "active language marker missing or duplicated",
+        failures,
+    )
+    if args.expected_lang:
+        require(
+            re.search(rf'<html\b[^>]*\blang="{re.escape(args.expected_lang)}"', text) is not None,
+            f'expected html lang="{args.expected_lang}"',
+            failures,
+        )
 
     duplicates = sorted(key for key, count in Counter(probe.ids).items() if count > 1)
     require(not duplicates, "duplicate IDs: " + ", ".join(duplicates), failures)

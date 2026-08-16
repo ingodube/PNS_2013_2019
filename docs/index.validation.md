@@ -1,107 +1,88 @@
-# Validação do relatório metodológico
+# Bilingual methodological report validation
 
-Data da validação local: 09/08/2026 (America/Bahia)
+Local validation date: August 16, 2026 (`America/Bahia`)
 
-Resultado geral local: **PASS**
+Local result: **PASS**
 
-## Pipeline de publicação
+## Publication routes
 
-- Fonte editável: `docs/metodologia_pns.Rmd`.
-- Saída pública direta e autocontida: `docs/metodologia.html`.
-- Redirecionamento preservado: `docs/index.html` → `metodologia.html`.
-- Endereço preservado: `https://ingodube.github.io/PNS_2013_2019/metodologia.html`.
-- Renderização: R 4.6.1 e Pandoc 3.8.3, com MathML, `theme: null`, template e CSS próprios.
-- Pipeline anterior removido: `tools/publication_standard.py` e `docs/metodologia_canonico.html`.
-- Dependências externas de apresentação: 0 — PASS.
-- Geração determinística em duas renderizações consecutivas: PASS.
+- Default English report: `docs/metodologia.html`.
+- PT-BR report: `docs/methodology-pt-br.html`.
+- Root redirect: `docs/index.html` → `metodologia.html`.
+- Stable public URL: `https://ingodube.github.io/PNS_2013_2019/metodologia.html`.
+- The native `Language` dropdown links the two self-contained documents.
+- Every output includes matching `lang`, canonical, and `hreflang` metadata.
 
-## Integridade e hashes
+## Rendering and integrity
 
-| Artefato | SHA-256 / Git blob |
+- R 4.6.1 and Pandoc 3.8.3.
+- Direct self-contained HTML with MathML, `theme: null`, the repo-local Pandoc template, and the repo-local CSS.
+- Two consecutive bilingual builds produced identical hashes: PASS.
+- PT-BR output compared with the previously published HTML: table cells, figure bytes, scientific code blocks, links, and document order preserved — PASS.
+- EN/PT-BR semantic IDs, table numeric values, scientific links, and CSV numeric values agree — PASS.
+- The names of all 27 federative units remain unchanged; only `Brasil` is localized as `Brazil` in English — PASS.
+
+| Artifact | SHA-256 |
 |---|---|
-| HTML anterior usado como baseline | `1548a4877956544f2235009d6de48f2eca7f3fd3c5dd43df3d5b4cef1b384357` |
-| `docs/metodologia.html` | `cba2e22014035b421e9c43886dd7dea0d44cef5ddd00eb1c5987ad7b328d1fc0` |
-| Git blob de `docs/metodologia.html` | `153a1882aa657e3f635be65972570120e291943a` |
-| `docs/metodologia_pns.Rmd` | `2a141d0bb138c6f1677f04dc1d6735395afdfeeaf10f3812204eaeacb2adbca2` |
-| Template Pandoc | `4df20e07e97cdbd35036042e8ae6c6084de5ea8199180ac2d3ed1cff56ccc324` |
-| CSS editorial | `87df8f2f540aba1373925c7ebb1bc46b086013c43782e63b20a81037e0d2ee95` |
-| Script de renderização | `4202f893085e12a74c3d4e57d99cdcde5bc518e836021fe3642e1f15ac0f4672` |
+| `docs/metodologia.html` | `b191bc881b25db0c81767d08734b2c83b8ed72eb8441d42c244ba2b96472e47a` |
+| `docs/methodology-pt-br.html` | `717a0399606009e0c6de69df643502a301c00b519ebc79af57021c1c847cd4cb` |
+| `docs/methodology_report_en.Rmd` | `ab41af75c5a0e894ce271529ba79f747a6dc90136f30262f17d5c9448fd60886` |
+| `docs/methodology_report_pt_br.Rmd` | `a78084837631a6fdf638a46b4ce691c7c40adca97d57729b17549f78ad8a99a7` |
+| Pandoc template | `822e98b57513717e2ac9bc7d375f2c12d4176810f2e4c7fe3c223c4f5289726c` |
+| Publication CSS | `a016e529f14d5f882b1ab1f7f9db2b3f74d6fe65e0b8f13f7c25f6e15dfebb11` |
 
-Hashes SHA-256 dos pixels decodificados das dez figuras, na ordem documental:
+## Document checks
 
-1. `8328f3fe4f56b4d1a53c35957402abd350b007f8cce6e21226bfe2490b3ffd33`
-2. `cf8bf599cd665dadfca7ba4e93a5b6cf6a50d86f7c25d2425e398aabb88c6b97`
-3. `3dc9e39b64ef5303839be324dc72dce85dd46d658f75c117cbd04b868e6e3543`
-4. `95610c279c698ba24a48def9dbec963aa6dccf725e100895401c75bc00063092`
-5. `bb1a0ea748a09e72ab155fd0959abe74e981748b5063a83f0dabce4326d003a7`
-6. `b93a9acf6593a117353d440140e54b9ce7b796dfe21e3b9416fbcb848dc69d24`
-7. `35430388e0550621f002cbba84afbe3a20864d52a9e6c50a36cbc3342fbfffe9`
-8. `b6034d6d062baebc611a2c0f14e4c4d368913ab11c3ecad42ca381ed44c7e017`
-9. `1a43dd5abbe2421a153d347cc5c02a84d04c5169086a974760b07332c0acbaab`
-10. `1440959a479de9279d8e2556a43f2efb5f08e4ac1c4a6b12c5d79a07b6a4389a`
-
-## Autoria, citações e navegação
-
-| Verificação | Resultado |
-|---|---|
-| Blocos de autoria estruturada | exatamente 2 — PASS |
-| Credenciais e e-mail de Ingo Dube Souza | correspondência literal — PASS |
-| Credenciais de Maria Eduarda de Lima e Silva | correspondência literal, sem e-mail inventado — PASS |
-| Data visível do relatório | `29/07/2026`, preservada — PASS |
-| Referências | 13, sem numeração e em ordem alfabética — PASS |
-| Citações numéricas residuais no texto | 0 — PASS |
-| IDs de referências | 13 semânticos e únicos — PASS |
-| IDs de figuras e tabelas | 10 `fig-*` e 13 `tab-*`, únicos — PASS |
-| Destinos internos ausentes | 0 — PASS |
-| Links do sumário | 21 destinos únicos — PASS |
-| Numeração do sumário e corpo | correspondência integral — PASS |
-| Declaração de IA | presente no corpo e ausente do sumário — PASS |
-| Realce visual de `:target` | PASS |
-
-## Preservação científica
-
-| Item | Baseline | Nova saída | Resultado |
+| Check | EN | PT-BR | Result |
 |---|---:|---:|---|
-| Tabelas | 13 | 13 | PASS |
-| Células de tabelas | 836 | 836, igualdade textual e de ordem | PASS |
-| Figuras | 10 | 10 | PASS |
-| Pixels das figuras | 10 hashes | 10 hashes idênticos | PASS |
-| Blocos de código | 4 | 4 | PASS |
-| Blocos científicos de código | 3 | 3 idênticos | PASS |
-| Exemplo operacional de renderização | pipeline antigo | comando da skill | alteração autorizada |
-| Expressões matemáticas | 9 | 9 em MathML | PASS |
-| Links externos anteriores | 10 | 10 preservados | PASS |
-| Novo link de autoria | — | `mailto:ingo.dube@ufba.br` | alteração autorizada |
-| Avisos metodológicos | 4 | 4 como prosa integrada | PASS |
+| Structured author blocks | 2 | 2 | PASS |
+| Tables | 13 | 13 | PASS |
+| Figures | 10 | 10 | PASS |
+| Code blocks | 4 | 4 | PASS |
+| MathML expressions | 9 | 9 | PASS |
+| Alphabetized author-date references | 13 | 13 | PASS |
+| Semantic figure/table/reference IDs | 36 | 36 | PASS |
+| Missing internal-link destinations | 0 | 0 | PASS |
+| Residual isolated numeric citations | 0 | 0 | PASS |
+| AI disclosure in body and absent from TOC | yes | yes | PASS |
+| AI-assisted translation disclosed | yes | yes | PASS |
 
-As diferenças textuais aceitas foram limitadas à autoria completa, às citações autor-data, à ordenação alfabética e retirada da numeração bibliográfica, às ligações internas e ao exemplo operacional do novo pipeline. Dados, células, fórmulas, campos bibliográficos, afirmações científicas, figuras e sua ordem foram preservados.
+The EN and PT-BR reports contain the exact requested author credentials. Maria Eduarda de Lima e Silva has no invented email or additional credential. Titles remain above tables and figures, sources and notes remain below them, table headers match the alignment of their columns, and prose and references remain justified.
 
-## Validação visual e responsiva no Microsoft Edge
+## Localized repository files
 
-| Largura | `clientWidth` | `scrollWidth` | Sangramento | Colunas do sumário | Abre/fecha | Resultado |
-|---:|---:|---:|---:|---:|---|---|
-| 320 px | 320 | 320 | 0 | 1 | PASS | PASS |
-| 360 px | 360 | 360 | 0 | 1 | PASS | PASS |
-| 390 px | 390 | 390 | 0 | 1 | PASS | PASS |
-| 768 px | 768 | 768 | 0 | 1 | PASS | PASS |
-| 1024 px | 1024 | 1024 | 0 | 2 | n/a (desktop) | PASS |
-| 1440 px | 1440 | 1440 | 0 | 2 | n/a (desktop) | PASS |
+| File group | PT-BR | EN | Validation |
+|---|---:|---:|---|
+| R programs | 7 | 7 | all 14 parse successfully |
+| Treated CSV files | 6 | 6 | dimensions, numeric values, UF names, and Brazil label pass |
+| Treated XLSX workbooks | 13 | 13 | formulas/numeric-cell counts preserved; all EN workbooks open in Microsoft Excel |
 
-Em todas as larguras: zero elementos fora do papel; sumário contido; títulos de figuras e tabelas acima dos objetos; cabeçalhos alinhados como os valores de cada coluna; fontes, notas, texto e referências justificados; tabelas limitadas aos próprios contêineres; quatro blocos de código; 13 tabelas; dez figuras; 13 referências; e zero erro de console.
+The generation scripts, glossary, and repo-local `methodology-rmarkdown` skill document the protected terms and the deterministic bilingual workflow.
 
-## Validação da skill
+## Responsive browser validation
+
+Microsoft Edge was exercised through Playwright. The language dropdown was opened and closed at every width.
+
+| Width | EN `clientWidth/scrollWidth` | PT-BR `clientWidth/scrollWidth` | TOC columns | Result |
+|---:|---:|---:|---:|---|
+| 320 px | 320 / 320 | 320 / 320 | 1 | PASS |
+| 360 px | 360 / 360 | 360 / 360 | 1 | PASS |
+| 390 px | 390 / 390 | 390 / 390 | 1 | PASS |
+| 768 px | 768 / 768 | 768 / 768 | 1 | PASS |
+| 1024 px | 1024 / 1024 | 1024 / 1024 | 2 | PASS |
+| 1440 px | 1440 / 1440 | 1440 / 1440 | 2 | PASS |
+
+At every width and in both languages: zero document-level horizontal bleeding, zero non-scrollable overflow offenders, TOC and language menu contained by the page, internal scrolling limited to necessary containers, target highlighting functional, table and figure titles intact, and zero browser-console errors. Visual inspection of EN and PT-BR at 390 and 1440 px also passed.
+
+## Skill and pipeline validation
 
 - `quick_validate.py`: PASS.
-- Fixture estático: PASS.
-- Análise sintática de Python, Node.js e R: PASS.
-- Validação parametrizada contra o HTML baseline: PASS.
+- Skill fixture and package test: PASS.
+- Python compilation, Node.js syntax checks, and R parsing: PASS.
+- Deterministic EN report-source and R-program localization: PASS.
+- Static HTML validation for both languages: PASS.
+- Cross-language scientific parity validator: PASS.
 
 ## GitHub Pages
 
-- Commit publicado e validado: `95854c0`.
-- Resposta de `https://ingodube.github.io/PNS_2013_2019/metodologia.html`: HTTP 200 — PASS.
-- SHA-256 servido: `cba2e22014035b421e9c43886dd7dea0d44cef5ddd00eb1c5987ad7b328d1fc0`, idêntico ao arquivo local — PASS.
-- 390 px: `clientWidth = scrollWidth = 390`, sangramento 0, zero elementos fora do papel, uma coluna no sumário e abertura/fechamento funcional — PASS.
-- 1440 px: `clientWidth = scrollWidth = 1440`, sangramento 0, zero elementos fora do papel e duas colunas no sumário — PASS.
-- Nas duas larguras públicas: 13 tabelas, dez figuras, quatro blocos de código, 13 referências, títulos acima dos objetos, alinhamento de tabelas, justificação e realce dos destinos — PASS.
-- O endereço público não mudou; o QR code existente permanece válido.
+Publication verification is pending the commit and push. This section will be updated with the deployed commit, HTTP status, served hashes, redirect behavior, and public responsive results.

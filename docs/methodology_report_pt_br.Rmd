@@ -16,6 +16,16 @@ date: "29/07/2026"
 repository: "[Repositório do projeto](https://github.com/ingodube/PNS_2013_2019)"
 keywords: "Pesquisa Nacional de Saúde; Plano amostral; Asma"
 lang: pt-BR
+contents-label: "Sumário"
+keywords-label: "Palavras-chave"
+language-label: "Language"
+language-current: "PT-BR"
+language-is-pt-br: true
+language-en-url: "metodologia.html"
+language-pt-br-url: "methodology-pt-br.html"
+canonical-url: "https://ingodube.github.io/PNS_2013_2019/methodology-pt-br.html"
+alternate-en-url: "https://ingodube.github.io/PNS_2013_2019/metodologia.html"
+alternate-pt-br-url: "https://ingodube.github.io/PNS_2013_2019/methodology-pt-br.html"
 output:
   html_document:
     self_contained: true
@@ -55,12 +65,19 @@ library(knitr)
 library(scales)
 library(stringr)
 
-candidate_roots <- unique(normalizePath(c(file.path(getwd(), ".."), getwd()), mustWork = FALSE))
-repo_root <- candidate_roots[file.exists(file.path(candidate_roots, "Códigos", "Extração PNS - Asma.R"))][1]
+configured_root <- Sys.getenv("REPORT_REPO_ROOT", unset = "")
+candidate_roots <- unique(normalizePath(
+  c(configured_root, getwd(), file.path(getwd(), ".."), file.path(getwd(), "..", "..")),
+  mustWork = FALSE
+))
+repo_root <- candidate_roots[
+  file.exists(file.path(candidate_roots, "README.md")) &
+    dir.exists(file.path(candidate_roots, "Processed Tables (PT-BR)"))
+][1]
 if (is.na(repo_root)) {
   stop("Nao foi possivel localizar a raiz do repositorio a partir do diretorio de renderizacao.")
 }
-tables_dir <- file.path(repo_root, "Tabelas tratadas")
+tables_dir <- file.path(repo_root, "Processed Tables (PT-BR)")
 
 read_csv_local <- function(path) {
   readr::read_csv(file.path(tables_dir, path), show_col_types = FALSE)
@@ -889,11 +906,11 @@ Este relatório não baixa microdados e não recalcula os objetos `survey` duran
 Caso `df_desembolso.xlsx` precise ser regenerado, execute o código de Farmácia Popular em ambiente com `PNSIBGE`, `survey` e `writexl` instalados:
 
 ```{r farmacia-command, echo=TRUE, eval=FALSE}
-source(file.path("Códigos", "Extração PNS - Farmácia Popular.R"))
+source(file.path("Codes (PT-BR)", "Extração PNS - Farmácia Popular.R"))
 system2("Rscript", c(
   ".codex/skills/methodology-rmarkdown/scripts/render_report.R",
-  "--input", "docs/metodologia_pns.Rmd",
-  "--output", "docs/metodologia.html"
+  "--input", "docs/methodology_report_pt_br.Rmd",
+  "--output", "docs/methodology-pt-br.html"
 ))
 ```
 
@@ -931,4 +948,4 @@ system2("Rscript", c(
 
 # Declaração de uso de inteligência artificial {.unnumbered .unlisted #declaracao-ia}
 
-Durante a preparação deste trabalho, foi utilizado o ChatGPT/Codex, da OpenAI, com modelo GPT-5, como ferramenta de apoio à estruturação dos códigos, revisão de consistência, formatação do relatório, organização visual de tabelas e figuras e automação da renderização. O conteúdo científico, a seleção dos indicadores, a interpretação dos resultados, a validação das estimativas e a responsabilidade final pelo trabalho são dos autores. A ferramenta de inteligência artificial não foi utilizada como autora, não substituiu a análise crítica dos autores e não altera a responsabilidade humana sobre a integridade, a precisão e a apresentação das informações.
+Durante a preparação deste trabalho, foi utilizado o ChatGPT/Codex, da OpenAI, com modelo GPT-5, como ferramenta de apoio à estruturação dos códigos, revisão de consistência, formatação do relatório, organização visual de tabelas e figuras, automação da renderização e tradução do relatório para o inglês. O conteúdo científico, a seleção dos indicadores, a interpretação dos resultados, a validação das estimativas e a responsabilidade final pelo trabalho são dos autores. A ferramenta de inteligência artificial não foi utilizada como autora, não substituiu a análise crítica dos autores e não altera a responsabilidade humana sobre a integridade, a precisão e a apresentação das informações.

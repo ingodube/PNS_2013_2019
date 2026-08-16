@@ -5,6 +5,15 @@
 <meta name="generator" content="pandoc">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="icon" href="data:,">
+$if(canonical-url)$
+<link rel="canonical" href="$canonical-url$">
+$endif$
+$if(alternate-en-url)$
+<link rel="alternate" hreflang="en" href="$alternate-en-url$">
+$endif$
+$if(alternate-pt-br-url)$
+<link rel="alternate" hreflang="pt-BR" href="$alternate-pt-br-url$">
+$endif$
 $for(author)$
 <meta name="author" content="$author.name$">
 $endfor$
@@ -30,6 +39,15 @@ $endfor$
 </head>
 <body>
 <main class="report-page">
+<nav class="language-bar" aria-label="$language-label$">
+<details class="language-switcher">
+<summary><span>$language-label$</span><span class="language-current">$language-current$</span></summary>
+<ul>
+<li><a href="$language-en-url$" lang="en" hreflang="en"$if(language-is-en)$ aria-current="page"$endif$>English (EN)</a></li>
+<li><a href="$language-pt-br-url$" lang="pt-BR" hreflang="pt-BR"$if(language-is-pt-br)$ aria-current="page"$endif$>Português (PT-BR)</a></li>
+</ul>
+</details>
+</nav>
 <header class="report-header">
 $if(title)$
 <h1 class="title">$title$</h1>
@@ -59,13 +77,13 @@ $if(repository)$
 <p class="report-repository">$repository$</p>
 $endif$
 $if(keywords)$
-<p class="keywords"><strong>Palavras-chave:</strong> $keywords$</p>
+<p class="keywords"><strong>$keywords-label$:</strong> $keywords$</p>
 $endif$
 </div>
 </header>
 $if(toc)$
 <details class="report-toc" open>
-<summary>Sumário</summary>
+<summary>$contents-label$</summary>
 <nav id="TOC" role="doc-toc">
 $toc$
 </nav>

@@ -1,4 +1,5 @@
-# Carregando pacotes necessários
+# English localization. PNS response labels such as Sim/Não remain in Portuguese because they are literal values in the source microdata.
+# Load required packages
 library(dplyr)
 library(PNSIBGE)
 library(survey)
@@ -11,12 +12,12 @@ options(survey.adjust.domain.lonely = TRUE)
 candidate_roots = unique(normalizePath(c(getwd(), file.path(getwd(), "..")), mustWork = FALSE))
 repo_root = candidate_roots[
   file.exists(file.path(candidate_roots, "README.md")) &
-    dir.exists(file.path(candidate_roots, "Códigos"))
+    dir.exists(file.path(candidate_roots, "Codes (EN)"))
 ][1]
 if (is.na(repo_root)) {
-  stop("Não foi possível localizar a raiz do repositório.")
+  stop("The repository root could not be located.")
 }
-tabelas_dir = file.path(repo_root, "Tabelas tratadas")
+tabelas_dir = file.path(repo_root, "Processed Tables (EN)")
 dir.create(tabelas_dir, recursive = TRUE, showWarnings = FALSE)
 
 fmt_decimal = function(x, digits = 0, big_mark = TRUE){
@@ -47,17 +48,17 @@ cria_design_pns = function(data_pns){
   data_design = data_pns %>%
     select(-any_of(c("V0028", "V00281", "V00282", "V00283",
                      "V0030", "V00301", "V00302", "V00303")))
-  
+
   pns_design(data_pns = data_design)
 }
 
 estima_media = function(var, design, nome_media){
   formula_var = as.formula(paste0("~", var))
-  
+
   estima_uma = function(design_atual, uf_atual){
     est = svymean(formula_var, design = design_atual, na.rm = TRUE)
     ci = as.numeric(confint(est, level = 0.95))
-    
+
     data.frame(
       UF = uf_atual,
       media = as.numeric(coef(est))[1],
@@ -66,23 +67,23 @@ estima_media = function(var, design, nome_media){
       metodo_ic = "normal"
     )
   }
-  
+
   ufs = sort(unique(design$variables$V0001))
-  
+
   est_uf = do.call(
     rbind,
     lapply(ufs, function(uf_atual){
       estima_uma(subset(design, V0001 == uf_atual), uf_atual)
     })
   )
-  
-  est_br = estima_uma(design, "Brasil")
-  
+
+  est_br = estima_uma(design, "Brazil")
+
   rbind(est_uf, est_br) %>%
     mutate(UF = as.character(UF)) %>%
     rename(!!nome_media := media) %>%
     mutate(estimativa_ic = formatar_ic_media(.data[[nome_media]], ci_l, ci_u)) %>%
-    arrange(if_else(UF == "Brasil", 1L, 0L), UF)
+    arrange(if_else(UF == "Brazil", 1L, 0L), UF)
 }
 
 variaveis_2019 = c("V0001", "V0024", "UPA_PNS", "ID_DOMICILIO", "V0006_PNS",
@@ -101,7 +102,7 @@ pns2019 = pns2019 %>%
 vars_renda = c("E01602", "E01604", "E01802", "E01804",
                "F001021", "F007021", "F008021", "VDF00102")
 
-# Criando a variável renda declarada
+# Create the reported-income variable
 pns2019 = pns2019 %>%
   mutate(
     renda = if_else(
@@ -111,15 +112,15 @@ pns2019 = pns2019 %>%
     )
   )
 
-# Deflacionando os salários
+# Deflate income values
 pns2019$data_referencia = as.Date(paste0("2019-06-30")) # Baseline
 pns2019$renda_def = round(deflate(pns2019$renda, pns2019$data_referencia, "08/2025", "ipca"), 2)
 
-# Desenho amostral PNS 2019
+# PNS 2019 survey design
 design_pns2019 = cria_design_pns(pns2019)
 
-# Calculando a estimativa de renda média por UF e Brasil
+# Estimate mean income by federative unit and Brazil
 df_renda_2019 = estima_media("renda_def", design_pns2019, "renda_def")
 
-# Salvando a base de dados
-write_xlsx(df_renda_2019, path = file.path(tabelas_dir, "df_renda_2019.xlsx"))
+# Save the data set
+write_xlsx(df_renda_2019, path = file.path(tabelas_dir, "income_2019.xlsx"))

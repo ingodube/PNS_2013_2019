@@ -12,12 +12,12 @@ options(survey.adjust.domain.lonely = TRUE)
 candidate_roots = unique(normalizePath(c(getwd(), file.path(getwd(), "..")), mustWork = FALSE))
 repo_root = candidate_roots[
   file.exists(file.path(candidate_roots, "README.md")) &
-    dir.exists(file.path(candidate_roots, "Códigos"))
+    dir.exists(file.path(candidate_roots, "Codes (PT-BR)"))
 ][1]
 if (is.na(repo_root)) {
   stop("Não foi possível localizar a raiz do repositório.")
 }
-tabelas_dir = file.path(repo_root, "Tabelas tratadas")
+tabelas_dir = file.path(repo_root, "Processed Tables (PT-BR)")
 dir.create(tabelas_dir, recursive = TRUE, showWarnings = FALSE)
 
 fmt_decimal = function(x, digits = 0, big_mark = TRUE){

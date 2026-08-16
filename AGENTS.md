@@ -1,44 +1,34 @@
 # AGENTS.md
 
-## Fluxo local
+## Local workflow
 
-- Use `C:\Users\ingon\Github\PNS_2013_2019` como pasta principal deste repositório no Codex e no VSCode.
-- O remoto esperado e `origin`, apontando para `https://github.com/ingodube/PNS_2013_2019.git`.
-- A branch de trabalho padrao e `main`.
+- Use `C:\Users\ingon\Github\PNS_2013_2019` as the primary repository directory in Codex and VS Code.
+- The expected remote is `origin`, pointing to `https://github.com/ingodube/PNS_2013_2019.git`.
+- The default working branch is `main`.
 
-## Verificacoes antes de alterar
+Before editing, confirm repository state with `git status --short --branch`, `git remote -v`, and `git log --oneline --max-count=5`.
 
-Antes de editar, confirme o estado local:
+## Localized analytical artifacts
 
-```powershell
-git status --short --branch
-git remote -v
-git log --oneline --max-count=5
-```
+- Keep English R programs in `Codes (EN)/` and Portuguese programs in `Codes (PT-BR)/`.
+- Keep English processed tables in `Processed Tables (EN)/` and Portuguese outputs in `Processed Tables (PT-BR)/`.
+- Treat the PT-BR tables as the validated scientific baseline. English tables may differ only in filenames, headers, textual categories, display punctuation, and `Brasil` → `Brazil`.
+- Never translate the names of Brazil's 27 federative units, PNS variable codes, formulas, package/API names, DOI values, or URLs.
+- Keep accidental root-level `df_*.csv`, `df_*.xlsx`, `Rplots.pdf`, `~$*.xlsx`, and duplicate local repository folders out of Git.
+- The current poster belongs at `poster/poster_pns_asma_morrison.pdf`; do not recreate `outputs/posters/`.
 
-Se houver commits locais pendentes de envio, revise:
+## Bilingual report
 
-```powershell
-git log origin/main..main --oneline
-git show --stat --oneline --summary origin/main..main
-```
+- English is the default public language at `docs/metodologia.html`.
+- Portuguese is published at `docs/methodology-pt-br.html`.
+- `docs/index.html` must redirect to the English default.
+- Edit `docs/methodology_report_pt_br.Rmd` as the PT-BR scientific baseline and regenerate `docs/methodology_report_en.Rmd` with `tools/localize_report.py`.
+- Keep semantic section, table, figure, and reference IDs aligned across languages.
+- Use the repo-local `.codex/skills/methodology-rmarkdown/` workflow for rendering and validation.
+- The language menu, `lang`, canonical links, and `hreflang` links must remain valid and responsive.
 
-## Sincronizacao
+## Publication
 
-- Para publicar commits locais revisados, use `git push origin main`.
-- Depois do envio, `git status --short --branch` deve mostrar `main...origin/main`, sem `ahead`.
-- Nao crie outro clone local para este projeto sem necessidade explicita.
-
-## Arquivos gerados
-
-- Mantenha todos os codigos R em `Códigos/` e todas as tabelas analiticas tratadas em `Tabelas tratadas/`.
-- Os CSV e XLSX de `Tabelas tratadas/` sao produtos validados e intencionalmente versionados para permitir a renderizacao do relatorio sem recalcular os microdados.
-- Mantenha fora do Git arquivos `df_*.csv` e `df_*.xlsx` criados por engano na raiz, alem de `Rplots.pdf`, `~$*.xlsx` e copias locais em `PNS_2013_2019/`.
-- O unico poster vigente deve ficar em `poster/poster_pns_asma_morrison.pdf`.
-- Nao recrie `outputs/posters/`; versoes anteriores permanecem recuperaveis pelo historico do Git.
-
-## Skill local
-
-- Para relatorios metodologicos em R Markdown, use a skill repo-local em `.codex/skills/methodology-rmarkdown/`.
-- Essa skill registra autoria estruturada, metadados, padrão visual CRM, texto e notas justificados, títulos de figuras e tabelas acima dos objetos, MathML, citações autor-data, referências e IDs semânticos, renderização Pandoc direta e validação antes de publicar.
-- Renderize `docs/metodologia_pns.Rmd` diretamente em `docs/metodologia.html` com `.codex/skills/methodology-rmarkdown/scripts/render_report.R`; não recrie o antigo wrapper JavaScript nem uma cópia canônica intermediária.
+- Push reviewed commits with `git push origin main` only after both local reports and the validation report pass.
+- After pushing, confirm that `main...origin/main` is not ahead and verify both GitHub Pages URLs.
+- Preserve the stable `metodologia.html` path so existing links and the poster QR code continue to work.

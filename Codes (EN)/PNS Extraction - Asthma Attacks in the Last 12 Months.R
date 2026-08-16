@@ -1,4 +1,5 @@
-# Carregando pacotes necessários
+# English localization. PNS response labels such as Sim/Não remain in Portuguese because they are literal values in the source microdata.
+# Load required packages
 library(dplyr)
 library(tidyr)
 library(PNSIBGE)
@@ -12,12 +13,12 @@ options(survey.adjust.domain.lonely = TRUE)
 candidate_roots = unique(normalizePath(c(getwd(), file.path(getwd(), "..")), mustWork = FALSE))
 repo_root = candidate_roots[
   file.exists(file.path(candidate_roots, "README.md")) &
-    dir.exists(file.path(candidate_roots, "Códigos"))
+    dir.exists(file.path(candidate_roots, "Codes (EN)"))
 ][1]
 if (is.na(repo_root)) {
-  stop("Não foi possível localizar a raiz do repositório.")
+  stop("The repository root could not be located.")
 }
-tabelas_dir = file.path(repo_root, "Tabelas tratadas")
+tabelas_dir = file.path(repo_root, "Processed Tables (EN)")
 dir.create(tabelas_dir, recursive = TRUE, showWarnings = FALSE)
 
 fmt_decimal = function(x, digits = 2){
@@ -42,43 +43,43 @@ cria_design_pns = function(data_pns){
   data_design = data_pns %>%
     select(-any_of(c("V0028", "V00281", "V00282", "V00283",
                      "V0030", "V00301", "V00302", "V00303")))
-  
+
   pns_design(data_pns = data_design)
 }
 
 estima_prop_beta = function(var, design, pct_col){
   formula_var = as.formula(paste0("~", var))
-  
+
   estima_uma = function(design_atual, uf_atual){
     est = tryCatch(
       svyciprop(formula_var, design = design_atual,
                 method = "beta", level = 0.95, na.rm = TRUE),
       error = function(e) NULL
     )
-    
+
     if (is.null(est)) {
       return(data.frame(
         uf = uf_atual,
         valor = NA_real_,
         ci_l = NA_real_,
         ci_u = NA_real_,
-        metodo_ic = "indisponivel"
+        metodo_ic = "unavailable"
       ))
     }
-    
+
     ci = tryCatch(as.numeric(confint(est)), error = function(e) c(NA_real_, NA_real_))
     valor = as.numeric(coef(est))[1]
-    
+
     if (!is.finite(valor) || length(ci) < 2 || any(!is.finite(ci))) {
       return(data.frame(
         uf = uf_atual,
         valor = NA_real_,
         ci_l = NA_real_,
         ci_u = NA_real_,
-        metodo_ic = "indisponivel"
+        metodo_ic = "unavailable"
       ))
     }
-    
+
     data.frame(
       uf = uf_atual,
       valor = valor,
@@ -87,18 +88,18 @@ estima_prop_beta = function(var, design, pct_col){
       metodo_ic = "beta"
     )
   }
-  
+
   ufs = sort(unique(design$variables$V0001))
-  
+
   est_uf = do.call(
     rbind,
     lapply(ufs, function(uf_atual){
       estima_uma(subset(design, V0001 == uf_atual), uf_atual)
     })
   )
-  
-  est_br = estima_uma(design, "Brasil")
-  
+
+  est_br = estima_uma(design, "Brazil")
+
   rbind(est_uf, est_br) %>%
     mutate(
       uf = as.character(uf),
@@ -107,52 +108,53 @@ estima_prop_beta = function(var, design, pct_col){
       ls = ci_u * 100,
       estimativa_ic = formatar_ic_pct(valor * 100, ci_l * 100, ci_u * 100)
     ) %>%
-    arrange(if_else(uf == "Brasil", 1L, 0L), uf)
+    arrange(if_else(uf == "Brazil", 1L, 0L), uf)
 }
 
 variaveis_2019 = c("V0001", "V0024", "UPA_PNS", "ID_DOMICILIO", "V0006_PNS",
-                   "V0025A", "V0025B", "Q074",
+                   "V0025A", "V0025B", "Q076",
                    "V0028", "V0029", "V0030", "V00281", "V00282", "V00291",
                    "V00292", "V00283", "V00293", "V00301", "V00302", "V00303")
 
 pns2019 = get_pns(year = 2019, vars = variaveis_2019,
-                   design = FALSE, labels = TRUE, selected = TRUE,
-                   anthropometry = FALSE)
+                  design = FALSE, labels = TRUE, selected = TRUE,
+                  anthropometry = FALSE)
+
 
 variaveis_2013 = c("V0001", "V0024", "UPA_PNS", "ID_DOMICILIO", "V0006_PNS",
-                   "V0025","Q074", "V0028", "V0029", "V00281", "V00282", "V00291",
+                   "V0025", "Q076", "V0028", "V0029", "V00281", "V00282", "V00291",
                    "V00292", "V00283", "V00293")
 
 pns2013 = get_pns(year = 2013, vars = variaveis_2013,
                   design = FALSE, labels = TRUE, selected = TRUE,
                   anthropometry = FALSE)
 
-# Tratando os dados
+# Prepare the data
 pns2013 = pns2013 %>%
-  mutate(asma = ifelse(Q074 == "Sim", 1, ifelse(Q074 == "Não", 0, NA)))
+  mutate(crise_asma_12m = ifelse(Q076 == "Sim", 1, ifelse(Q076 == "Não", 0, NA)))
 
 pns2019 = pns2019 %>%
-  mutate(asma = ifelse(Q074 == "Sim", 1, ifelse(Q074 == "Não", 0, NA)))
+  mutate(crise_asma_12m = ifelse(Q076 == "Sim", 1, ifelse(Q076 == "Não", 0, NA)))
 
-# Definindo o desenho amostral para MORADOR SELECIONADO
+# Define the survey design for the SELECTED RESIDENT
 design_pns2013 = cria_design_pns(pns2013)
 design_pns2019 = cria_design_pns(pns2019)
 
-# Prevalência (%) por UF
-prev_asma_2013 = estima_prop_beta("asma", design_pns2013, "prevalencia")
-prev_asma_2013$ano = rep(2013, nrow(prev_asma_2013))
+# Prevalence of asthma attacks in the last 12 months
+prev_crise_2013 = estima_prop_beta("crise_asma_12m", design_pns2013, "prevalencia")
+prev_crise_2013$ano = 2013
 
-prev_asma_2019 = estima_prop_beta("asma", design_pns2019, "prevalencia")
-prev_asma_2019$ano = rep(2019, nrow(prev_asma_2019))
+prev_crise_2019 = estima_prop_beta("crise_asma_12m", design_pns2019, "prevalencia")
+prev_crise_2019$ano = 2019
 
-# Juntando as tabelas
-prev_asma_2013_2019 = rbind(prev_asma_2013, prev_asma_2019)
+# Combine asthma-attack estimates
+prev_crise_2013_2019 = rbind(prev_crise_2013, prev_crise_2019)
 
-# Salvando a base no formato long
-write.csv(prev_asma_2013_2019, file = file.path(tabelas_dir, "df_prev_asma_2013_2019_long.csv"), row.names = FALSE)
+# Save the data in long format
+write.csv(prev_crise_2013_2019, file = file.path(tabelas_dir, "asthma_attack_prevalence_2013_2019_long.csv"), row.names = FALSE)
 
-# Transformando no formato wide
-prev_asma_2013_2019_wide = prev_asma_2013_2019 %>%
+# Reshape to wide format
+prev_crise_2013_2019_wide = prev_crise_2013_2019 %>%
   select(uf, ano, prevalencia, li, ls, metodo_ic, estimativa_ic) %>%
   pivot_wider(
     names_from = ano,
@@ -160,31 +162,29 @@ prev_asma_2013_2019_wide = prev_asma_2013_2019 %>%
     names_glue = "{.value}_{ano}"
   )
 
-# Salvando a base no formato wide
-write_xlsx(prev_asma_2013_2019_wide, path = file.path(tabelas_dir, "df_prev_asma_2013_2019_wide.xlsx"))
+# Save the data in wide format
+write_xlsx(prev_crise_2013_2019_wide, path = file.path(tabelas_dir, "asthma_attack_prevalence_2013_2019_wide.xlsx"))
 
-# Corrigindo a base de dados
-df_plot = prev_asma_2013_2019 %>%
+# Prepare the plotting data
+df_plot = prev_crise_2013_2019 %>%
   mutate(
-    ano = factor(ano, levels = c(2019, 2013)), # garante que 2019 fica embaixo
+    ano = factor(ano, levels = c(2019, 2013)),  # garante ordem das cores
     uf = factor(uf,
-                levels = c(setdiff(unique(uf), "Brasil"), "Brasil")) # Brasil por último
+                levels = c(setdiff(unique(uf), "Brazil"), "Brazil")) # Brazil last
   )
 
-# Criando gráfico
-ggplot(df_plot, aes(x = uf, 
-                    y = prevalencia, 
+# Create the chart
+ggplot(df_plot, aes(x = uf,
+                    y = prevalencia,
                     fill = ano)) +
-  geom_col(position = position_dodge(width = 0.7), width = 0.8) + # barras mais finas e separadas
-  geom_errorbar(aes(ymin = li,
-                    ymax = ls),
-                position = position_dodge(width = 0.9), 
-                width = 0.3) +
+  geom_col(position = position_dodge(width = 0.7), width = 0.8) +
+  geom_errorbar(aes(ymin = li, ymax = ls),
+                position = position_dodge(width = 0.9), width = 0.3) +
   coord_flip() +
   labs(x = NULL,
-       y = "Prevalência (%) de diagnóstico médico de asma",
+       y = "Prevalence (%) of asthma attacks in the last 12 months",
        fill = NULL) +
   scale_fill_manual(values = c("2013" = "#a7a6f2", "2019" = "#ead4a4"),
-                    breaks = c("2013", "2019")) + 
+                    breaks = c("2013", "2019")) +
   theme_minimal(base_size = 14) +
   theme(axis.text.y = element_text(size = 11))

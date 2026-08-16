@@ -1,40 +1,54 @@
-# Pesquisa Nacional de Saúde 2013-2019: Asma, Plano Amostral e Indicadores
+# National Health Survey 2013–2019: Asthma, Sampling Design, and Indicators
 
 <p align="justify">
-A Pesquisa Nacional de Saúde (PNS), conduzida pelo Instituto Brasileiro de Geografia e Estatística em parceria com o Ministério da Saúde, é um inquérito domiciliar de abrangência nacional com desenho amostral complexo. Este repositório documenta e implementa, em R, procedimentos para analisar indicadores relacionados à asma no Brasil em 2013 e 2019, incorporando pesos, estratos e unidades primárias de amostragem.
+The Brazilian National Health Survey (Pesquisa Nacional de Saúde, PNS), conducted by the Brazilian Institute of Geography and Statistics in partnership with the Ministry of Health, is a nationwide household survey with a complex sampling design. This repository documents and implements R procedures for analyzing asthma-related indicators in Brazil in 2013 and 2019 while accounting for weights, strata, and primary sampling units.
 </p>
 
 <p align="justify">
-As rotinas estimam prevalência de diagnóstico médico de asma, ocorrência de crises nos últimos 12 meses, uso de medicamentos orais ou bombinhas, taxas populacionais, tabagismo, desembolso, absenteísmo, dias perdidos e renda. O objetivo é manter o fluxo analítico transparente, auditável e reproduzível, com intervalos de confiança compatíveis com o plano amostral da PNS.
+The analytical programs estimate the prevalence of a medical asthma diagnosis, attacks in the last 12 months, oral-medication or inhaler use, population rates, smoking, out-of-pocket payment, absenteeism, lost days, and income. The workflow is designed to remain transparent, auditable, and reproducible, with confidence intervals that respect the PNS sampling design.
 </p>
 
-## Produtos principais
+## Main products
 
-- [Relatório metodológico publicado](https://ingodube.github.io/PNS_2013_2019/metodologia.html)
-- [Pôster científico](poster/poster_pns_asma_morrison.pdf)
+- [Methodological report — English, default](https://ingodube.github.io/PNS_2013_2019/metodologia.html)
+- [Methodological report — Portuguese (PT-BR)](https://ingodube.github.io/PNS_2013_2019/methodology-pt-br.html)
+- [Scientific poster](poster/poster_pns_asma_morrison.pdf)
 
-## Implementação do plano amostral
+## Localized analytical materials
+
+- [`Codes (EN)/`](Codes%20(EN)/): English documentation, messages, labels, and output paths.
+- [`Codes (PT-BR)/`](Codes%20(PT-BR)/): Portuguese analytical programs preserved as the scientific baseline.
+- [`Processed Tables (EN)/`](Processed%20Tables%20(EN)/): English headers, categories, notes, and display strings.
+- [`Processed Tables (PT-BR)/`](Processed%20Tables%20(PT-BR)/): validated Portuguese processed outputs.
 
 <p align="justify">
-Os códigos constroem o desenho amostral com o pacote <code>PNSIBGE</code> e utilizam o pacote <code>survey</code> para incorporar pesos, estratos e conglomerados. Para proporções binárias, o fluxo utiliza <code>survey::svyciprop(method = "beta")</code>, produzindo intervalos de confiança de 95% que respeitam os limites naturais das proporções e oferecem leitura mais prudente em domínios pequenos.
+The names of Brazil's 27 federative units are intentionally identical in both languages. Only the national label is localized from <code>Brasil</code> to <code>Brazil</code> in English materials. PNS variable codes, formulas, package and API names, DOI values, and URLs are not translated.
 </p>
 
-## Reprodutibilidade
+## Sampling-design implementation
 
 <p align="justify">
-Execute os códigos a partir da raiz do repositório. Cada arquivo em <a href="Códigos/">Códigos/</a> localiza essa raiz, cria <code>Tabelas tratadas/</code> quando necessário e grava os resultados diretamente nessa pasta. Um exemplo de execução é:
+The R programs construct the survey design with <code>PNSIBGE</code> and use <code>survey</code> to incorporate weights, strata, and clusters. For binary proportions, the workflow uses <code>survey::svyciprop(method = "beta")</code> to produce 95% confidence intervals that respect the natural bounds of proportions and support cautious interpretation in small domains.
+</p>
+
+## Reproducibility
+
+<p align="justify">
+Run a localized program from the repository root. For example:
 </p>
 
 ```r
-source(file.path("Códigos", "Extração PNS - Asma.R"))
+source(file.path("Codes (EN)", "PNS Extraction - Asthma.R"))
 ```
 
 <p align="justify">
-As rotinas dependem, conforme o indicador, dos pacotes <code>PNSIBGE</code>, <code>survey</code>, <code>dplyr</code>, <code>tidyr</code>, <code>ggplot2</code>, <code>writexl</code> e <code>deflateBR</code>. Os microdados brutos não são incluídos no repositório e são obtidos pelos mecanismos documentados nos próprios códigos.
+Depending on the indicator, the workflow requires <code>PNSIBGE</code>, <code>survey</code>, <code>dplyr</code>, <code>tidyr</code>, <code>ggplot2</code>, <code>writexl</code>, and <code>deflateBR</code>. Raw microdata are not stored in this repository and are retrieved through the mechanisms documented in the R programs.
 </p>
 
-## Relatório metodológico
+<p align="justify">
+Render both report languages with the repo-local <code>methodology-rmarkdown</code> workflow. The stable public path remains <code>metodologia.html</code>; it now serves English by default so existing references and the poster QR code remain valid.
+</p>
 
 <p align="justify">
-O relatório descreve a extração, a recodificação das variáveis, a construção dos indicadores, a implementação do desenho amostral, o cálculo dos intervalos de confiança e a interpretação dos resultados. O endereço público permanece estável para preservar referências externas e o QR code do pôster.
+Artificial intelligence supported code structuring, consistency review, report formatting, rendering automation, and translation. Scientific decisions, interpretation, validation, and final responsibility remain with the authors.
 </p>

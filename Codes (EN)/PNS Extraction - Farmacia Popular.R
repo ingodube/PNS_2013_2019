@@ -1,4 +1,5 @@
-# Carregando pacotes necessários
+# English localization. PNS response labels such as Sim/Não remain in Portuguese because they are literal values in the source microdata.
+# Load required packages
 library(dplyr)
 library(PNSIBGE)
 library(ggplot2)
@@ -11,12 +12,12 @@ options(survey.adjust.domain.lonely = TRUE)
 candidate_roots = unique(normalizePath(c(getwd(), file.path(getwd(), "..")), mustWork = FALSE))
 repo_root = candidate_roots[
   file.exists(file.path(candidate_roots, "README.md")) &
-    dir.exists(file.path(candidate_roots, "Códigos"))
+    dir.exists(file.path(candidate_roots, "Codes (EN)"))
 ][1]
 if (is.na(repo_root)) {
-  stop("Não foi possível localizar a raiz do repositório.")
+  stop("The repository root could not be located.")
 }
-tabelas_dir = file.path(repo_root, "Tabelas tratadas")
+tabelas_dir = file.path(repo_root, "Processed Tables (EN)")
 dir.create(tabelas_dir, recursive = TRUE, showWarnings = FALSE)
 
 fmt_decimal = function(x, digits = 2){
@@ -41,20 +42,20 @@ cria_design_pns = function(data_pns){
   data_design = data_pns %>%
     select(-any_of(c("V0028", "V00281", "V00282", "V00283",
                      "V0030", "V00301", "V00302", "V00303")))
-  
+
   pns_design(data_pns = data_design)
 }
 
 estima_prop_beta = function(var, label, design){
   formula_var = as.formula(paste0("~", var))
-  
+
   estima_uma = function(design_atual, uf_atual){
     est = tryCatch(
       svyciprop(formula_var, design = design_atual,
                 method = "beta", level = 0.95, na.rm = TRUE),
       error = function(e) NULL
     )
-    
+
     if (is.null(est)) {
       return(data.frame(
         uf = uf_atual,
@@ -65,13 +66,13 @@ estima_prop_beta = function(var, label, design){
         li = NA_real_,
         ls = NA_real_,
         tipo_med = label,
-        metodo_ic = "indisponivel"
+        metodo_ic = "unavailable"
       ))
     }
-    
+
     ci = tryCatch(as.numeric(confint(est)), error = function(e) c(NA_real_, NA_real_))
     valor = as.numeric(coef(est))[1]
-    
+
     if (!is.finite(valor) || length(ci) < 2 || any(!is.finite(ci))) {
       return(data.frame(
         uf = uf_atual,
@@ -82,10 +83,10 @@ estima_prop_beta = function(var, label, design){
         li = NA_real_,
         ls = NA_real_,
         tipo_med = label,
-        metodo_ic = "indisponivel"
+        metodo_ic = "unavailable"
       ))
     }
-    
+
     data.frame(
       uf = uf_atual,
       asma_pg = valor,
@@ -98,24 +99,24 @@ estima_prop_beta = function(var, label, design){
       metodo_ic = "beta"
     )
   }
-  
+
   ufs = sort(unique(design$variables$V0001))
-  
+
   est_uf = do.call(
     rbind,
     lapply(ufs, function(uf_atual){
       estima_uma(subset(design, V0001 == uf_atual), uf_atual)
     })
   )
-  
-  est_br = estima_uma(design, "Brasil")
-  
+
+  est_br = estima_uma(design, "Brazil")
+
   rbind(est_uf, est_br) %>%
     mutate(
       uf = as.character(uf),
       estimativa_ic = formatar_ic_pct(pct_asma_med_pg, li, ls)
     ) %>%
-    arrange(if_else(uf == "Brasil", 1L, 0L), uf)
+    arrange(if_else(uf == "Brazil", 1L, 0L), uf)
 }
 
 variaveis_2019 = c("V0001", "V0024", "UPA_PNS", "ID_DOMICILIO", "V0006_PNS",
@@ -142,7 +143,7 @@ pns2019 = get_pns(year = 2019, vars = variaveis_2019,
                   design = FALSE, labels = TRUE, selected = TRUE,
                   anthropometry = FALSE)
 
-# Limpando as bases de dados
+# Clean the data sets
 pns2019 = pns2019 %>%
   mutate(
     asma_oral_pg = case_when(
@@ -185,40 +186,40 @@ pns2019 = pns2019 %>%
 
 design_pns2019 = cria_design_pns(pns2019)
 
-# Estimação do percentual de usuários de medicamentos orais que fizeram o desembolso
-asma_oral_pg = estima_prop_beta("asma_oral_pg", "Medicamento oral", design_pns2019)
-asma_bombinha_pg = estima_prop_beta("asma_bombinha_pg", "Bombinha", design_pns2019)
+# Estimate the percentage of oral-medication users who paid out of pocket
+asma_oral_pg = estima_prop_beta("asma_oral_pg", "Oral medication", design_pns2019)
+asma_bombinha_pg = estima_prop_beta("asma_bombinha_pg", "Inhaler", design_pns2019)
 
-# Juntando tudo
+# Combine the results
 df_desembolso = rbind(asma_oral_pg, asma_bombinha_pg) %>%
-  arrange(tipo_med, if_else(uf == "Brasil", 1L, 0L), uf)
+  arrange(tipo_med, if_else(uf == "Brazil", 1L, 0L), uf)
 
-# Salvando a base de dados
-write_xlsx(df_desembolso, path = file.path(tabelas_dir, "df_desembolso.xlsx"))
+# Save the data set
+write_xlsx(df_desembolso, path = file.path(tabelas_dir, "asthma_medication_out_of_pocket.xlsx"))
 
-# Gerando o gráfico
+# Create the chart
 df_plot = df_desembolso %>%
   mutate(
-    tipo_med = factor(tipo_med, levels = c("Bombinha", "Medicamento oral")),
+    tipo_med = factor(tipo_med, levels = c("Inhaler", "Oral medication")),
     uf = factor(uf,
-                levels = c(setdiff(unique(uf), "Brasil"), "Brasil")) # Brasil por último
+                levels = c(setdiff(unique(uf), "Brazil"), "Brazil")) # Brazil last
   )
 
-ggplot(df_plot, aes(x = uf, 
-                    y = pct_asma_med_pg, 
+ggplot(df_plot, aes(x = uf,
+                    y = pct_asma_med_pg,
                     fill = tipo_med)) +
   geom_col(position = position_dodge(width = 0.7), width = 0.8) +
   geom_errorbar(aes(ymin = li,
                     ymax = ls),
-                position = position_dodge(width = 0.9), 
+                position = position_dodge(width = 0.9),
                 width = 0.3) +
   coord_flip() +
   labs(x = NULL,
        y = "(%) de usuários de medicamentos de asma que fizeram desembolso",
        fill = NULL) +
-  scale_fill_manual(values = c("Medicamento oral" = "#a7a6f2", "Bombinha" = "#ead4a4"),
-                    breaks = c("Medicamento oral", "Bombinha")) + 
+  scale_fill_manual(values = c("Oral medication" = "#a7a6f2", "Inhaler" = "#ead4a4"),
+                    breaks = c("Oral medication", "Inhaler")) +
   theme_minimal(base_size = 14) +
   theme(axis.text.y = element_text(size = 11))
 
-# Estimando o total e a taxa por 100 mil habitantes de pessoas que fizeram o desembolso de medicamentos orais ou bombinhas
+# Estimate the total and rate per 100,000 residents who paid out of pocket for oral medication or inhalers

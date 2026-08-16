@@ -1,4 +1,5 @@
-# Carregando pacotes necessários
+# English localization. PNS response labels such as Sim/Não remain in Portuguese because they are literal values in the source microdata.
+# Load required packages
 library(dplyr)
 library(tidyr)
 library(PNSIBGE)
@@ -11,12 +12,12 @@ options(survey.adjust.domain.lonely = TRUE)
 candidate_roots = unique(normalizePath(c(getwd(), file.path(getwd(), "..")), mustWork = FALSE))
 repo_root = candidate_roots[
   file.exists(file.path(candidate_roots, "README.md")) &
-    dir.exists(file.path(candidate_roots, "Códigos"))
+    dir.exists(file.path(candidate_roots, "Codes (EN)"))
 ][1]
 if (is.na(repo_root)) {
-  stop("Não foi possível localizar a raiz do repositório.")
+  stop("The repository root could not be located.")
 }
-tabelas_dir = file.path(repo_root, "Tabelas tratadas")
+tabelas_dir = file.path(repo_root, "Processed Tables (EN)")
 dir.create(tabelas_dir, recursive = TRUE, showWarnings = FALSE)
 
 fmt_decimal = function(x, digits = 2, big_mark = FALSE){
@@ -78,7 +79,7 @@ estima_prop_beta = function(var, label, design){
         li = NA_real_,
         ls = NA_real_,
         tipo = label,
-        metodo_ic = "indisponivel"
+        metodo_ic = "unavailable"
       ))
     }
 
@@ -92,7 +93,7 @@ estima_prop_beta = function(var, label, design){
         li = NA_real_,
         ls = NA_real_,
         tipo = label,
-        metodo_ic = "indisponivel"
+        metodo_ic = "unavailable"
       ))
     }
 
@@ -115,14 +116,14 @@ estima_prop_beta = function(var, label, design){
     })
   )
 
-  est_br = estima_uma(design, "Brasil")
+  est_br = estima_uma(design, "Brazil")
 
   rbind(est_uf, est_br) %>%
     mutate(
       uf = as.character(uf),
       estimativa_ic = formatar_ic_pct(pct, li, ls)
     ) %>%
-    arrange(if_else(uf == "Brasil", 1L, 0L), uf)
+    arrange(if_else(uf == "Brazil", 1L, 0L), uf)
 }
 
 estima_media_dias = function(var, label, design, day_var = "J003"){
@@ -169,14 +170,14 @@ estima_media_dias = function(var, label, design, day_var = "J003"){
     })
   )
 
-  est_br = estima_uma(design, "Brasil")
+  est_br = estima_uma(design, "Brazil")
 
   rbind(est_uf, est_br) %>%
     mutate(
       uf = as.character(uf),
       estimativa_ic = formatar_ic_media(media_dias, li, ls)
     ) %>%
-    arrange(if_else(uf == "Brasil", 1L, 0L), uf)
+    arrange(if_else(uf == "Brazil", 1L, 0L), uf)
 }
 
 variaveis_2019 = c("V0001", "V0024", "UPA_PNS", "ID_DOMICILIO", "V0006_PNS",
@@ -198,21 +199,21 @@ pns2013 = get_pns(year = 2013, vars = variaveis_2013,
                   anthropometry = FALSE)
 
 categorias_2019 = list(
-  dor_ossos = "Problemas nos ossos e articulações",
-  enxaqueca = "Dor de cabeça ou enxaqueca",
-  gineco_obstetrico = "Problemas gineco-obstétricos",
-  dor_dente = "Problema odontológico",
-  asma_dpoc = "Problemas respiratórios",
-  gastrointestinal = "Problemas gastrointestinais",
+  dor_ossos = "Bone and joint problems",
+  enxaqueca = "Headache or migraine",
+  gineco_obstetrico = "Gynecologic and obstetric problems",
+  dor_dente = "Dental problem",
+  asma_dpoc = "Respiratory problems",
+  gastrointestinal = "Gastrointestinal problems",
   dengue = "Dengue, Chikungunya, Zika",
-  cardiovascular = "Problemas cardiovasculares",
+  cardiovascular = "Cardiovascular problems",
   diabetes = "Diabetes",
-  cancer = "Câncer",
-  neurologico = "Problemas neurológicos",
-  mental = "Saúde mental",
-  fratura = "Lesões ou fraturas",
-  outro = "Outro problema de saúde",
-  nao_declarado = "Não declarado"
+  cancer = "Cancer",
+  neurologico = "Neurological problems",
+  mental = "Mental health",
+  fratura = "Injuries or fractures",
+  outro = "Other health problem",
+  nao_declarado = "Not reported"
 )
 
 cria_indicador_causa = function(motivo, padrao){
@@ -265,7 +266,7 @@ pns2013 = pns2013 %>%
 design_pns2019 = cria_design_pns(pns2019)
 design_pns2013 = cria_design_pns(pns2013)
 
-df_absenteismo = estima_prop_beta("absenteismo", "Geral", design_pns2019) %>%
+df_absenteismo = estima_prop_beta("absenteismo", "Overall", design_pns2019) %>%
   rename(pct_absenteismo = pct)
 
 variaveis = c("absenteismo", "dor_ossos", "enxaqueca", "gineco_obstetrico",
@@ -273,12 +274,12 @@ variaveis = c("absenteismo", "dor_ossos", "enxaqueca", "gineco_obstetrico",
               "cardiovascular", "diabetes", "cancer", "neurologico",
               "mental", "fratura", "outro", "nao_declarado")
 
-labels = c("Geral", "Dor nos ossos e articulações", "Enxaqueca",
-           "Gineco-obstétrico", "Dor de dente", "Respiratório (asma/bronquite/pneumonia)",
-           "Gastrointestinal", "Dengue/Chikungunya/Zika/Febre amarela",
-           "Cardiovascular", "Diabetes", "Câncer", "Neurológico",
-           "Saúde mental", "Fratura/violência", "Outro problema de saúde",
-           "Não declarado")
+labels = c("Overall", "Bone and joint pain", "Migraine",
+           "Gynecologic and obstetric", "Toothache", "Respiratory (asthma/bronchitis/pneumonia)",
+           "Gastrointestinal", "Dengue/Chikungunya/Zika/Yellow fever",
+           "Cardiovascular", "Diabetes", "Cancer", "Neurological",
+           "Mental health", "Fracture/violence", "Other health problem",
+           "Not reported")
 
 lista_resultados = mapply(
   estima_prop_beta,
@@ -289,11 +290,11 @@ lista_resultados = mapply(
 )
 
 df_final = do.call(rbind, lista_resultados) %>%
-  mutate(denominador = ifelse(tipo == "Geral",
-                              "Morador selecionado",
-                              "Moradores que deixaram de realizar atividades habituais por motivo de saúde"))
+  mutate(denominador = ifelse(tipo == "Overall",
+                              "Selected resident",
+                              "Residents who stopped performing usual activities for health reasons"))
 
-write_xlsx(df_final, path = file.path(tabelas_dir, "df_absenteismo.xlsx"))
+write_xlsx(df_final, path = file.path(tabelas_dir, "health_absenteeism.xlsx"))
 
 lista_resultados = mapply(
   estima_media_dias,
@@ -304,19 +305,19 @@ lista_resultados = mapply(
 )
 
 df_dias_perdidos = do.call(rbind, lista_resultados) %>%
-  filter(uf == "Brasil") %>%
+  filter(uf == "Brazil") %>%
   select(tipo, media_dias, li, ls, metodo_ic, estimativa_ic)
 
-write_xlsx(df_dias_perdidos, path = file.path(tabelas_dir, "df_dias_perdidos.xlsx"))
+write_xlsx(df_dias_perdidos, path = file.path(tabelas_dir, "lost_days.xlsx"))
 
 df_absenteismo_respiratorio_2013_2019 = bind_rows(
-  estima_prop_beta("respiratorio_harmonizado", "Respiratório harmonizado", design_pns2013) %>%
+  estima_prop_beta("respiratorio_harmonizado", "Harmonized respiratory condition", design_pns2013) %>%
     mutate(ano = 2013),
-  estima_prop_beta("respiratorio_harmonizado", "Respiratório harmonizado", design_pns2019) %>%
+  estima_prop_beta("respiratorio_harmonizado", "Harmonized respiratory condition", design_pns2019) %>%
     mutate(ano = 2019)
 ) %>%
   mutate(
-    denominador = "Moradores que deixaram de realizar atividades habituais por motivo de saúde",
+    denominador = "Residents who stopped performing usual activities for health reasons",
     harmonizacao = paste(
       "2013: Asma/bronquite/pneumonia + Resfriado/gripe;",
       "2019: Problemas respiratórios, incluindo resfriado/gripe/sinusite/asma/bronquite/pneumonia."
@@ -324,16 +325,16 @@ df_absenteismo_respiratorio_2013_2019 = bind_rows(
   )
 
 write_xlsx(df_absenteismo_respiratorio_2013_2019,
-           path = file.path(tabelas_dir, "df_absenteismo_respiratorio_2013_2019.xlsx"))
+           path = file.path(tabelas_dir, "harmonized_respiratory_absenteeism_2013_2019.xlsx"))
 
 df_dias_perdidos_respiratorio_2013_2019 = bind_rows(
-  estima_media_dias("respiratorio_harmonizado", "Respiratório harmonizado", design_pns2013) %>%
+  estima_media_dias("respiratorio_harmonizado", "Harmonized respiratory condition", design_pns2013) %>%
     mutate(ano = 2013),
-  estima_media_dias("respiratorio_harmonizado", "Respiratório harmonizado", design_pns2019) %>%
+  estima_media_dias("respiratorio_harmonizado", "Harmonized respiratory condition", design_pns2019) %>%
     mutate(ano = 2019)
 ) %>%
   mutate(
-    denominador = "Moradores cujo principal motivo de perda de atividades foi respiratório harmonizado",
+    denominador = "Residents whose main reason for activity loss was a harmonized respiratory condition",
     harmonizacao = paste(
       "2013: Asma/bronquite/pneumonia + Resfriado/gripe;",
       "2019: Problemas respiratórios, incluindo resfriado/gripe/sinusite/asma/bronquite/pneumonia."
@@ -341,4 +342,4 @@ df_dias_perdidos_respiratorio_2013_2019 = bind_rows(
   )
 
 write_xlsx(df_dias_perdidos_respiratorio_2013_2019,
-           path = file.path(tabelas_dir, "df_dias_perdidos_respiratorio_2013_2019.xlsx"))
+           path = file.path(tabelas_dir, "harmonized_respiratory_lost_days_2013_2019.xlsx"))

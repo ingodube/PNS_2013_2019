@@ -1,0 +1,992 @@
+---
+title: "Implementing the Brazilian National Health Survey Sampling Design in R: an Asthma Case Study"
+author:
+  - name: "Ingo Dube Souza"
+    credentials:
+      - "Graduate Program in Statistics and Data Science (PGECD/UFBA)"
+      - "Economic Studies (SENAI/CIMATEC)"
+    email: "ingo.dube@ufba.br"
+  - name: "Maria Eduarda de Lima e Silva"
+    credentials:
+      - "PhD in Applied Economics (UFRGS)"
+      - "Economic Studies (SENAI/CIMATEC)"
+report-type: "Methodological report"
+subtitle: "Technical report on estimators, confidence intervals, epidemiological indicators, and interpretation of PNS 2013–2019 asthma results."
+date: "July 29, 2026"
+repository: "[Project repository](https://github.com/ingodube/PNS_2013_2019)"
+keywords: "National Health Survey; Sampling design; Asthma"
+lang: en
+contents-label: "Contents"
+keywords-label: "Keywords"
+language-label: "Language"
+language-current: "EN"
+language-is-en: true
+language-en-url: "metodologia.html"
+language-pt-br-url: "methodology-pt-br.html"
+canonical-url: "https://ingodube.github.io/PNS_2013_2019/metodologia.html"
+alternate-en-url: "https://ingodube.github.io/PNS_2013_2019/metodologia.html"
+alternate-pt-br-url: "https://ingodube.github.io/PNS_2013_2019/methodology-pt-br.html"
+output:
+  html_document:
+    self_contained: true
+    toc: true
+    toc_depth: 3
+    toc_float: false
+    number_sections: true
+    fig_caption: false
+    theme: null
+    math_method: mathml
+    template: ../.codex/skills/methodology-rmarkdown/assets/technical-report.html
+    css: ../.codex/skills/methodology-rmarkdown/assets/technical-report.css
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = FALSE,
+  warning = FALSE,
+  message = FALSE,
+  fig.width = 11,
+  fig.height = 8,
+  dpi = 150
+)
+
+required <- c("dplyr", "tidyr", "ggplot2", "readr", "openxlsx", "knitr", "scales", "stringr")
+missing <- required[!vapply(required, requireNamespace, logical(1), quietly = TRUE)]
+if (length(missing) > 0) {
+  stop("Missing R packages required to render this report: ", paste(missing, collapse = ", "))
+}
+
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(readr)
+library(openxlsx)
+library(knitr)
+library(scales)
+library(stringr)
+
+configured_root <- Sys.getenv("REPORT_REPO_ROOT", unset = "")
+candidate_roots <- unique(normalizePath(
+  c(configured_root, getwd(), file.path(getwd(), ".."), file.path(getwd(), "..", "..")),
+  mustWork = FALSE
+))
+repo_root <- candidate_roots[
+  file.exists(file.path(candidate_roots, "README.md")) &
+    dir.exists(file.path(candidate_roots, "Processed Tables (PT-BR)"))
+][1]
+if (is.na(repo_root)) {
+  stop("The repository root could not be located from the rendering directory.")
+}
+tables_dir <- file.path(repo_root, "Processed Tables (PT-BR)")
+
+localized_files <- c(
+  "asthma_diagnosis_prevalence_2013_2019_long.csv" = "df_prev_asma_2013_2019_long.csv",
+  "asthma_attack_prevalence_2013_2019_long.csv" = "df_prev_crise_2013_2019_long.csv",
+  "asthma_medication_use_2013_2019_long.csv" = "df_medic_asma_2013_2019_long.csv",
+  "recent_asthma_attack_medication_use_2013_2019_long.csv" = "df_medic_crise_asma_2013_2019_long.csv",
+  "asthma_medication_population_rate_2013_2019_long.csv" = "df_taxa_medic_asma_2013_2019_long.csv",
+  "active_smoker_rate_2013_2019_long.csv" = "df_taxa_fumantes_2013_2019_long.csv",
+  "health_absenteeism.xlsx" = "df_absenteismo.xlsx",
+  "lost_days.xlsx" = "df_dias_perdidos.xlsx",
+  "harmonized_respiratory_absenteeism_2013_2019.xlsx" = "df_absenteismo_respiratorio_2013_2019.xlsx",
+  "harmonized_respiratory_lost_days_2013_2019.xlsx" = "df_dias_perdidos_respiratorio_2013_2019.xlsx",
+  "income_2019.xlsx" = "df_renda_2019.xlsx",
+  "asthma_medication_out_of_pocket.xlsx" = "df_desembolso.xlsx"
+)
+
+localize_values <- function(data) {
+  translations <- c(
+    "Brasil" = "Brazil", "Geral" = "Overall", "Medicamento oral" = "Oral medication",
+    "Bombinha" = "Inhaler", "Dor nos ossos e articulações" = "Bone and joint pain",
+    "Enxaqueca" = "Migraine", "Gineco-obstétrico" = "Gynecologic and obstetric",
+    "Dor de dente" = "Toothache", "Respiratório (asma/bronquite/pneumonia)" = "Respiratory (asthma/bronchitis/pneumonia)",
+    "Dengue/Chikungunya/Zika/Febre amarela" = "Dengue/Chikungunya/Zika/Yellow fever",
+    "Câncer" = "Cancer", "Neurológico" = "Neurological", "Saúde mental" = "Mental health",
+    "Fratura/violência" = "Fracture/violence", "Outro problema de saúde" = "Other health problem",
+    "Não declarado" = "Not reported", "Respiratório harmonizado" = "Harmonized respiratory condition"
+  )
+  data[] <- lapply(data, function(column) {
+    if (!is.character(column)) return(column)
+    translated <- unname(ifelse(column %in% names(translations), translations[column], column))
+    translated
+  })
+  if ("estimativa_ic" %in% names(data)) {
+    data$estimativa_ic <- stringr::str_replace_all(data$estimativa_ic, ",", ".")
+  }
+  data
+}
+
+source_file <- function(path) {
+  if (path %in% names(localized_files)) unname(localized_files[[path]]) else path
+}
+
+read_csv_local <- function(path) {
+  localize_values(readr::read_csv(file.path(tables_dir, source_file(path)), show_col_types = FALSE))
+}
+
+read_xlsx_local <- function(path) {
+  localize_values(openxlsx::read.xlsx(file.path(tables_dir, source_file(path))))
+}
+
+exists_local <- function(path) file.exists(file.path(tables_dir, source_file(path)))
+
+pal_anos <- c("2013" = "#a7a6f2", "2019" = "#ead4a4")
+pal_duas <- c("Oral medication" = "#a7a6f2", "Inhaler" = "#ead4a4")
+
+theme_report_plot <- function(base_size = 13) {
+  theme_minimal(base_size = base_size) +
+    theme(
+      text = element_text(color = "#1f2933"),
+      axis.title.x = element_text(color = "#243b53", margin = margin(t = 9)),
+      axis.title.y = element_blank(),
+      axis.text.x = element_text(color = "#52616f"),
+      axis.text.y = element_text(size = 9.5, color = "#243b53"),
+      panel.grid.major.y = element_blank(),
+      panel.grid.minor = element_blank(),
+      panel.grid.major.x = element_line(color = "#e6edf3", linewidth = 0.35),
+      legend.position = "top",
+      legend.justification = "left",
+      legend.text = element_text(color = "#243b53"),
+      plot.margin = margin(8, 14, 8, 8)
+    )
+}
+
+report_kable <- function(x, caption, id) {
+  table_html <- knitr::kable(
+    x,
+    caption = caption,
+    format = "html",
+    table.attr = 'class="report-table"'
+  )
+  sub("<caption>", paste0('<caption id="', id, '">'), table_html, fixed = TRUE)
+}
+
+source_note <- function(class = "source-note") {
+  paste0('<p class="', class, '">Source: prepared by the authors.</p>')
+}
+
+report_note <- function(note, class = "table-note") {
+  if (is.null(note) || is.na(note) || !nzchar(note)) {
+    return("")
+  }
+  paste0('<p class="', class, '">Note: ', note, '</p>')
+}
+
+emit_report_table <- function(x, caption, id, note = NULL) {
+  cat(
+    '<div class="table-scroll" role="region" aria-label="Horizontally scrollable table when needed">',
+    "\n",
+    report_kable(x, caption = caption, id = id),
+    "\n",
+    "</div>",
+    "\n",
+    report_note(note, "table-note"),
+    "\n",
+    source_note("table-source"),
+    "\n"
+  )
+}
+
+fmt_decimal <- function(x, digits = 2, big_mark = FALSE) {
+  ifelse(
+    is.na(x),
+    NA_character_,
+    format(
+      round(x, digits),
+      decimal.mark = ".",
+      big.mark = ifelse(big_mark, ",", ""),
+      nsmall = digits,
+      trim = TRUE
+    )
+  )
+}
+
+fmt_ic <- function(estimate, lower, upper, type = c("pct", "rate", "mean")) {
+  type <- match.arg(type)
+  if (type == "pct") {
+    return(ifelse(
+      is.na(estimate) | is.na(lower) | is.na(upper),
+      NA_character_,
+      paste0(fmt_decimal(estimate, 2), "% [",
+             fmt_decimal(lower, 2), "%; ",
+             fmt_decimal(upper, 2), "%]")
+    ))
+  }
+
+  if (type == "rate") {
+    return(ifelse(
+      is.na(estimate) | is.na(lower) | is.na(upper),
+      NA_character_,
+      paste0(fmt_decimal(estimate, 0, TRUE), " [",
+             fmt_decimal(lower, 0, TRUE), "; ",
+             fmt_decimal(upper, 0, TRUE), "]")
+    ))
+  }
+
+  ifelse(
+    is.na(estimate) | is.na(lower) | is.na(upper),
+    NA_character_,
+    paste0(fmt_decimal(estimate, 1), " [",
+           fmt_decimal(lower, 1), "; ",
+           fmt_decimal(upper, 1), "]")
+  )
+}
+
+make_year_ic_table <- function(df, value_col, lower_col, upper_col, type = "pct", id_col = "uf") {
+  df %>%
+    mutate(
+      ano = as.character(ano),
+      estimativa_ic = fmt_ic(.data[[value_col]], .data[[lower_col]], .data[[upper_col]], type)
+    ) %>%
+    select(.data[[id_col]], ano, estimativa_ic) %>%
+    tidyr::pivot_wider(names_from = ano, values_from = estimativa_ic) %>%
+    arrange(ifelse(.data[[id_col]] == "Brazil", 1, 0), .data[[id_col]]) %>%
+    rename(UF = all_of(id_col))
+}
+
+plot_year_ic <- function(df, value_col, lower_col, upper_col, y_lab) {
+  uf_levels <- df %>%
+    distinct(uf) %>%
+    mutate(ordem = ifelse(uf == "Brazil", 1, 0)) %>%
+    arrange(ordem, uf) %>%
+    pull(uf)
+
+  plot_df <- df %>%
+    mutate(
+      ano = factor(as.character(ano), levels = c("2019", "2013")),
+      uf = factor(uf, levels = rev(uf_levels))
+    )
+
+  ggplot(plot_df, aes(x = uf, y = .data[[value_col]], fill = ano)) +
+    geom_col(position = position_dodge(width = 0.7), width = 0.78, color = "white", linewidth = 0.25) +
+    geom_errorbar(
+      aes(ymin = .data[[lower_col]], ymax = .data[[upper_col]]),
+      position = position_dodge(width = 0.9),
+      width = 0.28,
+      linewidth = 0.45,
+      color = "#34495e"
+    ) +
+    coord_flip() +
+    labs(x = NULL, y = y_lab, fill = NULL) +
+    scale_fill_manual(values = pal_anos, breaks = c("2013", "2019")) +
+    scale_y_continuous(expand = expansion(mult = c(0, 0.08))) +
+    theme_report_plot()
+}
+
+plot_single_ic <- function(df, label_col, value_col, lower_col, upper_col, y_lab, fill = "#a7a6f2") {
+  plot_df <- df %>%
+    mutate(label = factor(.data[[label_col]], levels = .data[[label_col]]))
+
+  ggplot(plot_df, aes(x = label, y = .data[[value_col]])) +
+    geom_col(fill = fill, width = 0.78, color = "white", linewidth = 0.25) +
+    geom_errorbar(aes(ymin = .data[[lower_col]], ymax = .data[[upper_col]]), width = 0.28, linewidth = 0.45, color = "#34495e") +
+    coord_flip() +
+    labs(x = NULL, y = y_lab) +
+    scale_y_continuous(expand = expansion(mult = c(0, 0.08))) +
+    theme_report_plot()
+}
+
+fmt_pct <- function(x) format(round(x, 2), decimal.mark = ".", nsmall = 2)
+fmt_int <- function(x) format(round(x, 0), big.mark = ".", decimal.mark = ".")
+
+get_brasil <- function(df, value_col, lower_col, upper_col, year, year_col = "ano") {
+  df %>%
+    filter(uf == "Brazil", .data[[year_col]] == year) %>%
+    transmute(
+      estimativa = .data[[value_col]],
+      li = .data[[lower_col]],
+      ls = .data[[upper_col]]
+    ) %>%
+    slice(1)
+}
+
+overlap_ci <- function(a_li, a_ls, b_li, b_ls) {
+  max(a_li, b_li, na.rm = TRUE) <= min(a_ls, b_ls, na.rm = TRUE)
+}
+
+prev_asma <- read_csv_local("asthma_diagnosis_prevalence_2013_2019_long.csv")
+prev_crise <- read_csv_local("asthma_attack_prevalence_2013_2019_long.csv")
+medic_asma <- read_csv_local("asthma_medication_use_2013_2019_long.csv")
+medic_crise <- read_csv_local("recent_asthma_attack_medication_use_2013_2019_long.csv")
+taxa_medic <- read_csv_local("asthma_medication_population_rate_2013_2019_long.csv")
+taxa_fumantes <- read_csv_local("active_smoker_rate_2013_2019_long.csv")
+
+absenteismo <- read_xlsx_local("health_absenteeism.xlsx")
+dias_perdidos <- read_xlsx_local("lost_days.xlsx")
+absenteismo_resp_2013_2019 <- read_xlsx_local("harmonized_respiratory_absenteeism_2013_2019.xlsx")
+dias_perdidos_resp_2013_2019 <- read_xlsx_local("harmonized_respiratory_lost_days_2013_2019.xlsx")
+renda <- read_xlsx_local("income_2019.xlsx")
+desembolso <- if (exists_local("asthma_medication_out_of_pocket.xlsx")) read_xlsx_local("asthma_medication_out_of_pocket.xlsx") else NULL
+
+```
+
+# Introduction {#introducao}
+
+Epidemiological indicators are summary measures that describe the frequency, distribution, and evolution of health-related events in defined populations. Prevalence estimates, rates, means, medication-use proportions, and confidence intervals are not merely numerical results: they organize the assessment of health needs, territorial inequalities, risk factors, access to care, and public-policy performance. In observational research, these indicators are especially relevant because they transform individual responses into evidence that can support epidemiological surveillance, health planning, and the prioritization of interventions.
+
+Asthma clearly illustrates the need for responsible management of observational data. It is a chronic respiratory condition that combines medical diagnosis, recurrent symptoms, attacks, pharmacological management, exposure to risk factors, and possible limitations in daily activities. Estimating the prevalence of a medical asthma diagnosis, the occurrence of attacks in the last 12 months, medication use, and the distribution of risk factors such as smoking helps assess whether increased diagnosis is accompanied by better clinical control and adequate access to treatment.
+
+This report presents the implementation in R of the National Health Survey (PNS) sampling design as a case study of asthma in Brazil between 2013 and 2019. It demonstrates how microdata from complex surveys can be converted into valid, interpretable, and reproducible indicators when weights, strata, primary sampling units, and appropriate uncertainty-estimation procedures are respected. It also discusses the limitations and challenges of using sample data when a population database is unavailable or cannot be obtained. The central methodological contribution is to make explicit the path from the original microdata to indicator construction and epidemiological interpretation, thereby increasing the transparency and reproducibility of the adopted procedure.
+
+<p class="method-note"><strong>Statistical objective</strong> Reproducibly document how PNS microdata are transformed into weighted indicators of asthma diagnosis, attacks, medication use, smoking, and complementary outcomes.</p>
+
+# Data source and analytical scope {#fonte-dados}
+
+The R programs use PNS 2013 and 2019 microdata obtained through the `PNSIBGE` package with `get_pns(..., design = FALSE, labels = TRUE, selected = TRUE, anthropometry = FALSE)`. The PNS was designed as a population-based household survey with a probabilistic design, stratification, and multistage cluster selection, producing valid estimates for Brazil, major regions, federative units, and other domains ([Souza-Júnior et al., 2015](#ref-souza-junior-2015)). The `selected = TRUE` option indicates that the analyses focus on the resident selected for the individual questionnaire, the appropriate level for questions on asthma diagnosis, attacks, medication, smoking, absenteeism, and individual income.
+
+# Implementation of the complex sampling design {#plano-amostral}
+
+The implemented method constructs the survey design with `PNSIBGE::pns_design()` after retaining the variables required for the selected resident's weight and removing competing household or anthropometric weight sets. This operational step follows directly from the design described for PNS 2013: inference must not treat the microdata as a simple random sample because variance depends on strata, primary sampling units, and calibrated weights ([Souza-Júnior et al., 2015](#ref-souza-junior-2015)). The routine used was:
+
+```{r design-code, echo=TRUE, eval=FALSE}
+cria_design_pns = function(data_pns){
+  data_design = data_pns %>%
+    select(-any_of(c("V0028", "V00281", "V00282", "V00283",
+                     "V0030", "V00301", "V00302", "V00303")))
+
+  pns_design(data_pns = data_design)
+}
+```
+
+The central design variables include `UPA_PNS`, `ID_DOMICILIO`, `V0024`, `V0029`, `V00291`, `V00292`, and `V00293`. Substantively, they represent the clustering, stratification, and weighting structure required for each respondent to represent the target population appropriately. Ignoring this structure tends to underestimate uncertainty and may produce overly optimistic conclusions about differences between years or federative units.
+
+The R programs also define:
+
+```{r lonely-psu-code, echo=TRUE, eval=FALSE}
+options(survey.lonely.psu = "adjust")
+options(survey.adjust.domain.lonely = TRUE)
+```
+
+These options prevent failures in state domains or subgroups with lonely primary sampling units. In practice, they allow estimation to continue for small domains while explicitly handling variance in those domains.
+
+# Estimators and confidence intervals {#estimadores-intervalos}
+
+<p class="method-note"><strong>Estimator</strong> The estimates prioritize weighted proportions, rates per 100,000 residents, and weighted means while preserving the PNS strata, clusters, and weights.</p>
+
+For binary variables, the weighted proportion is defined as:
+
+$$
+\hat{p} = \frac{\sum_i w_i y_i}{\sum_i w_i}
+$$
+
+where $w_i$ is the transformed survey weight for each selected resident and $y_i$ is the corresponding binary event indicator. The percentage estimate is:
+
+$$
+\hat{p_{\%}} = 100 \times \hat{p}
+$$
+
+Likewise, for population rates per 100,000 residents, the method estimates the proportion under the complex design and then rescales it:
+
+$$
+\hat{{p}_{100k}} = 100000 \times \hat{p}
+$$
+
+Confidence intervals for proportions use:
+
+```{r prop-beta-code, echo=TRUE, eval=FALSE}
+survey::svyciprop(formula_var, design = design_atual,
+                  method = "beta", na.rm = TRUE)
+```
+
+Thus, the $95\%\ CI$ is obtained on the original proportion scale using the beta method and then converted to a percentage or rate per 100,000 when needed. This approach avoids manually truncating limits and reduces the risk of intervals outside the 0–1 scale.
+
+Statistically, the Wald interval is a normal approximation around the point estimate. This approximation may be fragile when the proportion is low or high, when domains contain few effective respondents, or when the complex sampling structure increases variance. [Brown, Cai, and DasGupta (2001)](#ref-brown-2001) show that the Wald interval for binomial proportions can have erratic coverage, even at sample sizes often considered sufficient under common rules of thumb. In this report, these situations arise in state-level domains, whose effective sample sizes are naturally smaller, among people with a medical asthma diagnosis, and even more markedly among people with a recent attack.
+
+The beta method used by `survey::svyciprop(method = "beta")` belongs to the family of solutions recommended for proportions estimated under complex survey designs, especially when the expected number of positive events is small or the proportion approaches the scale boundaries ([Korn and Graubard, 1998](#ref-korn-graubard-1998)). It respects the bounded nature of a proportion, produces limits compatible with the probability scale, and avoids the inappropriate practice of simply clipping negative values or values above 100%.
+
+<p class="method-note"><strong>Statistical caution</strong> Visual assessment of the bars must always be combined with the confidence intervals. Apparent differences between federative units or years should not be interpreted as clear change when uncertainty remains broadly overlapping. In other words, overlapping confidence intervals do not provide sufficient evidence to claim a significant year-to-year change.</p>
+
+From an applied perspective, using the beta confidence interval supports a more cautious public-policy interpretation. Comparisons between 2013 and 2019 should consider both the magnitude of the difference and the uncertainty around the estimates. To estimate means, such as inflation-adjusted income and lost days, the R programs use `survey::svymean()`:
+
+$$
+\bar{x} = \frac{\sum_i w_i x_i}{\sum_i w_i}
+$$
+
+where $x_i$ is a continuous variable for each selected resident and $w_i$ is the corresponding weight already calibrated under the PNS sampling design.
+
+# Asthma indicators and associated factors {#indicadores-asma}
+
+As noted in the [introduction](#introducao), asthma is a chronic respiratory disease of major relevance to health surveillance, affecting symptoms, attacks, quality of life, and health-service use. The Global Asthma Report 2022 emphasizes that population measurement is necessary to guide policies for prevention, diagnosis, access to treatment, and symptom control ([Global Asthma Network, 2022](#ref-global-asthma-2022)). In Brazil, PNS 2013 estimated the prevalence of a medical asthma diagnosis among adults and identified differences by sex, age, education, region, and health-insurance status ([Menezes et al., 2015](#ref-menezes-2015)). Complementary studies of self-reported asthma trends between 2003 and 2013 also indicate increased diagnosis among adults, suggesting that the 2013–2019 results should be interpreted as part of a longer trajectory of changes in detection, access, and epidemiological profile ([Santos et al., 2018](#ref-santos-2018)). International surveys among adults show substantial variation across countries and reinforce the need to analyze smoking, treatment, and diagnosis jointly ([To et al., 2012](#ref-to-2012)).
+
+## Prevalence of a medical asthma diagnosis {#prevalencia-asma}
+
+The R program `PNS Extraction - Asthma.R` recodes `Q074` as `asma = 1` for "Sim", `asma = 0` for "Não", and `NA` otherwise. Estimates are calculated by federative unit and for Brazil.
+
+<p id="fig-prevalencia-asma" class="figure-title">Figure 1: Prevalence (%) of a medical asthma diagnosis by federative unit and Brazil, PNS 2013 and 2019.</p>
+
+```{r plot-prev-asma}
+plot_year_ic(
+  prev_asma,
+  value_col = "prevalencia",
+  lower_col = "li",
+  upper_col = "ls",
+  y_lab = "Prevalence (%) of a medical asthma diagnosis"
+)
+```
+`r source_note()`
+
+```{r table-prev-asma, results='asis'}
+emit_report_table(
+  make_year_ic_table(prev_asma, "prevalencia", "li", "ls", type = "pct"),
+  caption = "Table 1: Prevalence of a medical asthma diagnosis by federative unit and Brazil, PNS 2013 and 2019.",
+  id = "tab-prevalencia-asma"
+)
+```
+
+```{r interp-prev-asma, results='asis'}
+asma_2013 <- get_brasil(prev_asma, "prevalencia", "li", "ls", 2013)
+asma_2019 <- get_brasil(prev_asma, "prevalencia", "li", "ls", 2019)
+asma_overlap <- overlap_ci(asma_2013$li, asma_2013$ls, asma_2019$li, asma_2019$ls)
+
+cat(
+  "<p>",
+  "In Brazil, the estimated prevalence of a medical asthma diagnosis increased from ",
+  fmt_pct(asma_2013$estimativa), "% in 2013 (95% CI: ",
+  fmt_pct(asma_2013$li), " to ", fmt_pct(asma_2013$ls), ") to ",
+  fmt_pct(asma_2019$estimativa), "% in 2019 (95% CI: ",
+  fmt_pct(asma_2019$li), " to ", fmt_pct(asma_2019$ls), "). ",
+  ifelse(asma_overlap,
+         "The confidence intervals overlap; the comparison should therefore be interpreted cautiously.",
+         "The confidence intervals do not overlap, strengthening the evidence of an increase over the period."),
+  "</p>",
+  sep = ""
+)
+```
+
+This increase may reflect a higher occurrence of the disease, improved medical diagnosis, or both. State-level interpretation must consider the width and overlap of the confidence intervals, especially in federative units with smaller effective sample sizes and therefore wider intervals. Because a medical diagnosis depends on access to care, state differences may reflect both epidemiological burden and inequalities in access to consultations, clinical investigation, and diagnosis recording ([Menezes et al., 2015](#ref-menezes-2015); [Santos et al., 2018](#ref-santos-2018)).
+
+## Asthma attacks in the last 12 months {#crises-asma}
+
+The R program `PNS Extraction - Asthma Attacks in the Last 12 Months.R` uses `Q076` to construct `crise_asma_12m`. The estimate represents the proportion reporting an attack during the reference period.
+
+<p id="fig-crise-asma" class="figure-title">Figure 2: Prevalence (%) of an asthma attack in the last 12 months by federative unit and Brazil, PNS 2013 and 2019.</p>
+
+```{r plot-prev-crise}
+plot_year_ic(
+  prev_crise,
+  value_col = "prevalencia",
+  lower_col = "li",
+  upper_col = "ls",
+  y_lab = "Prevalence (%) of an asthma attack in the last 12 months"
+)
+```
+`r source_note()`
+
+```{r table-prev-crise, results='asis'}
+emit_report_table(
+  make_year_ic_table(prev_crise, "prevalencia", "li", "ls", type = "pct"),
+  caption = "Table 2: Asthma attack in the last 12 months by federative unit and Brazil, PNS 2013 and 2019.",
+  id = "tab-crise-asma"
+)
+```
+
+```{r interp-prev-crise, results='asis'}
+crise_2013 <- get_brasil(prev_crise, "prevalencia", "li", "ls", 2013)
+crise_2019 <- get_brasil(prev_crise, "prevalencia", "li", "ls", 2019)
+crise_overlap <- overlap_ci(crise_2013$li, crise_2013$ls, crise_2019$li, crise_2019$ls)
+
+cat(
+  "<p>",
+  "The national occurrence of asthma attacks was ",
+  fmt_pct(crise_2013$estimativa), "% in 2013 and ",
+  fmt_pct(crise_2019$estimativa), "% in 2019. ",
+  ifelse(crise_overlap,
+         "The overlap of the 95% confidence intervals indicates no statistically clear change.",
+         "The lack of overlap between the 95% confidence intervals suggests a relevant change over the period."),
+  "</p>",
+  sep = ""
+)
+```
+
+The stability of attacks despite the increased prevalence of diagnosis suggests that clinical control and continued access to care remain critical. This finding is consistent with the need to integrate medication access, clinical follow-up, health education, and non-pharmacological interventions, such as reducing exposure to environmental triggers and individual management planning ([Global Asthma Network, 2022](#ref-global-asthma-2022); [Severe Asthma, n.d.](#ref-severe-asthma)).
+
+## Medication use among people with asthma {#medicamentos-asma}
+
+The R program `PNS Extraction - Asthma Medication.R` harmonizes different questions from 2013 and 2019. In 2013, `Q07701` identifies medication use. In 2019, use is defined by oral medication (`Q07704`) or an inhaler (`Q07708`).
+
+<p id="fig-medicamento-asma" class="figure-title">Figure 3: Use of oral medication or an inhaler among people with a medical asthma diagnosis by federative unit and Brazil, PNS 2013 and 2019.</p>
+
+```{r plot-medic-asma}
+plot_year_ic(
+  medic_asma,
+  value_col = "pct_medic_asma",
+  lower_col = "li",
+  upper_col = "ls",
+  y_lab = "Percentage of people with asthma who use oral medication or an inhaler"
+)
+```
+`r source_note()`
+
+```{r table-medic-asma, results='asis'}
+emit_report_table(
+  make_year_ic_table(medic_asma, "pct_medic_asma", "li", "ls", type = "pct"),
+  caption = "Table 3: Use of oral medication or an inhaler among people with a medical asthma diagnosis, PNS 2013 and 2019.",
+  id = "tab-medicamento-asma"
+)
+```
+
+```{r interp-medic-asma, results='asis'}
+medic_2013 <- get_brasil(medic_asma, "pct_medic_asma", "li", "ls", 2013)
+medic_2019 <- get_brasil(medic_asma, "pct_medic_asma", "li", "ls", 2019)
+medic_overlap <- overlap_ci(medic_2013$li, medic_2013$ls, medic_2019$li, medic_2019$ls)
+
+cat(
+  "<p>",
+  "Among people with a medical asthma diagnosis, oral-medication or inhaler use was ",
+  fmt_pct(medic_2013$estimativa), "% in 2013 and ",
+  fmt_pct(medic_2019$estimativa), "% in 2019. ",
+  ifelse(medic_overlap,
+         "Because the 95% confidence intervals overlap, the percentage decrease should be interpreted cautiously.",
+         "The lack of overlap suggests a statistically clear change."),
+  "</p>",
+  sep = ""
+)
+```
+
+The local percentage decrease may be influenced by measurement differences between questionnaires, changes in the profile of diagnosed respondents, or actual changes in access and adherence to treatment.
+
+## Medication use among people with a recent attack {#medicamentos-crise}
+
+This indicator restricts the denominator to people who reported an asthma attack in the last 12 months and estimates the proportion who used medication.
+
+<p id="fig-medicamento-crise" class="figure-title">Figure 4: Use of oral medication or an inhaler among people with an asthma attack in the last 12 months by federative unit and Brazil, PNS 2013 and 2019.</p>
+
+```{r plot-medic-crise}
+plot_year_ic(
+  medic_crise,
+  value_col = "pct_medic_crise_asma",
+  lower_col = "li",
+  upper_col = "ls",
+  y_lab = "Percentage of people with a recent attack who use medication"
+)
+```
+`r source_note()`
+
+```{r table-medic-crise, results='asis'}
+emit_report_table(
+  make_year_ic_table(medic_crise, "pct_medic_crise_asma", "li", "ls", type = "pct"),
+  caption = "Table 4: Use of oral medication or an inhaler among people with an asthma attack in the last 12 months, PNS 2013 and 2019.",
+  id = "tab-medicamento-crise"
+)
+```
+
+This restriction focuses the analysis on the group with the greatest recent clinical need. State differences should be interpreted cautiously because the subgroup is smaller and its confidence intervals tend to be wider.
+
+## Population rate of asthma medication use {#taxa-medicamentos}
+
+The implemented method also estimates the rate per 100,000 residents for users of oral medication or inhalers. For this indicator, `NA` medication-use values are treated as zero in the population numerator, and the target population receives a unit denominator (`pop_taxa_medic_asma = 1`).
+
+<p id="fig-taxa-medicamento" class="figure-title">Figure 5: Population rate of oral-medication or inhaler users for asthma treatment per 100,000 residents, PNS 2013 and 2019.</p>
+
+```{r plot-taxa-medic}
+plot_year_ic(
+  taxa_medic,
+  value_col = "taxa_100k_medic_asma",
+  lower_col = "lim_inf_taxa_100k_medic_asma",
+  upper_col = "lim_sup_taxa_100k_medic_asma",
+  y_lab = "Users per 100,000 residents"
+)
+```
+`r source_note()`
+
+```{r table-taxa-medic, results='asis'}
+emit_report_table(
+  make_year_ic_table(
+    taxa_medic,
+    "taxa_100k_medic_asma",
+    "lim_inf_taxa_100k_medic_asma",
+    "lim_sup_taxa_100k_medic_asma",
+    type = "rate"
+  ),
+  caption = "Table 5: Population rate of oral-medication or inhaler users for asthma per 100,000 residents, PNS 2013 and 2019.",
+  id = "tab-taxa-medicamento"
+)
+```
+
+The population rate complements the proportion among people with asthma. A lower proportion among diagnosed respondents can coexist with a stable population rate when diagnosis prevalence increases.
+
+# Smoking {#tabagismo}
+
+The R program `PNS Extraction - Active Smoker Rate.R` defines current smoking from `P050`: daily and less-than-daily smokers receive `1`, current nonsmokers receive `0`, and other responses remain `NA`. The rate per 100,000 uses valid responses as its denominator.
+
+<p id="fig-tabagismo" class="figure-title">Figure 6: Active smokers per 100,000 residents by federative unit, PNS 2013 and 2019.</p>
+
+```{r plot-taxa-fumantes}
+taxa_fumantes_exibicao <- taxa_fumantes %>%
+  filter(uf != "Brazil")
+
+plot_year_ic(
+  taxa_fumantes_exibicao,
+  value_col = "taxa_100k_fumantes",
+  lower_col = "lim_inf_taxa_100k_fumantes",
+  upper_col = "lim_sup_taxa_100k_fumantes",
+  y_lab = "Active smokers per 100,000 residents"
+)
+```
+`r source_note()`
+
+```{r table-taxa-fumantes, results='asis'}
+emit_report_table(
+  make_year_ic_table(
+    taxa_fumantes_exibicao,
+    "taxa_100k_fumantes",
+    "lim_inf_taxa_100k_fumantes",
+    "lim_sup_taxa_100k_fumantes",
+    type = "rate"
+  ),
+  caption = "Table 6: Active smokers per 100,000 residents by federative unit and Brazil, PNS 2013 and 2019.",
+  id = "tab-tabagismo"
+)
+```
+
+```{r interp-fumantes, results='asis'}
+fumantes_uf <- taxa_fumantes_exibicao %>%
+  select(uf, ano, taxa_100k_fumantes, lim_inf_taxa_100k_fumantes, lim_sup_taxa_100k_fumantes) %>%
+  pivot_wider(
+    names_from = ano,
+    values_from = c(taxa_100k_fumantes, lim_inf_taxa_100k_fumantes, lim_sup_taxa_100k_fumantes)
+  ) %>%
+  mutate(delta = taxa_100k_fumantes_2019 - taxa_100k_fumantes_2013) %>%
+  arrange(delta)
+
+quedas <- head(fumantes_uf$uf, 5)
+cat(
+  "<p>",
+  "In the local outputs, active-smoker rates are available by federative unit. The largest absolute reductions between 2013 and 2019 occur in: ",
+  paste(quedas, collapse = ", "),
+  ". Inferential interpretation must consider the 95% confidence interval for each bar.",
+  "</p>",
+  sep = ""
+)
+```
+
+The reduction in smoking is consistent with a decline in respiratory risk factors. Nevertheless, the data move in the opposite direction from disease prevalence. Thus, the increase in diagnosis may be related primarily to an approximately 41.30% increase in pulmonologists practicing in Brazil, according to data from the Federal Council of Medicine. In other words, a larger number of specialists in this disease may increase the probability of diagnosis. State comparisons must also not rely only on bar height: overlapping intervals may preclude a statistical conclusion about local change.
+
+# Farmacia Popular and out-of-pocket payment {#farmacia-popular}
+
+The R program `PNS Extraction - Farmacia Popular.R` estimates, for 2019, the proportion of asthma-medication users who paid out of pocket for oral medication (`Q07707`) or an inhaler (`Q07711`). The same program also recodes access through Farmacia Popular and public services, while the planned local graphical output is `asthma_medication_out_of_pocket.xlsx`.
+
+<p id="fig-desembolso" class="figure-title">Figure 7: Proportion of oral-medication or inhaler users for asthma who paid out of pocket, PNS 2019.</p>
+
+```{r plot-desembolso}
+if (!is.null(desembolso)) {
+  uf_desembolso_levels <- desembolso %>%
+    distinct(uf) %>%
+    mutate(ordem = ifelse(uf == "Brazil", 1, 0)) %>%
+    arrange(ordem, uf) %>%
+    pull(uf)
+
+  plot_desembolso <- desembolso %>%
+    mutate(
+      tipo_med = factor(tipo_med, levels = c("Inhaler", "Oral medication")),
+      uf = factor(uf, levels = rev(uf_desembolso_levels))
+    )
+
+  ggplot(plot_desembolso, aes(x = uf, y = pct_asma_med_pg, fill = tipo_med)) +
+    geom_col(position = position_dodge(width = 0.7), width = 0.78, color = "white", linewidth = 0.25) +
+    geom_errorbar(
+      aes(ymin = li, ymax = ls),
+      position = position_dodge(width = 0.9),
+      width = 0.28,
+      linewidth = 0.45,
+      color = "#34495e"
+    ) +
+    coord_flip() +
+    labs(
+      x = NULL,
+      y = "Percentage of asthma-medication users who paid out of pocket",
+      fill = NULL
+    ) +
+    scale_fill_manual(values = pal_duas, breaks = c("Oral medication", "Inhaler")) +
+    scale_y_continuous(expand = expansion(mult = c(0, 0.08))) +
+    theme_report_plot()
+} else {
+  cat("The asthma_medication_out_of_pocket.xlsx file is not available locally. The chart will be rendered after PNS Extraction - Farmacia Popular.R is run in an environment with PNSIBGE and writexl installed.")
+}
+```
+`r source_note()`
+
+```{r table-desembolso, results='asis'}
+if (!is.null(desembolso)) {
+  tabela_desembolso <- desembolso %>%
+    mutate(estimativa_ic = fmt_ic(pct_asma_med_pg, li, ls, type = "pct")) %>%
+    select(UF = uf, Medicamento = tipo_med, `Estimate [95% CI]` = estimativa_ic) %>%
+    arrange(Medicamento, ifelse(UF == "Brazil", 1, 0), UF)
+
+  emit_report_table(
+    tabela_desembolso,
+    caption = "Table 7: Proportion of oral-medication or inhaler users for asthma who paid out of pocket, PNS 2019.",
+    id = "tab-desembolso"
+  )
+}
+```
+
+This indicator helps distinguish medication access from medication use. If a substantial share of users pays directly for treatment, public-provision and pharmaceutical-assistance policies become central to asthma management.
+
+# Absenteeism, lost days, and income {#absenteismo-renda}
+
+## Absenteeism for health reasons {#absenteismo}
+
+The R program `PNS Extraction - Lost Days.R` recodes `J002` as overall absenteeism and transforms `J00402` into indicator variables for specific causes in 2019. The overall estimate uses the selected resident as its denominator, whereas specific causes are estimated among residents who stopped performing usual activities for health reasons. Each proportion is estimated with `svyciprop(method = "beta")`.
+
+<p id="fig-absenteismo" class="figure-title">Figure 8: Absenteeism for health reasons in Brazil, PNS 2019.</p>
+
+```{r plot-absenteismo}
+abs_br <- absenteismo %>%
+  filter(uf == "Brazil", !is.na(pct)) %>%
+  arrange(pct)
+
+plot_single_ic(
+  abs_br,
+  label_col = "tipo",
+  value_col = "pct",
+  lower_col = "li",
+  upper_col = "ls",
+  y_lab = "(%)"
+)
+```
+`r source_note()`
+
+```{r table-absenteismo-2019, results='asis'}
+tabela_abs_2019 <- abs_br %>%
+  mutate(`Estimate [95% CI]` = fmt_ic(pct, li, ls, type = "pct")) %>%
+  select(Indicator = tipo, `Estimate [95% CI]`)
+
+emit_report_table(
+  tabela_abs_2019,
+  caption = "Table 8: Absenteeism for health reasons in Brazil, PNS 2019.",
+  id = "tab-absenteismo",
+  note = "Denominator: for the overall indicator, selected residents with a valid response on loss of usual activities; for specific causes, residents who lost usual activities for health reasons. CI method: beta via <code>survey::svyciprop(method = \"beta\")</code>."
+)
+```
+
+Absenteeism provides context for the functional burden of health conditions. The respiratory category combines asthma, bronchitis, and pneumonia and therefore must not be interpreted as an asthma-only estimate. In the chart, the overall value answers whether the respondent stopped performing usual activities for health reasons; cause-specific values describe the composition of reasons among respondents who experienced activity loss.
+
+## Mean lost days {#dias-perdidos}
+
+Among people who reported each reason, the implemented method estimates the weighted mean number of lost days (`J003`) with `svymean()` and a normal confidence interval.
+
+<p id="fig-dias-perdidos" class="figure-title">Figure 9: Mean lost days by health reason in Brazil, PNS 2019.</p>
+
+```{r plot-dias-perdidos}
+dias_plot <- dias_perdidos %>%
+  filter(!is.na(media_dias)) %>%
+  arrange(media_dias)
+
+plot_single_ic(
+  dias_plot,
+  label_col = "tipo",
+  value_col = "media_dias",
+  lower_col = "li",
+  upper_col = "ls",
+  y_lab = "Mean lost days",
+  fill = "#ead4a4"
+)
+```
+`r source_note()`
+
+```{r table-dias-perdidos-2019, results='asis'}
+tabela_dias_2019 <- dias_plot %>%
+  mutate(`Estimate [95% CI]` = fmt_ic(media_dias, li, ls, type = "mean")) %>%
+  select(Reason = tipo, `Estimate [95% CI]`)
+
+emit_report_table(
+  tabela_dias_2019,
+  caption = "Table 9: Mean lost days by health reason in Brazil, PNS 2019.",
+  id = "tab-dias-perdidos",
+  note = "CI method: normal approximation via <code>survey::svymean()</code>."
+)
+```
+
+This result quantifies the intensity of impact among affected respondents. Because some reasons are rare, wide confidence intervals indicate greater uncertainty.
+
+## Harmonized respiratory comparison between 2013 and 2019 {#comparacao-respiratoria}
+
+PNS 2013 and PNS 2019 allow comparisons of usual-activity loss and lost days for health reasons, but their main-reason categories are not identical. This report therefore uses a harmonized approximation restricted to respiratory problems: in 2013, the respiratory domain is the conceptual sum of the `Asma / bronquite / pneumonia` and `Resfriado / gripe` responses in `J004`; in 2019, it uses the `J00402` category `Problemas respiratórios (resfriado/gripe/sinusite/asma/bronquite/pneumonia)`. The comparison therefore does not estimate asthma alone: it estimates a respiratory group that includes asthma and approximates the two questionnaires.
+
+```{r table-absenteismo-respiratorio-comparacao, results='asis'}
+tabela_abs_resp <- absenteismo_resp_2013_2019 %>%
+  filter(uf == "Brazil") %>%
+  arrange(ano) %>%
+  select(Ano = ano, `Estimate [95% CI]` = estimativa_ic)
+
+emit_report_table(
+  tabela_abs_resp,
+  caption = "Table 10: Share of harmonized respiratory problems among residents who lost usual activities for health reasons, Brazil, PNS 2013 and 2019.",
+  id = "tab-absenteismo-respiratorio",
+  note = "Indicator: share of harmonized respiratory problems among residents who lost usual activities for health reasons. Denominator: selected residents who lost usual activities for health reasons. Harmonization: in 2013, conceptual sum of the <code>Asma / bronquite / pneumonia</code> and <code>Resfriado / gripe</code> categories; in 2019, the respiratory-problems category including cold, flu, sinusitis, asthma, bronchitis, and pneumonia. CI method: beta via <code>survey::svyciprop(method = \"beta\")</code>."
+)
+```
+
+```{r table-dias-respiratorio-comparacao, results='asis'}
+tabela_dias_resp <- dias_perdidos_resp_2013_2019 %>%
+  filter(uf == "Brazil") %>%
+  arrange(ano) %>%
+  select(Ano = ano, `Estimate [95% CI]` = estimativa_ic)
+
+emit_report_table(
+  tabela_dias_resp,
+  caption = "Table 11: Mean lost days due to harmonized respiratory problems, Brazil, PNS 2013 and 2019.",
+  id = "tab-dias-perdidos-respiratorio",
+  note = "Indicator: mean lost days due to harmonized respiratory problems among residents who lost usual activities for health reasons. Denominator: selected residents who lost usual activities for health reasons. Harmonization: in 2013, conceptual sum of the <code>Asma / bronquite / pneumonia</code> and <code>Resfriado / gripe</code> categories; in 2019, the respiratory-problems category including cold, flu, sinusitis, asthma, bronchitis, and pneumonia. CI method: normal approximation via <code>survey::svymean()</code>."
+)
+```
+
+```{r interp-respiratorio-comparacao, results='asis'}
+abs_resp_br <- absenteismo_resp_2013_2019 %>% filter(uf == "Brazil")
+dias_resp_br <- dias_perdidos_resp_2013_2019 %>% filter(uf == "Brazil")
+
+abs_2013 <- abs_resp_br %>% filter(ano == 2013) %>% slice(1)
+abs_2019 <- abs_resp_br %>% filter(ano == 2019) %>% slice(1)
+dias_2013 <- dias_resp_br %>% filter(ano == 2013) %>% slice(1)
+dias_2019 <- dias_resp_br %>% filter(ano == 2019) %>% slice(1)
+
+cat(
+  "<p>",
+  "In the harmonized respiratory domain, the share among reasons for activity loss was ",
+  fmt_pct(abs_2013$pct), "% in 2013 (95% CI: ",
+  fmt_pct(abs_2013$li), " to ", fmt_pct(abs_2013$ls), ") e ",
+  fmt_pct(abs_2019$pct), "% in 2019 (95% CI: ",
+  fmt_pct(abs_2019$li), " to ", fmt_pct(abs_2019$ls), "). ",
+  "The mean number of lost days was ",
+  fmt_decimal(dias_2013$media_dias, 1), " in 2013 and ",
+  fmt_decimal(dias_2019$media_dias, 1), " in 2019. ",
+  "Because the intervals overlap and harmonization approximates nonidentical categories, interpretation should emphasize approximate stability in respiratory functional burden rather than causal change between years.",
+  "</p>",
+  sep = ""
+)
+```
+
+## Inflation-adjusted income {#renda-deflacionada}
+
+The R program `PNS Extraction - Income.R` sums reported income components, adjusts values to August 2025 prices using IPCA through `deflateBR`, and estimates mean income by federative unit and Brazil with `svymean()`.
+
+<p id="fig-renda" class="figure-title">Figure 10: Mean inflation-adjusted income by federative unit and Brazil, PNS 2019.</p>
+
+```{r plot-renda}
+renda_plot <- renda %>%
+  rename(uf = UF) %>%
+  arrange(renda_def) %>%
+  mutate(uf = factor(uf, levels = uf))
+
+plot_single_ic(
+  renda_plot,
+  label_col = "uf",
+  value_col = "renda_def",
+  lower_col = "ci_l",
+  upper_col = "ci_u",
+  y_lab = "Mean inflation-adjusted income (R$)",
+  fill = "#a7a6f2"
+)
+```
+`r report_note("values adjusted to August 2025 prices using IPCA.", "figure-note")`
+`r source_note("source-after-note")`
+
+```{r table-renda, results='asis'}
+tabela_renda <- renda %>%
+  rename(UF = UF) %>%
+  mutate(`Estimate [95% CI]` = fmt_ic(renda_def, ci_l, ci_u, type = "rate")) %>%
+  select(UF, `Estimate [95% CI]`) %>%
+  arrange(ifelse(UF == "Brazil", 1, 0), UF)
+
+emit_report_table(
+  tabela_renda,
+  caption = "Table 12: Mean inflation-adjusted income by federative unit and Brazil, PNS 2019.",
+  id = "tab-renda",
+  note = "Values adjusted to August 2025 prices using IPCA."
+)
+```
+
+Income is not an asthma outcome, but it contributes to interpreting inequalities in access, diagnosis, medication purchase, and the capacity to manage the disease.
+
+# Interoperability, OMOP, and ETL for observational data {#interoperabilidade-omop}
+
+The PNS is an observational sample-data source and is therefore treated here as a longitudinal healthcare database. Even so, the R programs in this repository implement ETL logic: they extract raw microdata, transform original variables into analytical concepts, and load final tables suitable for analysis, visualization, and reproduction. This approach is central to observational-data initiatives because it makes recoding rules, denominators, exclusions, and measurement scales explicit.
+
+The OMOP Common Data Model (CDM), maintained by the OHDSI community, seeks to standardize the structure and content of observational data to enable efficient analyses and reproducible evidence across databases ([OHDSI, n.d.-b](#ref-ohdsi-cdm); [OHDSI, n.d.-c](#ref-ohdsi-standardized)). In clinical databases, an OMOP ETL usually maps patients, visits, conditions, medications, measurements, and procedures to standardized tables and vocabularies. The PNS follows a different logic: it contains survey respondents, self-reported variables, sampling weights, strata, and clusters. A literal mapping to OMOP must therefore be approached cautiously because the sampling design is a constitutive part of the information and cannot be discarded without inferential loss.
+
+Despite this limitation, the OMOP/OHDSI discussion is useful here. First, it makes explicit the importance of documenting every transformation, such as `Q074` for an asthma diagnosis, `Q076` for a recent attack, and `P050` for smoking. Second, it reinforces the need for harmonized vocabularies and concepts when comparing population surveys with healthcare databases such as electronic health records, pharmacy dispensing data, or administrative systems. Third, it shows that reproducible PNS outputs can serve as a population reference layer for interpreting clinical databases—for example, population prevalence, state distribution, attack burden, and medication-use patterns.
+
+A feasible future agenda is to treat the PNS as a complementary source within an observational-data network, such as the hospital information system reported by Brazil's Unified Health System (SUS). ETL of the microdata would generate documented analytical tables, while OMOP clinical databases could evaluate care trajectories, prescribing, dispensing, recorded exacerbations, and service use. Interoperability between these layers would help distinguish three phenomena in the results: increased diagnosis, stable attacks, and uncertainty about medication access and use. The principal value lies less in forcing the PNS into a clinical model than in using OMOP/OHDSI principles of standardization, documentation, and reproducibility to make population evidence comparable and auditable ([OHDSI, n.d.-a](#ref-ohdsi-etl); [OHDSI, n.d.-b](#ref-ohdsi-cdm); [OHDSI, n.d.-c](#ref-ohdsi-standardized)).
+
+# Interpretive synthesis {#sintese}
+
+<p class="method-note"><strong>Applied interpretation</strong> The synthesis integrates magnitude, temporal direction, and statistical uncertainty to avoid conclusions based only on bar height or isolated percentage differences.</p>
+
+```{r sintese-table, results='asis'}
+sintese <- tibble::tibble(
+  Indicator = c(
+    "Medical asthma diagnosis",
+    "Asthma attack in the last 12 months",
+    "Medication use among people with asthma",
+    "Active-smoker rate",
+    "Population rate of asthma medication use"
+  ),
+  Interpretation = c(
+    paste0("Increased from ", fmt_pct(asma_2013$estimativa), "% to ", fmt_pct(asma_2019$estimativa), "% in Brazil."),
+    paste0("Remained approximately stable: ", fmt_pct(crise_2013$estimativa), "% to ", fmt_pct(crise_2019$estimativa), "% in Brazil."),
+    paste0("Decreased from ", fmt_pct(medic_2013$estimativa), "% to ", fmt_pct(medic_2019$estimativa), "% among people with asthma; interpret with the 95% confidence interval."),
+    "Local outputs show decreases in several federative units; the national rate cited in the summary depends on a national calculation not present in this CSV.",
+    "Helps distinguish use among people with asthma from the total population burden."
+  )
+)
+
+emit_report_table(
+  sintese,
+  caption = "Table 13: Integrated interpretation of the main findings, PNS 2013 and 2019.",
+  id = "tab-sintese"
+)
+```
+
+Taken together, the results indicate an increase in medical asthma diagnoses between 2013 and 2019 without a clear improvement in recent attacks. Stable attacks and the cautious interpretation of medication use suggest that asthma management depends not only on diagnosis but also on access, adherence, clinical follow-up, and non-pharmacological interventions. Correct implementation of the complex sampling design is essential for these conclusions to be comparable across years and federative units.
+
+# Operational rendering limitations {#limitacoes-renderizacao}
+
+This report does not download microdata or recalculate `survey` objects during rendering. It documents the methodology of the R programs and plots validated local outputs. To regenerate all outputs from the microdata, the R environment requires `PNSIBGE`, `survey`, `writexl`, `fastDummies`, and `deflateBR` in addition to the packages used by this Rmd.
+
+If `asthma_medication_out_of_pocket.xlsx` must be regenerated, run the Farmacia Popular R program in an environment with `PNSIBGE`, `survey`, and `writexl` installed:
+
+```{r farmacia-command, echo=TRUE, eval=FALSE}
+source(file.path("Codes (EN)", "PNS Extraction - Farmacia Popular.R"))
+system2("Rscript", c(
+  ".codex/skills/methodology-rmarkdown/scripts/render_report.R",
+  "--input", "docs/methodology_report_en.Rmd",
+  "--output", "docs/metodologia.html"
+))
+```
+
+# References {#referencias}
+
+<div class="references">
+
+<p id="ref-brown-2001" class="reference-entry">BROWN, Lawrence D.; CAI, T. Tony; DASGUPTA, Anirban. Interval estimation for a binomial proportion. <em>Statistical Science</em>, v. 16, n. 2, p. 101-133, 2001. doi:10.1214/ss/1009213286.</p>
+
+<p id="ref-dube-silva-2026" class="reference-entry">DUBE, I.; SILVA, M. E. L. <em>PNS_2013_2019</em>. GitHub, 2026. Available at: <a href="https://github.com/ingodube/PNS_2013_2019">https://github.com/ingodube/PNS_2013_2019</a>. Accessed on: May 28, 2026.</p>
+
+<p id="ref-global-asthma-2022" class="reference-entry">GLOBAL ASTHMA NETWORK. <em>Global Asthma Report 2022</em>. Auckland, New Zealand: Global Asthma Network, 2022. Available at: <a href="https://globalasthmareport.org/resources/Global_Asthma_Report_2022.pdf">https://globalasthmareport.org/resources/Global_Asthma_Report_2022.pdf</a>. Accessed on: September 19, 2025.</p>
+
+<p id="ref-korn-graubard-1998" class="reference-entry">KORN, Edward L.; GRAUBARD, Barry I. Confidence intervals for proportions with small expected number of positive counts estimated from survey data. <em>Survey Methodology</em>, v. 24, n. 2, p. 193-201, 1998.</p>
+
+<p id="ref-lumley-2010" class="reference-entry">LUMLEY, Thomas. <em>Complex Surveys: A Guide to Analysis Using R</em>. Hoboken: Wiley, 2010.</p>
+
+<p id="ref-menezes-2015" class="reference-entry">MENEZES, A. M. B. et al. Prevalência de diagnóstico médico de asma em adultos brasileiros: Pesquisa Nacional de Saúde, 2013. <em>Revista Brasileira de Epidemiologia</em>, São Paulo, v. 18, supl. 2, p. 204-213, 2015.</p>
+
+<p id="ref-ohdsi-etl" class="reference-entry">OHDSI. <em>ETL Creation Best Practices</em>. Available at: <a href="https://www.ohdsi.org/web/wiki/doku.php?id=documentation:etl_best_practices">https://www.ohdsi.org/web/wiki/doku.php?id=documentation:etl_best_practices</a>.</p>
+
+<p id="ref-ohdsi-cdm" class="reference-entry">OHDSI. <em>OMOP Common Data Model</em>. Available at: <a href="https://ohdsi.github.io/CommonDataModel/">https://ohdsi.github.io/CommonDataModel/</a>.</p>
+
+<p id="ref-ohdsi-standardized" class="reference-entry">OHDSI. <em>Standardized Data: The OMOP Common Data Model</em>. Available at: <a href="https://www.ohdsi.org/data-standardization/">https://www.ohdsi.org/data-standardization/</a>.</p>
+
+<p id="ref-santos-2018" class="reference-entry">SANTOS, Felipe Moraes dos et al. Tendência da prevalência de asma autorreferida no Brasil de 2003 a 2013 em adultos e fatores associados à prevalência. <em>Jornal Brasileiro de Pneumologia</em>, v. 44, n. 6, p. 491-497, 2018. doi:10.1590/S1806-37562017000000328.</p>
+
+<p id="ref-severe-asthma" class="reference-entry">SEVERE ASTHMA. <em>Non-Pharmacological Interventions for Asthma</em>. Available at: <a href="https://www.severeasthma.org.au/non-pharmacological-interventions-asthma/">https://www.severeasthma.org.au/non-pharmacological-interventions-asthma/</a>. Accessed on: September 19, 2025.</p>
+
+<p id="ref-souza-junior-2015" class="reference-entry">SOUZA-JÚNIOR, Paulo Roberto Borges de et al. Desenho da amostra da Pesquisa Nacional de Saúde 2013. <em>Epidemiologia e Serviços de Saúde</em>, v. 24, p. 207-216, 2015.</p>
+
+<p id="ref-to-2012" class="reference-entry">TO, T. et al. Global asthma prevalence in adults: findings from the cross-sectional world health survey. <em>BMC Public Health</em>, v. 12, art. 204, 2012. doi:10.1186/1471-2458-12-204.</p>
+
+</div>
+
+# Artificial intelligence use statement {.unnumbered .unlisted #declaracao-ia}
+
+During preparation of this work, OpenAI's ChatGPT/Codex with the GPT-5 model was used to support code structuring, consistency review, report formatting, visual organization of tables and figures, rendering automation, and translation of the report into English. The scientific content, indicator selection, interpretation of results, validation of estimates, and final responsibility for the work remain with the authors. The artificial intelligence tool was not used as an author, did not replace the authors' critical analysis, and does not alter human responsibility for the integrity, accuracy, and presentation of the information.

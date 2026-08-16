@@ -39,11 +39,70 @@ body {
 }
 
 .report-header,
-.report-toc {
+.report-toc,
+.language-bar {
   margin-left: auto;
   margin-right: auto;
   max-width: 68rem;
   min-width: 0;
+}
+
+.language-bar {
+  display: flex;
+  font-family: Arial, Helvetica, sans-serif;
+  justify-content: flex-end;
+  margin-bottom: 1rem;
+  position: relative;
+  z-index: 10;
+}
+
+.language-switcher { position: relative; }
+
+.language-switcher summary {
+  border-bottom: 1px solid var(--rule);
+  color: var(--ink);
+  cursor: pointer;
+  display: flex;
+  font-size: 0.76rem;
+  font-weight: 700;
+  gap: 0.6rem;
+  letter-spacing: 0.055em;
+  list-style: none;
+  padding: 0.35rem 0;
+  text-transform: uppercase;
+}
+
+.language-switcher summary::-webkit-details-marker { display: none; }
+.language-switcher summary::after { color: var(--accent); content: "▾"; }
+.language-switcher[open] summary::after { content: "▴"; }
+.language-current { color: var(--accent-dark); }
+
+.language-switcher ul {
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  list-style: none;
+  margin: 0.35rem 0 0;
+  min-width: 12.5rem;
+  padding: 0.35rem 0;
+  position: absolute;
+  right: 0;
+  top: 100%;
+}
+
+.language-switcher li { margin: 0; text-align: left; }
+.language-switcher a {
+  color: var(--ink);
+  display: block;
+  font-size: 0.82rem;
+  padding: 0.5rem 0.75rem;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.language-switcher a:hover,
+.language-switcher a:focus-visible,
+.language-switcher a[aria-current="page"] {
+  background: #fff3eb;
+  color: var(--accent-dark);
 }
 
 .report-header {

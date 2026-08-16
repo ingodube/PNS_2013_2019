@@ -17,6 +17,7 @@ if (!target) {
 const widths = argument("--widths", "320,360,390,768,1024,1440")
   .split(",")
   .map(Number);
+const screenshotDir = argument("--screenshot-dir", null);
 const url = /^https?:/i.test(target)
   ? target
   : pathToFileURL(path.resolve(target)).href;
@@ -29,6 +30,7 @@ const candidates = [
 const executablePath = candidates.find(fs.existsSync);
 
 (async () => {
+  if (screenshotDir) fs.mkdirSync(screenshotDir, { recursive: true });
   const browser = await chromium.launch(executablePath ? { headless: true, executablePath } : { headless: true });
   const results = [];
   let failed = false;
@@ -43,6 +45,7 @@ const executablePath = candidates.find(fs.existsSync);
     const metrics = await page.evaluate(async () => {
       const root = document.documentElement;
       const toc = document.querySelector(".report-toc");
+      const languageSwitcher = document.querySelector(".language-switcher");
       const list = document.querySelector("#TOC > ul");
       const pageBox = document.querySelector(".report-page")?.getBoundingClientRect();
       const tocBox = toc?.getBoundingClientRect();
@@ -94,6 +97,23 @@ const executablePath = candidates.find(fs.existsSync);
         await new Promise(resolve => requestAnimationFrame(resolve));
         tocToggle = closed && toc.open;
       }
+      let languageToggle = false;
+      let languageContained = false;
+      if (languageSwitcher instanceof HTMLDetailsElement) {
+        languageSwitcher.open = true;
+        await new Promise(resolve => requestAnimationFrame(resolve));
+        const switcherBox = languageSwitcher.getBoundingClientRect();
+        const menuBox = languageSwitcher.querySelector("ul")?.getBoundingClientRect();
+        const opened = languageSwitcher.open;
+        languageContained = Boolean(menuBox && switcherBox && menuBox.left >= -1 && menuBox.right <= root.clientWidth + 1);
+        languageSwitcher.open = false;
+        await new Promise(resolve => requestAnimationFrame(resolve));
+        languageToggle = opened && !languageSwitcher.open;
+      }
+      const languageLinks = [...document.querySelectorAll(".language-switcher a")];
+      const languageMenuValid = languageLinks.length === 2 &&
+        languageLinks.every(link => link.getAttribute("hreflang") && link.getAttribute("href")) &&
+        languageLinks.filter(link => link.getAttribute("aria-current") === "page").length === 1;
       const referenceLink = document.querySelector('a[href^="#ref-"]');
       let targetHighlight = true;
       if (referenceLink) {
@@ -114,6 +134,9 @@ const executablePath = candidates.find(fs.existsSync);
         tocToggle,
         tocColumns: list ? getComputedStyle(list).columnCount : null,
         tocContained: Boolean(pageBox && tocBox && tocBox.left >= pageBox.left - 1 && tocBox.right <= pageBox.right + 1),
+        languageToggle,
+        languageContained,
+        languageMenuValid,
         figureTitleOrder,
         tableTitleOrder,
         tableAlignment,
@@ -131,9 +154,14 @@ const executablePath = candidates.find(fs.existsSync);
       metrics.offenders === 0 && metrics.tocOpen === true && metrics.tocToggle &&
       metrics.tocColumns === expectedColumns && metrics.tocContained && metrics.figureTitleOrder &&
       metrics.tableTitleOrder && metrics.tableAlignment && metrics.sourceAndNotesJustified &&
-      metrics.referencesJustified && metrics.targetHighlight;
+      metrics.referencesJustified && metrics.targetHighlight && metrics.languageToggle &&
+      metrics.languageContained && metrics.languageMenuValid && metrics.tables === 13 &&
+      metrics.figures === 10 && metrics.codeBlocks === 4 && metrics.references === 13;
     failed ||= !pass;
     results.push({ width, status: response ? response.status() : 200, errors, ...metrics, pass });
+    if (screenshotDir) {
+      await page.screenshot({ path: path.join(screenshotDir, `${width}.png`), fullPage: true });
+    }
     await page.close();
   }
   await browser.close();

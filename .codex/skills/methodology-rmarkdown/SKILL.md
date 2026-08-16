@@ -16,6 +16,18 @@ description: Produce, revise, render, validate, and publish scholarly or technic
 7. Commit and publish only after source, output, skill, and validation report pass.
 8. Verify the public URL after publication when the report is hosted.
 
+## Bilingual reports
+
+- Keep one reviewed source as the scientific baseline and generate localized sources deterministically.
+- Publish each language as a separate self-contained HTML document; do not duplicate languages in one DOM.
+- Use a native `Language` dropdown above the report title and expose explicit EN and PT-BR links.
+- Set `lang`, canonical, and `hreflang` metadata for every output.
+- Preserve stable semantic IDs so the table of contents, citations, figures, tables, and references map one-to-one across languages.
+- Store and enforce a translation glossary with protected terms, geographic names, identifiers, formulas, DOI values, and URLs.
+- For Brazil-focused reports, never translate federative-unit names; translate only the national label when required by the target language.
+- Validate scientific parity using underlying numeric values rather than locale-formatted display strings.
+- Record artificial-intelligence assistance with translation in the disclosure whenever applicable.
+
 ## Read the bundled guidance
 
 - Read `references/visual-standard.md` before changing layout or typography.
@@ -50,6 +62,12 @@ Render from the repository root:
 Rscript .codex/skills/methodology-rmarkdown/scripts/render_report.R --input docs/report.Rmd --output docs/report.html
 ```
 
+Render this repository's EN and PT-BR reports together:
+
+```powershell
+Rscript .codex/skills/methodology-rmarkdown/scripts/render_bilingual_reports.R .
+```
+
 Run static validation:
 
 ```powershell
@@ -63,3 +81,5 @@ node .codex/skills/methodology-rmarkdown/scripts/validate_responsive.cjs docs/re
 ```
 
 Record exact commands, versions, hashes, counts, browser widths, and PASS/FAIL results in the repository validation report.
+
+For a bilingual report, run the static and responsive validators against every localized HTML file and verify every public language URL after publication.
