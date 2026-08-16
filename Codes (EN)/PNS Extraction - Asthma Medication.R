@@ -18,7 +18,7 @@ repo_root = candidate_roots[
 if (is.na(repo_root)) {
   stop("The repository root could not be located.")
 }
-tabelas_dir = file.path(repo_root, "Processed Tables (EN)")
+tabelas_dir = file.path(repo_root, "Spreadsheets (EN)")
 dir.create(tabelas_dir, recursive = TRUE, showWarnings = FALSE)
 
 fmt_decimal = function(x, digits = 2, big_mark = FALSE){

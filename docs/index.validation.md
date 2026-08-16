@@ -6,7 +6,7 @@ Local result: **PASS**
 
 ## Publication routes
 
-- Default English report: `docs/metodologia.html`.
+- English report: `docs/metodologia.html`.
 - PT-BR report: `docs/methodology-pt-br.html`.
 - Root redirect: `docs/index.html` → `metodologia.html`.
 - Stable public URL: `https://ingodube.github.io/PNS_2013_2019/metodologia.html`.
@@ -18,16 +18,15 @@ Local result: **PASS**
 - R 4.6.1 and Pandoc 3.8.3.
 - Direct self-contained HTML with MathML, `theme: null`, the repo-local Pandoc template, and the repo-local CSS.
 - Two consecutive bilingual builds produced identical hashes: PASS.
-- PT-BR output compared with the previously published HTML: table cells, figure bytes, scientific code blocks, links, and document order preserved — PASS.
-- EN/PT-BR semantic IDs, table numeric values, scientific links, and CSV numeric values agree — PASS.
-- The names of all 27 federative units remain unchanged; only `Brasil` is localized as `Brazil` in English — PASS.
+- EN/PT-BR semantic IDs, table numeric values, scientific links, figure bytes, and CSV numeric values agree: PASS.
+- All 26 XLSX files, 12 CSV files, and the scientific-poster PDF retained their pre-rename SHA-256 hashes: PASS.
 
 | Artifact | SHA-256 |
 |---|---|
-| `docs/metodologia.html` | `b191bc881b25db0c81767d08734b2c83b8ed72eb8441d42c244ba2b96472e47a` |
+| `docs/metodologia.html` | `5cc4021876ea449236d76714482bf0719807f58bfac1fc426e7b035057674295` |
 | `docs/methodology-pt-br.html` | `717a0399606009e0c6de69df643502a301c00b519ebc79af57021c1c847cd4cb` |
-| `docs/methodology_report_en.Rmd` | `ab41af75c5a0e894ce271529ba79f747a6dc90136f30262f17d5c9448fd60886` |
-| `docs/methodology_report_pt_br.Rmd` | `a78084837631a6fdf638a46b4ce691c7c40adca97d57729b17549f78ad8a99a7` |
+| `docs/methodology_report_en.Rmd` | `334b24a6a11f7b5f1cb57a0881cfd0db6ee2e5679d34a699e15d34f0dd73d0af` |
+| `docs/methodology_report_pt_br.Rmd` | `4292a1a7fbb1d8e3772a162409d2f4b62ce6bd41b9b267289104b6a5e0050e24` |
 | Pandoc template | `822e98b57513717e2ac9bc7d375f2c12d4176810f2e4c7fe3c223c4f5289726c` |
 | Publication CSS | `a016e529f14d5f882b1ab1f7f9db2b3f74d6fe65e0b8f13f7c25f6e15dfebb11` |
 
@@ -41,27 +40,29 @@ Local result: **PASS**
 | Code blocks | 4 | 4 | PASS |
 | MathML expressions | 9 | 9 | PASS |
 | Alphabetized author-date references | 13 | 13 | PASS |
-| Semantic figure/table/reference IDs | 36 | 36 | PASS |
+| Semantic figure/table/reference IDs | 37 | 37 | PASS |
 | Missing internal-link destinations | 0 | 0 | PASS |
 | Residual isolated numeric citations | 0 | 0 | PASS |
 | AI disclosure in body and absent from TOC | yes | yes | PASS |
 | AI-assisted translation disclosed | yes | yes | PASS |
 
-The EN and PT-BR reports contain the exact requested author credentials. Maria Eduarda de Lima e Silva has no invented email or additional credential. Titles remain above tables and figures, sources and notes remain below them, table headers match the alignment of their columns, and prose and references remain justified.
+The English report contains the requested affiliations exactly: `MSc Program in Statistics and Data Science (PGECD/UFBA)` for Ingo Dube Souza and `Department of Industrial Economics (SENAI/CIMATEC)` for both authors. Maria Eduarda de Lima e Silva retains `PhD in Applied Economics (UFRGS)` and has no invented email or additional credential. The PT-BR credentials are unchanged.
+
+Titles remain above tables and figures, sources and notes remain below them, table headers match the alignment of their columns, and prose and references remain justified.
 
 ## Localized repository files
 
 | File group | PT-BR | EN | Validation |
 |---|---:|---:|---|
-| R programs | 7 | 7 | all 14 parse successfully |
-| Treated CSV files | 6 | 6 | dimensions, numeric values, UF names, and Brazil label pass |
-| Treated XLSX workbooks | 13 | 13 | formulas/numeric-cell counts preserved; all EN workbooks open in Microsoft Excel |
+| R programs | 7 | 7 | all 14 parse successfully and use the renamed spreadsheet directories |
+| CSV spreadsheets | 6 | 6 | dimensions, numeric values, UF names, and Brazil label pass |
+| XLSX spreadsheets | 13 | 13 | hashes, formulas, and numeric-cell counts preserved |
 
-The generation scripts, glossary, and repo-local `methodology-rmarkdown` skill document the protected terms and the deterministic bilingual workflow.
+The generation scripts, glossary, and repo-local `methodology-rmarkdown` skill document the protected terms and deterministic bilingual workflow.
 
 ## Responsive browser validation
 
-Microsoft Edge was exercised through Playwright. The language dropdown was opened and closed at every width.
+Microsoft Edge was exercised through Playwright. The language dropdown and TOC were tested at every width.
 
 | Width | EN `clientWidth/scrollWidth` | PT-BR `clientWidth/scrollWidth` | TOC columns | Result |
 |---:|---:|---:|---:|---|
@@ -72,7 +73,7 @@ Microsoft Edge was exercised through Playwright. The language dropdown was opene
 | 1024 px | 1024 / 1024 | 1024 / 1024 | 2 | PASS |
 | 1440 px | 1440 / 1440 | 1440 / 1440 | 2 | PASS |
 
-At every width and in both languages: zero document-level horizontal bleeding, zero non-scrollable overflow offenders, TOC and language menu contained by the page, internal scrolling limited to necessary containers, target highlighting functional, table and figure titles intact, and zero browser-console errors. Visual inspection of EN and PT-BR at 390 and 1440 px also passed.
+At every width and in both languages: zero document-level horizontal bleeding, zero non-scrollable overflow offenders, TOC and language menu contained by the page, internal scrolling limited to necessary containers, target highlighting functional, table and figure titles intact, and zero browser-console errors.
 
 ## Skill and pipeline validation
 
@@ -83,11 +84,9 @@ At every width and in both languages: zero document-level horizontal bleeding, z
 - Static HTML validation for both languages: PASS.
 - Cross-language scientific parity validator: PASS.
 
-## GitHub Pages
+## History and GitHub Pages
 
-- Report publication commit: `7530097` on `main`.
-- `https://ingodube.github.io/PNS_2013_2019/metodologia.html`: HTTP 200; served SHA-256 `b191bc881b25db0c81767d08734b2c83b8ed72eb8441d42c244ba2b96472e47a`, identical to the local EN file — PASS.
-- `https://ingodube.github.io/PNS_2013_2019/methodology-pt-br.html`: HTTP 200; served SHA-256 `717a0399606009e0c6de69df643502a301c00b519ebc79af57021c1c847cd4cb`, identical to the local PT-BR file — PASS.
-- The repository root redirects to `metodologia.html`, whose document language is English — PASS.
-- Public EN and PT-BR pages at 390 and 1440 px: zero bleed, zero overflow offenders, functional language menu and TOC, correct object counts, correct title order, aligned tables, justified notes/references, and internal target highlighting — PASS.
+- Authorized neutral-message history rewrite: pending.
+- Force-with-lease publication: pending.
+- Public HTTP, content-hash, language-route, and responsive checks: pending publication.
 - The stable public report path and the poster QR code remain unchanged.

@@ -44,7 +44,7 @@ OUTPUT_FILE_NAMES = {
 
 REPLACEMENTS = {
     'dir.exists(file.path(candidate_roots, "Codes (PT-BR)"))': 'dir.exists(file.path(candidate_roots, "Codes (EN)"))',
-    'file.path(repo_root, "Processed Tables (PT-BR)")': 'file.path(repo_root, "Processed Tables (EN)")',
+    'file.path(repo_root, "Spreadsheets (PT-BR)")': 'file.path(repo_root, "Spreadsheets (EN)")',
     'stop("Não foi possível localizar a raiz do repositório.")': 'stop("The repository root could not be located.")',
     "# Carregando pacotes necessários": "# Load required packages",
     "# Tratando os dados": "# Prepare the data",

@@ -106,8 +106,8 @@ TRANSLATIONS = {
 
 GLOBAL_REPLACEMENTS = [
     ('title: "Implementação do Plano Amostral da Pesquisa Nacional de Saúde no R: um estudo de caso sobre a asma no Brasil"', 'title: "Implementing the Brazilian National Health Survey Sampling Design in R: an Asthma Case Study"'),
-    ('"Programa de Pós Graduação em Estatística e Ciência de Dados (PGECD/UFBA)"', '"Graduate Program in Statistics and Data Science (PGECD/UFBA)"'),
-    ('"Estudos Econômicos (SENAI/CIMATEC)"', '"Economic Studies (SENAI/CIMATEC)"'),
+    ('"Programa de Pós Graduação em Estatística e Ciência de Dados (PGECD/UFBA)"', '"MSc Program in Statistics and Data Science (PGECD/UFBA)"'),
+    ('"Estudos Econômicos (SENAI/CIMATEC)"', '"Department of Industrial Economics (SENAI/CIMATEC)"'),
     ('"Dra. em Economia Aplicada (UFRGS)"', '"PhD in Applied Economics (UFRGS)"'),
     ('report-type: "Relatório metodológico"', 'report-type: "Methodological report"'),
     ('subtitle: "Relatório técnico dos estimadores, intervalos de confiança, indicadores epidemiológicos e interpretação dos resultados da PNS 2013-2019 no contexto da asma."', 'subtitle: "Technical report on estimators, confidence intervals, epidemiological indicators, and interpretation of PNS 2013–2019 asthma results."'),

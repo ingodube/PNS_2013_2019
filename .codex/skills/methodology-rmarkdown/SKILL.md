@@ -24,6 +24,7 @@ description: Produce, revise, render, validate, and publish scholarly or technic
 - Set `lang`, canonical, and `hreflang` metadata for every output.
 - Preserve stable semantic IDs so the table of contents, citations, figures, tables, and references map one-to-one across languages.
 - Store and enforce a translation glossary with protected terms, geographic names, identifiers, formulas, DOI values, and URLs.
+- When localized analytical workbooks are versioned, keep them in clearly language-qualified `Spreadsheets (EN)` and `Spreadsheets (PT-BR)` directories and update every consuming path together.
 - For Brazil-focused reports, never translate federative-unit names; translate only the national label when required by the target language.
 - Validate scientific parity using underlying numeric values rather than locale-formatted display strings.
 - Record artificial-intelligence assistance with translation in the disclosure whenever applicable.

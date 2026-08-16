@@ -11,11 +11,11 @@ Before editing, confirm repository state with `git status --short --branch`, `gi
 ## Localized analytical artifacts
 
 - Keep English R programs in `Codes (EN)/` and Portuguese programs in `Codes (PT-BR)/`.
-- Keep English processed tables in `Processed Tables (EN)/` and Portuguese outputs in `Processed Tables (PT-BR)/`.
+- Keep English spreadsheets in `Spreadsheets (EN)/` and Portuguese outputs in `Spreadsheets (PT-BR)/`.
 - Treat the PT-BR tables as the validated scientific baseline. English tables may differ only in filenames, headers, textual categories, display punctuation, and `Brasil` → `Brazil`.
 - Never translate the names of Brazil's 27 federative units, PNS variable codes, formulas, package/API names, DOI values, or URLs.
 - Keep accidental root-level `df_*.csv`, `df_*.xlsx`, `Rplots.pdf`, `~$*.xlsx`, and duplicate local repository folders out of Git.
-- The current poster belongs at `poster/poster_pns_asma_morrison.pdf`; do not recreate `outputs/posters/`.
+- The current Portuguese poster belongs at `poster (PT-BR)/poster_pns_asma_morrison.pdf`; do not recreate `outputs/posters/`.
 
 ## Bilingual report
 

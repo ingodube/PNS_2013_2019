@@ -32,6 +32,8 @@ This file defines the localization rules for the English and Brazilian Portugues
 | Nota | Note |
 | Sumário | Contents |
 | Referências | References |
+| Programa de Pós Graduação em Estatística e Ciência de Dados | MSc Program in Statistics and Data Science |
+| Estudos Econômicos | Department of Industrial Economics |
 
 ## Numerical presentation
 

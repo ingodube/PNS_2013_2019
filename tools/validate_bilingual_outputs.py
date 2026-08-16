@@ -151,8 +151,8 @@ def main() -> int:
     pt_links = {link for link in pt.links if not link.startswith("#") and link not in ignored_links}
     require(en_links == pt_links, "external links differ between languages")
 
-    pt_dir = root / "Processed Tables (PT-BR)"
-    en_dir = root / "Processed Tables (EN)"
+    pt_dir = root / "Spreadsheets (PT-BR)"
+    en_dir = root / "Spreadsheets (EN)"
     for pt_name, en_name in CSV_PAIRS.items():
         pt_rows = read_csv(pt_dir / pt_name)
         en_rows = read_csv(en_dir / en_name)

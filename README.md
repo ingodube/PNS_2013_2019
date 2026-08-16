@@ -10,20 +10,13 @@ The analytical programs estimate the prevalence of a medical asthma diagnosis, a
 
 ## Main products
 
-- [Methodological report — English, default](https://ingodube.github.io/PNS_2013_2019/metodologia.html)
-- [Methodological report — Portuguese (PT-BR)](https://ingodube.github.io/PNS_2013_2019/methodology-pt-br.html)
-- [Scientific poster](poster/poster_pns_asma_morrison.pdf)
+- [Methodological report — English](https://ingodube.github.io/PNS_2013_2019/metodologia.html)
+- [Scientific poster — Portuguese (PT-BR)](poster%20(PT-BR)/poster_pns_asma_morrison.pdf)
 
 ## Localized analytical materials
 
-- [`Codes (EN)/`](Codes%20(EN)/): English documentation, messages, labels, and output paths.
-- [`Codes (PT-BR)/`](Codes%20(PT-BR)/): Portuguese analytical programs preserved as the scientific baseline.
-- [`Processed Tables (EN)/`](Processed%20Tables%20(EN)/): English headers, categories, notes, and display strings.
-- [`Processed Tables (PT-BR)/`](Processed%20Tables%20(PT-BR)/): validated Portuguese processed outputs.
-
-<p align="justify">
-The names of Brazil's 27 federative units are intentionally identical in both languages. Only the national label is localized from <code>Brasil</code> to <code>Brazil</code> in English materials. PNS variable codes, formulas, package and API names, DOI values, and URLs are not translated.
-</p>
+- **Codes:** [`English`](Codes%20(EN)/) and [`Portuguese (PT-BR)`](Codes%20(PT-BR)/).
+- **Spreadsheets:** [`English`](Spreadsheets%20(EN)/) and [`Portuguese (PT-BR)`](Spreadsheets%20(PT-BR)/).
 
 ## Sampling-design implementation
 
@@ -43,10 +36,6 @@ source(file.path("Codes (EN)", "PNS Extraction - Asthma.R"))
 
 <p align="justify">
 Depending on the indicator, the workflow requires <code>PNSIBGE</code>, <code>survey</code>, <code>dplyr</code>, <code>tidyr</code>, <code>ggplot2</code>, <code>writexl</code>, and <code>deflateBR</code>. Raw microdata are not stored in this repository and are retrieved through the mechanisms documented in the R programs.
-</p>
-
-<p align="justify">
-Render both report languages with the repo-local <code>methodology-rmarkdown</code> workflow. The stable public path remains <code>metodologia.html</code>; it now serves English by default so existing references and the poster QR code remain valid.
 </p>
 
 <p align="justify">

@@ -10,8 +10,8 @@ const valueAfter = (flag, fallback) => {
 };
 
 const repoRoot = process.cwd();
-const sourceDir = path.join(repoRoot, "Processed Tables (PT-BR)");
-const outputDir = path.resolve(valueAfter("--output-dir", path.join(repoRoot, "Processed Tables (EN)")));
+const sourceDir = path.join(repoRoot, "Spreadsheets (PT-BR)");
+const outputDir = path.resolve(valueAfter("--output-dir", path.join(repoRoot, "Spreadsheets (EN)")));
 const previewDir = path.resolve(valueAfter("--preview-dir", path.join(outputDir, "_previews")));
 
 const fileNames = {
