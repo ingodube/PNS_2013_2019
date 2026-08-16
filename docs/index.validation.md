@@ -86,7 +86,16 @@ At every width and in both languages: zero document-level horizontal bleeding, z
 
 ## History and GitHub Pages
 
-- Authorized neutral-message history rewrite: pending.
-- Force-with-lease publication: pending.
-- Public HTTP, content-hash, language-route, and responsive checks: pending publication.
+- Pre-rewrite functional commit: `f9db27e62b7e66733fbf36b4801ca0137032d3c1`.
+- Recoverable external bundle: `C:\Users\ingon\Github\PNS_2013_2019-before-message-rewrite-20260816.bundle`; SHA-256 `da8e84e2a234f7675f076dbb862ebc085adc4daa9d615d19bc102ff3f61aa08e`.
+- Rewritten publication commit: `54dbc536ea7827289a1e51a62fe0aa8ca6a26c63`.
+- All 52 commits preserve their tree sequence, authors, author dates, committers, committer dates, and order: PASS.
+- Every reachable commit message uses the approved neutral English vocabulary; no message body remains: PASS.
+- `force-with-lease` from the protected remote SHA `d7cfe8ae23349e18b55ee1b0010a8258ca1971ae` to `54dbc536ea7827289a1e51a62fe0aa8ca6a26c63`: PASS.
+- `https://ingodube.github.io/PNS_2013_2019/`: HTTP 200 and English entry point: PASS.
+- `https://ingodube.github.io/PNS_2013_2019/metodologia.html`: HTTP 200; served SHA-256 `5cc4021876ea449236d76714482bf0719807f58bfac1fc426e7b035057674295`, identical to the local EN file: PASS.
+- `https://ingodube.github.io/PNS_2013_2019/methodology-pt-br.html`: HTTP 200; served SHA-256 `717a0399606009e0c6de69df643502a301c00b519ebc79af57021c1c847cd4cb`, identical to the local PT-BR file: PASS.
+- Public EN, PT-BR, and root routes at 390 and 1440 px: zero bleed, zero overflow offenders, functional language menu and TOC, correct object counts, correct title order, aligned tables, justified notes/references, and internal target highlighting: PASS.
+- The README scientific-poster destination under `poster (PT-BR)` returns HTTP 200 from the GitHub repository: PASS.
+- The GitHub repository description is present and written in English: PASS.
 - The stable public report path and the poster QR code remain unchanged.
