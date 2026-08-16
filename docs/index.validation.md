@@ -85,4 +85,9 @@ At every width and in both languages: zero document-level horizontal bleeding, z
 
 ## GitHub Pages
 
-Publication verification is pending the commit and push. This section will be updated with the deployed commit, HTTP status, served hashes, redirect behavior, and public responsive results.
+- Report publication commit: `7530097` on `main`.
+- `https://ingodube.github.io/PNS_2013_2019/metodologia.html`: HTTP 200; served SHA-256 `b191bc881b25db0c81767d08734b2c83b8ed72eb8441d42c244ba2b96472e47a`, identical to the local EN file — PASS.
+- `https://ingodube.github.io/PNS_2013_2019/methodology-pt-br.html`: HTTP 200; served SHA-256 `717a0399606009e0c6de69df643502a301c00b519ebc79af57021c1c847cd4cb`, identical to the local PT-BR file — PASS.
+- The repository root redirects to `metodologia.html`, whose document language is English — PASS.
+- Public EN and PT-BR pages at 390 and 1440 px: zero bleed, zero overflow offenders, functional language menu and TOC, correct object counts, correct title order, aligned tables, justified notes/references, and internal target highlighting — PASS.
+- The stable public report path and the poster QR code remain unchanged.
