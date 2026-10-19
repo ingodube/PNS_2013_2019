@@ -1,0 +1,18 @@
+{
+  "published_commit": "30de67729221c30227e707cf3b21356823b6670c",
+  "verified_utc": "2026-10-19T09:35:28.550044+00:00",
+  "pages": [
+    {
+      "url": "https://ingodube.github.io/PNS_2013_2019/metodologia.html",
+      "http_status": 200,
+      "sha256": "81e30b907f0b5171d87a03efe8c6a4f6b3b83f98457ef1b74b1794c8dd783055",
+      "matches_local": true
+    },
+    {
+      "url": "https://ingodube.github.io/PNS_2013_2019/methodology-pt-br.html",
+      "http_status": 200,
+      "sha256": "6ce36017ab0fe96c6389d63a4b6633235c8ad88013006b961db116b84857fae9",
+      "matches_local": true
+    }
+  ]
+}

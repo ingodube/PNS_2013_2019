@@ -96,4 +96,11 @@ numbers, references and legitimate uncertainty were preserved.
 
 ## Publication
 
-Local validation is complete. Public verification will be recorded after the validated commit is pushed.
+Scientific release published at commit `30de67729221c30227e707cf3b21356823b6670c`.
+
+Both public language URLs returned HTTP 200 and their SHA-256 hashes matched
+the validated local HTML files byte for byte. Verified at 2026-10-19T09:35:28.550044+00:00.
+Details: `data/publication_verification.json`.
+
+- [English report](https://ingodube.github.io/PNS_2013_2019/metodologia.html)
+- [Portuguese report](https://ingodube.github.io/PNS_2013_2019/methodology-pt-br.html)
