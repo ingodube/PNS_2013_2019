@@ -1,0 +1,225 @@
+indicator,year,UF,previous_percent,corrected_percent,difference_pp,interpretation
+asthma_diagnosis,2013,Acre,4.06815498216609,4.0681549821660905,8.881784197001252e-16,Adult domain; explicit valid answers
+asthma_diagnosis,2013,Alagoas,2.63228934332806,2.63228934332806,0.0,Adult domain; explicit valid answers
+asthma_diagnosis,2013,Amapá,4.01591812330427,4.01591812330427,0.0,Adult domain; explicit valid answers
+asthma_diagnosis,2013,Amazonas,5.65090625089051,5.65090625089051,0.0,Adult domain; explicit valid answers
+asthma_diagnosis,2013,Bahia,2.3467971925976,2.3467971925976,0.0,Adult domain; explicit valid answers
+asthma_diagnosis,2013,Ceará,3.21815895329385,3.2181589532938504,4.440892098500626e-16,Adult domain; explicit valid answers
+asthma_diagnosis,2013,Distrito Federal,5.91345462310724,5.91345462310724,0.0,Adult domain; explicit valid answers
+asthma_diagnosis,2013,Espírito Santo,4.75651233529603,4.75651233529603,0.0,Adult domain; explicit valid answers
+asthma_diagnosis,2013,Goiás,3.60651583850496,3.6065158385049605,4.440892098500626e-16,Adult domain; explicit valid answers
+asthma_diagnosis,2013,Maranhão,2.64190403868062,2.64190403868062,0.0,Adult domain; explicit valid answers
+asthma_diagnosis,2013,Mato Grosso,3.94140669845651,3.94140669845651,0.0,Adult domain; explicit valid answers
+asthma_diagnosis,2013,Mato Grosso do Sul,4.24488572576749,4.244885725767491,8.881784197001252e-16,Adult domain; explicit valid answers
+asthma_diagnosis,2013,Minas Gerais,4.39331426703008,4.39331426703008,0.0,Adult domain; explicit valid answers
+asthma_diagnosis,2013,Paraná,4.55440021966374,4.55440021966374,0.0,Adult domain; explicit valid answers
+asthma_diagnosis,2013,Paraíba,2.83389923656542,2.8338992365654203,4.440892098500626e-16,Adult domain; explicit valid answers
+asthma_diagnosis,2013,Pará,4.29235451345531,4.29235451345531,0.0,Adult domain; explicit valid answers
+asthma_diagnosis,2013,Pernambuco,4.93231371436306,4.93231371436306,0.0,Adult domain; explicit valid answers
+asthma_diagnosis,2013,Piauí,4.41102977131656,4.41102977131656,0.0,Adult domain; explicit valid answers
+asthma_diagnosis,2013,Rio Grande do Norte,3.64892033567484,3.64892033567484,0.0,Adult domain; explicit valid answers
+asthma_diagnosis,2013,Rio Grande do Sul,6.78900438802742,6.78900438802742,0.0,Adult domain; explicit valid answers
+asthma_diagnosis,2013,Rio de Janeiro,5.0124198009883,5.0124198009883,0.0,Adult domain; explicit valid answers
+asthma_diagnosis,2013,Rondônia,4.20038058398107,4.20038058398107,0.0,Adult domain; explicit valid answers
+asthma_diagnosis,2013,Roraima,4.56602494493442,4.56602494493442,0.0,Adult domain; explicit valid answers
+asthma_diagnosis,2013,Santa Catarina,4.3260370833218,4.3260370833218005,8.881784197001252e-16,Adult domain; explicit valid answers
+asthma_diagnosis,2013,Sergipe,2.86735267397948,2.86735267397948,0.0,Adult domain; explicit valid answers
+asthma_diagnosis,2013,São Paulo,4.88795677887773,4.88795677887773,0.0,Adult domain; explicit valid answers
+asthma_diagnosis,2013,Tocantins,4.96297335166347,4.962973351663471,8.881784197001252e-16,Adult domain; explicit valid answers
+asthma_diagnosis,2013,Brasil,4.40828372867363,4.40828372867363,0.0,Adult domain; explicit valid answers
+asthma_diagnosis,2019,Acre,3.86545751606663,3.68775878672883,-0.17769872933779984,Adult domain; explicit valid answers
+asthma_diagnosis,2019,Alagoas,3.9887513127448,3.8314445276701603,-0.1573067850746397,Adult domain; explicit valid answers
+asthma_diagnosis,2019,Amapá,6.62827588710168,6.509111396646169,-0.11916449045551047,Adult domain; explicit valid answers
+asthma_diagnosis,2019,Amazonas,4.86036694322778,4.48731919108986,-0.3730477521379205,Adult domain; explicit valid answers
+asthma_diagnosis,2019,Bahia,3.55669739454139,2.8784627174223,-0.6782346771190899,Adult domain; explicit valid answers
+asthma_diagnosis,2019,Ceará,5.01221766285902,4.8591505347526,-0.15306712810641976,Adult domain; explicit valid answers
+asthma_diagnosis,2019,Distrito Federal,4.92832884132986,5.20674781486157,0.27841897353171063,Adult domain; explicit valid answers
+asthma_diagnosis,2019,Espírito Santo,6.70651439095913,6.21451259959767,-0.49200179136146005,Adult domain; explicit valid answers
+asthma_diagnosis,2019,Goiás,5.90628504831638,5.98607933088666,0.07979428257028065,Adult domain; explicit valid answers
+asthma_diagnosis,2019,Maranhão,3.83794314292066,3.60199130069915,-0.2359518422215099,Adult domain; explicit valid answers
+asthma_diagnosis,2019,Mato Grosso,2.91285536107303,2.97347557620534,0.06062021513230986,Adult domain; explicit valid answers
+asthma_diagnosis,2019,Mato Grosso do Sul,4.95636238905948,4.75153754528068,-0.20482484377880006,Adult domain; explicit valid answers
+asthma_diagnosis,2019,Minas Gerais,6.02615301682543,6.01267156767999,-0.013481449145439584,Adult domain; explicit valid answers
+asthma_diagnosis,2019,Paraná,5.18341521117125,4.95670392107096,-0.22671129010029034,Adult domain; explicit valid answers
+asthma_diagnosis,2019,Paraíba,3.5684568848397,3.17698874783353,-0.3914681370061701,Adult domain; explicit valid answers
+asthma_diagnosis,2019,Pará,4.82569970197317,4.643834342672689,-0.1818653593004811,Adult domain; explicit valid answers
+asthma_diagnosis,2019,Pernambuco,4.75481253143203,4.69534718121741,-0.059465350214620294,Adult domain; explicit valid answers
+asthma_diagnosis,2019,Piauí,4.61305879543818,4.657304462734739,0.04424566729655943,Adult domain; explicit valid answers
+asthma_diagnosis,2019,Rio Grande do Norte,5.02431639810395,4.83831308207874,-0.18600331602520992,Adult domain; explicit valid answers
+asthma_diagnosis,2019,Rio Grande do Sul,8.55406689205886,8.11470227815713,-0.4393646139017289,Adult domain; explicit valid answers
+asthma_diagnosis,2019,Rio de Janeiro,4.60420870332814,4.55157087554473,-0.05263782778340964,Adult domain; explicit valid answers
+asthma_diagnosis,2019,Rondônia,3.43165682673175,3.61400141741491,0.18234459068316022,Adult domain; explicit valid answers
+asthma_diagnosis,2019,Roraima,5.8477616069634,6.06408520393144,0.21632359696804038,Adult domain; explicit valid answers
+asthma_diagnosis,2019,Santa Catarina,5.08411338602885,5.021203672555139,-0.06290971347371066,Adult domain; explicit valid answers
+asthma_diagnosis,2019,Sergipe,4.63543792356262,4.42099708691087,-0.2144408366517494,Adult domain; explicit valid answers
+asthma_diagnosis,2019,São Paulo,6.40114548738738,6.41106199572851,0.009916508341130559,Adult domain; explicit valid answers
+asthma_diagnosis,2019,Tocantins,4.36332076146551,4.05116332947759,-0.3121574319879201,Adult domain; explicit valid answers
+asthma_diagnosis,2019,Brasil,5.40126923821393,5.26753783413201,-0.13373140408191997,Adult domain; explicit valid answers
+asthma_attack,2013,Acre,22.8846396707693,22.8846396707693,0.0,Adult domain; diagnosis and valid attack answer
+asthma_attack,2013,Alagoas,37.2780224885424,37.2780224885424,0.0,Adult domain; diagnosis and valid attack answer
+asthma_attack,2013,Amapá,35.3652893551325,35.365289355132504,7.105427357601002e-15,Adult domain; diagnosis and valid attack answer
+asthma_attack,2013,Amazonas,27.5589690681732,27.5589690681732,0.0,Adult domain; diagnosis and valid attack answer
+asthma_attack,2013,Bahia,46.1495583461242,46.149558346124195,-7.105427357601002e-15,Adult domain; diagnosis and valid attack answer
+asthma_attack,2013,Ceará,26.6266358547708,26.626635854770804,3.552713678800501e-15,Adult domain; diagnosis and valid attack answer
+asthma_attack,2013,Distrito Federal,25.8574632596372,25.857463259637196,-3.552713678800501e-15,Adult domain; diagnosis and valid attack answer
+asthma_attack,2013,Espírito Santo,35.674675829699,35.674675829699,0.0,Adult domain; diagnosis and valid attack answer
+asthma_attack,2013,Goiás,44.9849190460829,44.9849190460829,0.0,Adult domain; diagnosis and valid attack answer
+asthma_attack,2013,Maranhão,37.5413664605715,37.5413664605715,0.0,Adult domain; diagnosis and valid attack answer
+asthma_attack,2013,Mato Grosso,27.8639408150151,27.8639408150151,0.0,Adult domain; diagnosis and valid attack answer
+asthma_attack,2013,Mato Grosso do Sul,33.4252836392205,33.425283639220496,-7.105427357601002e-15,Adult domain; diagnosis and valid attack answer
+asthma_attack,2013,Minas Gerais,33.0388925889701,33.0388925889701,0.0,Adult domain; diagnosis and valid attack answer
+asthma_attack,2013,Paraná,43.2642316848456,43.2642316848456,0.0,Adult domain; diagnosis and valid attack answer
+asthma_attack,2013,Paraíba,45.7197530732008,45.7197530732008,0.0,Adult domain; diagnosis and valid attack answer
+asthma_attack,2013,Pará,22.7540891050877,22.7540891050877,0.0,Adult domain; diagnosis and valid attack answer
+asthma_attack,2013,Pernambuco,39.7071234164936,39.7071234164936,0.0,Adult domain; diagnosis and valid attack answer
+asthma_attack,2013,Piauí,49.7537719838411,49.7537719838411,0.0,Adult domain; diagnosis and valid attack answer
+asthma_attack,2013,Rio Grande do Norte,51.1340392980872,51.134039298087195,-7.105427357601002e-15,Adult domain; diagnosis and valid attack answer
+asthma_attack,2013,Rio Grande do Sul,36.1724680090096,36.1724680090096,0.0,Adult domain; diagnosis and valid attack answer
+asthma_attack,2013,Rio de Janeiro,33.1409904754386,33.1409904754386,0.0,Adult domain; diagnosis and valid attack answer
+asthma_attack,2013,Rondônia,33.3653360898866,33.3653360898866,0.0,Adult domain; diagnosis and valid attack answer
+asthma_attack,2013,Roraima,36.5300584988252,36.5300584988252,0.0,Adult domain; diagnosis and valid attack answer
+asthma_attack,2013,Santa Catarina,40.8347769505938,40.8347769505938,0.0,Adult domain; diagnosis and valid attack answer
+asthma_attack,2013,Sergipe,47.9175095995594,47.9175095995594,0.0,Adult domain; diagnosis and valid attack answer
+asthma_attack,2013,São Paulo,44.6795510443927,44.6795510443927,0.0,Adult domain; diagnosis and valid attack answer
+asthma_attack,2013,Tocantins,33.0485547309624,33.0485547309624,0.0,Adult domain; diagnosis and valid attack answer
+asthma_attack,2013,Brasil,38.2856824620569,38.285682462056904,7.105427357601002e-15,Adult domain; diagnosis and valid attack answer
+asthma_attack,2019,Acre,30.1444739962294,29.9049360759369,-0.2395379202925021,Adult domain; diagnosis and valid attack answer
+asthma_attack,2019,Alagoas,40.4257366508701,45.137888106388004,4.712151455517905,Adult domain; diagnosis and valid attack answer
+asthma_attack,2019,Amapá,19.6274552633924,21.0343952924444,1.4069400290520022,Adult domain; diagnosis and valid attack answer
+asthma_attack,2019,Amazonas,25.2555020406179,27.8932894585734,2.6377874179555008,Adult domain; diagnosis and valid attack answer
+asthma_attack,2019,Bahia,24.7005513925075,24.235804713727198,-0.4647466787803012,Adult domain; diagnosis and valid attack answer
+asthma_attack,2019,Ceará,47.5650748988822,47.2966267272985,-0.2684481715836995,Adult domain; diagnosis and valid attack answer
+asthma_attack,2019,Distrito Federal,26.9739596039482,26.9739596039482,0.0,Adult domain; diagnosis and valid attack answer
+asthma_attack,2019,Espírito Santo,34.3476086378842,34.667487412293,0.3198787744087994,Adult domain; diagnosis and valid attack answer
+asthma_attack,2019,Goiás,33.3128762912094,34.1329549364019,0.8200786451925026,Adult domain; diagnosis and valid attack answer
+asthma_attack,2019,Maranhão,31.2049521567691,31.186363909488502,-0.01858824728059716,Adult domain; diagnosis and valid attack answer
+asthma_attack,2019,Mato Grosso,33.9289513753097,35.026100062923796,1.0971486876140943,Adult domain; diagnosis and valid attack answer
+asthma_attack,2019,Mato Grosso do Sul,35.8381126196932,32.7574080436562,-3.080704576037,Adult domain; diagnosis and valid attack answer
+asthma_attack,2019,Minas Gerais,38.1768800815999,36.4313273944202,-1.7455526871796962,Adult domain; diagnosis and valid attack answer
+asthma_attack,2019,Paraná,36.9426450244129,37.752317646892806,0.8096726224799085,Adult domain; diagnosis and valid attack answer
+asthma_attack,2019,Paraíba,49.3718602375824,42.088731078764404,-7.283129158817999,Adult domain; diagnosis and valid attack answer
+asthma_attack,2019,Pará,27.2709333570397,26.078483932685998,-1.1924494243537005,Adult domain; diagnosis and valid attack answer
+asthma_attack,2019,Pernambuco,43.4902581554165,42.8260237343624,-0.6642344210540969,Adult domain; diagnosis and valid attack answer
+asthma_attack,2019,Piauí,42.8492383987935,44.4186222489149,1.5693838501213975,Adult domain; diagnosis and valid attack answer
+asthma_attack,2019,Rio Grande do Norte,29.2000467726577,29.814985385625896,0.6149386129681957,Adult domain; diagnosis and valid attack answer
+asthma_attack,2019,Rio Grande do Sul,38.9664381558087,36.9038347258849,-2.0626034299238043,Adult domain; diagnosis and valid attack answer
+asthma_attack,2019,Rio de Janeiro,32.7877247094699,33.7886535534903,1.0009288440204003,Adult domain; diagnosis and valid attack answer
+asthma_attack,2019,Rondônia,25.1919661596426,24.978340485086,-0.21362567455659942,Adult domain; diagnosis and valid attack answer
+asthma_attack,2019,Roraima,27.0631627398349,26.9706947653671,-0.09246797446780164,Adult domain; diagnosis and valid attack answer
+asthma_attack,2019,Santa Catarina,32.3244304886041,28.3664851663891,-3.957945322215,Adult domain; diagnosis and valid attack answer
+asthma_attack,2019,Sergipe,39.4292208434411,43.019178080209706,3.589957236768605,Adult domain; diagnosis and valid attack answer
+asthma_attack,2019,São Paulo,43.7551467362418,44.3118469678684,0.5567002316265999,Adult domain; diagnosis and valid attack answer
+asthma_attack,2019,Tocantins,35.2355939540775,40.0763282443033,4.840734290225797,Adult domain; diagnosis and valid attack answer
+asthma_attack,2019,Brasil,37.7134888823384,37.6378611304581,-0.07562775188030457,Adult domain; diagnosis and valid attack answer
+asthma_medication_conditional,2013,Acre,74.6558120551955,74.6558120551955,0.0,Changed estimand: edition-specific eligibility and reference period; not an access trend
+asthma_medication_conditional,2013,Alagoas,85.9468353758958,85.9468353758958,0.0,Changed estimand: edition-specific eligibility and reference period; not an access trend
+asthma_medication_conditional,2013,Amapá,82.7587954692472,82.7587954692472,0.0,Changed estimand: edition-specific eligibility and reference period; not an access trend
+asthma_medication_conditional,2013,Amazonas,86.7227720941801,86.7227720941801,0.0,Changed estimand: edition-specific eligibility and reference period; not an access trend
+asthma_medication_conditional,2013,Bahia,84.2208985629782,84.22089856297819,-1.4210854715202004e-14,Changed estimand: edition-specific eligibility and reference period; not an access trend
+asthma_medication_conditional,2013,Ceará,78.8135524591881,78.8135524591881,0.0,Changed estimand: edition-specific eligibility and reference period; not an access trend
+asthma_medication_conditional,2013,Distrito Federal,77.4477510061696,77.4477510061696,0.0,Changed estimand: edition-specific eligibility and reference period; not an access trend
+asthma_medication_conditional,2013,Espírito Santo,64.9042523678376,64.9042523678376,0.0,Changed estimand: edition-specific eligibility and reference period; not an access trend
+asthma_medication_conditional,2013,Goiás,80.4113788924695,80.4113788924695,0.0,Changed estimand: edition-specific eligibility and reference period; not an access trend
+asthma_medication_conditional,2013,Maranhão,53.2445030230163,53.2445030230163,0.0,Changed estimand: edition-specific eligibility and reference period; not an access trend
+asthma_medication_conditional,2013,Mato Grosso,86.5887025200681,86.5887025200681,0.0,Changed estimand: edition-specific eligibility and reference period; not an access trend
+asthma_medication_conditional,2013,Mato Grosso do Sul,80.5265842151896,80.5265842151896,0.0,Changed estimand: edition-specific eligibility and reference period; not an access trend
+asthma_medication_conditional,2013,Minas Gerais,71.8244985366855,71.8244985366855,0.0,Changed estimand: edition-specific eligibility and reference period; not an access trend
+asthma_medication_conditional,2013,Paraná,85.3082651981982,85.3082651981982,0.0,Changed estimand: edition-specific eligibility and reference period; not an access trend
+asthma_medication_conditional,2013,Paraíba,77.5011831130178,77.5011831130178,0.0,Changed estimand: edition-specific eligibility and reference period; not an access trend
+asthma_medication_conditional,2013,Pará,82.3005042874007,82.3005042874007,0.0,Changed estimand: edition-specific eligibility and reference period; not an access trend
+asthma_medication_conditional,2013,Pernambuco,68.4593901693783,68.4593901693783,0.0,Changed estimand: edition-specific eligibility and reference period; not an access trend
+asthma_medication_conditional,2013,Piauí,68.2465202548678,68.2465202548678,0.0,Changed estimand: edition-specific eligibility and reference period; not an access trend
+asthma_medication_conditional,2013,Rio Grande do Norte,68.5262916546272,68.5262916546272,0.0,Changed estimand: edition-specific eligibility and reference period; not an access trend
+asthma_medication_conditional,2013,Rio Grande do Sul,83.1853570710227,83.18535707102261,-8.526512829121202e-14,Changed estimand: edition-specific eligibility and reference period; not an access trend
+asthma_medication_conditional,2013,Rio de Janeiro,91.9840238444763,91.9840238444763,0.0,Changed estimand: edition-specific eligibility and reference period; not an access trend
+asthma_medication_conditional,2013,Rondônia,79.9357834784863,79.9357834784863,0.0,Changed estimand: edition-specific eligibility and reference period; not an access trend
+asthma_medication_conditional,2013,Roraima,81.6938773856002,81.6938773856002,0.0,Changed estimand: edition-specific eligibility and reference period; not an access trend
+asthma_medication_conditional,2013,Santa Catarina,67.0058488732473,67.0058488732473,0.0,Changed estimand: edition-specific eligibility and reference period; not an access trend
+asthma_medication_conditional,2013,Sergipe,87.5815903629373,87.5815903629373,0.0,Changed estimand: edition-specific eligibility and reference period; not an access trend
+asthma_medication_conditional,2013,São Paulo,88.4553558899754,88.4553558899754,0.0,Changed estimand: edition-specific eligibility and reference period; not an access trend
+asthma_medication_conditional,2013,Tocantins,66.9691827355977,66.9691827355977,0.0,Changed estimand: edition-specific eligibility and reference period; not an access trend
+asthma_medication_conditional,2013,Brasil,81.5001008182328,81.5001008182327,-9.947598300641403e-14,Changed estimand: edition-specific eligibility and reference period; not an access trend
+asthma_medication_conditional,2019,Acre,54.4707927086594,56.3666152146969,1.8958225060374971,Changed estimand: edition-specific eligibility and reference period; not an access trend
+asthma_medication_conditional,2019,Alagoas,62.0403343428925,62.81255546123909,0.772221118346593,Changed estimand: edition-specific eligibility and reference period; not an access trend
+asthma_medication_conditional,2019,Amapá,67.3025469255646,67.3025469255646,0.0,Changed estimand: edition-specific eligibility and reference period; not an access trend
+asthma_medication_conditional,2019,Amazonas,46.7007048614565,50.9524010863082,4.251696224851699,Changed estimand: edition-specific eligibility and reference period; not an access trend
+asthma_medication_conditional,2019,Bahia,74.0377203691319,84.35177894723141,10.314058578099505,Changed estimand: edition-specific eligibility and reference period; not an access trend
+asthma_medication_conditional,2019,Ceará,44.4901982641944,49.3979365307109,4.907738266516503,Changed estimand: edition-specific eligibility and reference period; not an access trend
+asthma_medication_conditional,2019,Distrito Federal,52.7936556148725,52.793655614872506,7.105427357601002e-15,Changed estimand: edition-specific eligibility and reference period; not an access trend
+asthma_medication_conditional,2019,Espírito Santo,76.4607897375218,72.4147139947095,-4.046075742812292,Changed estimand: edition-specific eligibility and reference period; not an access trend
+asthma_medication_conditional,2019,Goiás,60.5929412050685,62.588798863653,1.995857658584498,Changed estimand: edition-specific eligibility and reference period; not an access trend
+asthma_medication_conditional,2019,Maranhão,61.2574744689217,56.1690260625725,-5.088448406349201,Changed estimand: edition-specific eligibility and reference period; not an access trend
+asthma_medication_conditional,2019,Mato Grosso,71.0120012674073,71.0120012674073,0.0,Changed estimand: edition-specific eligibility and reference period; not an access trend
+asthma_medication_conditional,2019,Mato Grosso do Sul,69.3953704003344,63.6741698930296,-5.7212005073048005,Changed estimand: edition-specific eligibility and reference period; not an access trend
+asthma_medication_conditional,2019,Minas Gerais,64.0013870769576,69.747611696436,5.746224619478397,Changed estimand: edition-specific eligibility and reference period; not an access trend
+asthma_medication_conditional,2019,Paraná,74.7944900755138,74.0540327204092,-0.7404573551046099,Changed estimand: edition-specific eligibility and reference period; not an access trend
+asthma_medication_conditional,2019,Paraíba,56.0312126303248,39.488023200279,-16.5431894300458,Changed estimand: edition-specific eligibility and reference period; not an access trend
+asthma_medication_conditional,2019,Pará,63.7326464323638,62.0894777021614,-1.6431687302023974,Changed estimand: edition-specific eligibility and reference period; not an access trend
+asthma_medication_conditional,2019,Pernambuco,60.9263964244205,66.06908524178769,5.142688817367187,Changed estimand: edition-specific eligibility and reference period; not an access trend
+asthma_medication_conditional,2019,Piauí,53.0327526417989,54.4505006518647,1.4177480100658002,Changed estimand: edition-specific eligibility and reference period; not an access trend
+asthma_medication_conditional,2019,Rio Grande do Norte,61.6855421222262,60.2832595418338,-1.4022825803924022,Changed estimand: edition-specific eligibility and reference period; not an access trend
+asthma_medication_conditional,2019,Rio Grande do Sul,61.3345192971769,65.8119645010996,4.477445203922699,Changed estimand: edition-specific eligibility and reference period; not an access trend
+asthma_medication_conditional,2019,Rio de Janeiro,54.2869396893711,54.2869396893711,0.0,Changed estimand: edition-specific eligibility and reference period; not an access trend
+asthma_medication_conditional,2019,Rondônia,79.7628634760448,78.9539495916151,-0.8089138844296997,Changed estimand: edition-specific eligibility and reference period; not an access trend
+asthma_medication_conditional,2019,Roraima,74.3560953034127,72.6012592394787,-1.7548360639340075,Changed estimand: edition-specific eligibility and reference period; not an access trend
+asthma_medication_conditional,2019,Santa Catarina,65.6819083574383,60.8503915591461,-4.831516798292206,Changed estimand: edition-specific eligibility and reference period; not an access trend
+asthma_medication_conditional,2019,Sergipe,80.2302827678323,80.23028276783229,-1.4210854715202004e-14,Changed estimand: edition-specific eligibility and reference period; not an access trend
+asthma_medication_conditional,2019,São Paulo,69.3353256444116,68.956244158415,-0.3790814859965934,Changed estimand: edition-specific eligibility and reference period; not an access trend
+asthma_medication_conditional,2019,Tocantins,49.5168139954145,49.5168139954145,0.0,Changed estimand: edition-specific eligibility and reference period; not an access trend
+asthma_medication_conditional,2019,Brasil,64.3980947802639,65.6548851089331,1.2567903286691973,Changed estimand: edition-specific eligibility and reference period; not an access trend
+current_smoking,2013,Acre,18.528,18.5275279918474,-0.0004720081525988462,Adult domain; old rounded per-100000 rate converted to percent
+current_smoking,2013,Alagoas,13.287,13.286842584296801,-0.00015741570319960374,Adult domain; old rounded per-100000 rate converted to percent
+current_smoking,2013,Amapá,12.621,12.6210518485497,5.184854969897401e-05,Adult domain; old rounded per-100000 rate converted to percent
+current_smoking,2013,Amazonas,13.147,13.1470267657374,2.6765737398903866e-05,Adult domain; old rounded per-100000 rate converted to percent
+current_smoking,2013,Bahia,12.827,12.8268947263971,-0.0001052736028999135,Adult domain; old rounded per-100000 rate converted to percent
+current_smoking,2013,Ceará,16.174,16.17389942601,-0.00010057399000018563,Adult domain; old rounded per-100000 rate converted to percent
+current_smoking,2013,Distrito Federal,10.621,10.6214551455543,0.0004551455542998184,Adult domain; old rounded per-100000 rate converted to percent
+current_smoking,2013,Espírito Santo,12.896,12.8964530166732,0.0004530166731999685,Adult domain; old rounded per-100000 rate converted to percent
+current_smoking,2013,Goiás,13.461,13.460563353058799,-0.00043664694120160163,Adult domain; old rounded per-100000 rate converted to percent
+current_smoking,2013,Maranhão,15.003,15.003224301196799,0.00022430119679839322,Adult domain; old rounded per-100000 rate converted to percent
+current_smoking,2013,Mato Grosso,12.461,12.4608086878351,-0.00019131216490109182,Adult domain; old rounded per-100000 rate converted to percent
+current_smoking,2013,Mato Grosso do Sul,17.913,17.9133037024338,0.00030370243380062334,Adult domain; old rounded per-100000 rate converted to percent
+current_smoking,2013,Minas Gerais,17.484,17.4837966331088,-0.00020336689120270535,Adult domain; old rounded per-100000 rate converted to percent
+current_smoking,2013,Paraná,17.755,17.75546479541,0.00046479541000010727,Adult domain; old rounded per-100000 rate converted to percent
+current_smoking,2013,Paraíba,12.554,12.5538957832871,-0.00010421671290039569,Adult domain; old rounded per-100000 rate converted to percent
+current_smoking,2013,Pará,13.273,13.273274451411702,0.0002744514117019037,Adult domain; old rounded per-100000 rate converted to percent
+current_smoking,2013,Pernambuco,15.051,15.0506457120572,-0.0003542879428000134,Adult domain; old rounded per-100000 rate converted to percent
+current_smoking,2013,Piauí,16.726,16.7260500562358,5.005623579990015e-05,Adult domain; old rounded per-100000 rate converted to percent
+current_smoking,2013,Rio Grande do Norte,13.099,13.0985585752414,-0.00044142475860020625,Adult domain; old rounded per-100000 rate converted to percent
+current_smoking,2013,Rio Grande do Sul,14.201,14.200710719615001,-0.00028928038499920206,Adult domain; old rounded per-100000 rate converted to percent
+current_smoking,2013,Rio de Janeiro,12.803,12.8026167424758,-0.000383257524200431,Adult domain; old rounded per-100000 rate converted to percent
+current_smoking,2013,Rondônia,11.773,11.773020611419199,2.0611419198957037e-05,Adult domain; old rounded per-100000 rate converted to percent
+current_smoking,2013,Roraima,13.556000000000001,13.556124321861901,0.00012432186190025618,Adult domain; old rounded per-100000 rate converted to percent
+current_smoking,2013,Santa Catarina,16.168,16.168114523494502,0.00011452349450280508,Adult domain; old rounded per-100000 rate converted to percent
+current_smoking,2013,Sergipe,11.891,11.8914107796279,0.0004107796279004816,Adult domain; old rounded per-100000 rate converted to percent
+current_smoking,2013,São Paulo,14.684000000000001,14.6836893764433,-0.00031062355670030684,Adult domain; old rounded per-100000 rate converted to percent
+current_smoking,2013,Tocantins,14.02,14.0200217337012,2.1733701199622146e-05,Adult domain; old rounded per-100000 rate converted to percent
+current_smoking,2013,Brasil,14.65,14.650176684309802,0.00017668430980144478,Adult domain; old rounded per-100000 rate converted to percent
+current_smoking,2019,Acre,13.062,13.8559938126017,0.7939938126017001,Adult domain; old rounded per-100000 rate converted to percent
+current_smoking,2019,Alagoas,10.016,10.6064508408511,0.5904508408510996,Adult domain; old rounded per-100000 rate converted to percent
+current_smoking,2019,Amapá,10.57,10.869504993752098,0.29950499375209816,Adult domain; old rounded per-100000 rate converted to percent
+current_smoking,2019,Amazonas,9.441,10.1692752996411,0.7282752996410995,Adult domain; old rounded per-100000 rate converted to percent
+current_smoking,2019,Bahia,9.193,9.7791250484596,0.5861250484595999,Adult domain; old rounded per-100000 rate converted to percent
+current_smoking,2019,Ceará,11.301,11.5520113817195,0.25101138171950055,Adult domain; old rounded per-100000 rate converted to percent
+current_smoking,2019,Distrito Federal,10.612,11.0228260924328,0.41082609243279933,Adult domain; old rounded per-100000 rate converted to percent
+current_smoking,2019,Espírito Santo,10.309000000000001,10.2006004367112,-0.10839956328880085,Adult domain; old rounded per-100000 rate converted to percent
+current_smoking,2019,Goiás,12.897,13.416655651162701,0.5196556511627008,Adult domain; old rounded per-100000 rate converted to percent
+current_smoking,2019,Maranhão,10.367,11.0470243835393,0.6800243835392994,Adult domain; old rounded per-100000 rate converted to percent
+current_smoking,2019,Mato Grosso,12.573,12.8585883374637,0.28558833746370027,Adult domain; old rounded per-100000 rate converted to percent
+current_smoking,2019,Mato Grosso do Sul,14.41,14.9145561292939,0.5045561292938991,Adult domain; old rounded per-100000 rate converted to percent
+current_smoking,2019,Minas Gerais,12.166,12.686264183640999,0.5202641836409985,Adult domain; old rounded per-100000 rate converted to percent
+current_smoking,2019,Paraná,14.226,14.5831086418999,0.35710864189989877,Adult domain; old rounded per-100000 rate converted to percent
+current_smoking,2019,Paraíba,11.103,11.6678444941154,0.5648444941154,Adult domain; old rounded per-100000 rate converted to percent
+current_smoking,2019,Pará,9.384,9.8365144834183,0.4525144834182999,Adult domain; old rounded per-100000 rate converted to percent
+current_smoking,2019,Pernambuco,10.868,11.236449496875501,0.36844949687550077,Adult domain; old rounded per-100000 rate converted to percent
+current_smoking,2019,Piauí,10.318,10.9981180699655,0.6801180699655003,Adult domain; old rounded per-100000 rate converted to percent
+current_smoking,2019,Rio Grande do Norte,10.815,10.9659073898345,0.1509073898345008,Adult domain; old rounded per-100000 rate converted to percent
+current_smoking,2019,Rio Grande do Sul,15.601,15.782545987966301,0.18154598796630061,Adult domain; old rounded per-100000 rate converted to percent
+current_smoking,2019,Rio de Janeiro,11.55,12.0150273966569,0.4650273966568985,Adult domain; old rounded per-100000 rate converted to percent
+current_smoking,2019,Rondônia,9.629,10.379623027769599,0.7506230277695991,Adult domain; old rounded per-100000 rate converted to percent
+current_smoking,2019,Roraima,10.973,11.4396135352342,0.4666135352341989,Adult domain; old rounded per-100000 rate converted to percent
+current_smoking,2019,Santa Catarina,12.856,13.0219859777655,0.16598597776549973,Adult domain; old rounded per-100000 rate converted to percent
+current_smoking,2019,Sergipe,9.096,9.2326423279966,0.1366423279966007,Adult domain; old rounded per-100000 rate converted to percent
+current_smoking,2019,São Paulo,13.898,14.3123813175927,0.41438131759270114,Adult domain; old rounded per-100000 rate converted to percent
+current_smoking,2019,Tocantins,11.83,12.550034028544399,0.7200340285443989,Adult domain; old rounded per-100000 rate converted to percent
+current_smoking,2019,Brasil,12.151,12.5865351273203,0.43553512732029986,Adult domain; old rounded per-100000 rate converted to percent

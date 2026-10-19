@@ -1,0 +1,12 @@
+# Source hashes used by the publication gate must survive a Windows checkout.
+*.R text eol=lf
+*.Rmd text eol=lf
+*.py text eol=lf
+*.html text eol=lf
+*.css text eol=lf
+*.cjs text eol=lf
+*.mjs text eol=lf
+# Preserve the exact bytes recorded in generated provenance manifests.
+*.csv -text
+*.json -text
+*.xlsx binary

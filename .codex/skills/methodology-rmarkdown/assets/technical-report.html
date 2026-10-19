@@ -6,13 +6,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="icon" href="data:,">
 $if(canonical-url)$
-<link rel="canonical" href="$canonical-url$">
+<link rel="canonical" href="$canonical-url$" data-external="1">
 $endif$
 $if(alternate-en-url)$
-<link rel="alternate" hreflang="en" href="$alternate-en-url$">
+<link rel="alternate" hreflang="en" href="$alternate-en-url$" data-external="1">
 $endif$
 $if(alternate-pt-br-url)$
-<link rel="alternate" hreflang="pt-BR" href="$alternate-pt-br-url$">
+<link rel="alternate" hreflang="pt-BR" href="$alternate-pt-br-url$" data-external="1">
 $endif$
 $for(author)$
 <meta name="author" content="$author.name$">

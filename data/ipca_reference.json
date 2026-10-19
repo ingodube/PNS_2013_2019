@@ -1,0 +1,9 @@
+{
+  "source": "https://apisidra.ibge.gov.br/values/t/1737/n1/all/v/2266/p/201907,202508",
+  "retrieved": "2026-10-18",
+  "variable": "IPCA - Numero-indice (base: dezembro de 1993 = 100)",
+  "base_period": "201907",
+  "target_period": "202508",
+  "base_index": 5224.18,
+  "target_index": 7323.91
+}

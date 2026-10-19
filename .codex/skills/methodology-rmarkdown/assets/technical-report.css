@@ -230,8 +230,8 @@ a:focus-visible { color: var(--accent); }
 .method-note strong { font-family: Arial, Helvetica, sans-serif; }
 .method-note strong::after { content: "."; }
 
-.figure-title,
-.table-title,
+.report-content .figure-title,
+.report-content .table-title,
 table caption {
   caption-side: top;
   color: var(--muted);
@@ -264,6 +264,8 @@ img, svg, canvas { display: block; height: auto; margin: 0 auto; max-width: 100%
 
 .math.display,
 math[display="block"] { margin: 1.25rem auto; max-width: 100%; overflow: visible; text-align: center; }
+
+.report-content div.math.display { overflow-x: auto; overflow-y: hidden; }
 
 div.sourceCode { margin: 1.3rem 0 1.65rem; max-width: 100%; min-width: 0; }
 

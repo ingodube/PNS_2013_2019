@@ -98,6 +98,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--allow-code-block-change", action="append", type=int, default=[])
     parser.add_argument("--author-date", action="store_true")
     parser.add_argument("--expected-lang")
+    parser.add_argument("--retired-id", action="append", default=[], help="Explicit legacy anchor retained for a retirement note")
     return parser.parse_args()
 
 
@@ -187,13 +188,13 @@ def main() -> int:
 
     if args.expected_figures is not None:
         require(
-            len([item for item in probe.ids if item.startswith("fig-")]) == args.expected_figures,
+            len([item for item in probe.ids if item.startswith("fig-") and item not in args.retired_id]) == args.expected_figures,
             "semantic figure IDs do not match figure count",
             failures,
         )
     if args.expected_tables is not None:
         require(
-            len([item for item in probe.ids if item.startswith("tab-")]) == args.expected_tables,
+            len([item for item in probe.ids if item.startswith("tab-") and item not in args.retired_id]) == args.expected_tables,
             "semantic table IDs do not match table count",
             failures,
         )

@@ -1,0 +1,11 @@
+{
+  "R/pns_core.R": "48f3b133ad97e8fea8430e475f326cb92754894072072a7807bf403029e52689",
+  "R/report_helpers.R": "6febfffaffb356f95ad92b2dc43c17addfdcd8c59c4ab57616d7baf102bc8000",
+  "data/estimates.csv": "91c4ef02378b7b8c18a98ab8ee554f052418c5c1b79bb3c42c059d767e0ec627",
+  "data/contrasts.csv": "aadfa1240d0ad8f7124be9e3958198e8a4c6d277534c2ba29ade5925563c82da",
+  "data/analysis_manifest.json": "76c67966eaf29bccabfa8ca9a7708c17ced8a40d48e23ce82d2eb5e9e6ca1d45",
+  "docs/methodology_report_pt_br.Rmd": "39dbf544ba0e447977532fc2abfcf6afc48a34aec4fd9cb9873e24eb0109cc1b",
+  "docs/methodology_report_en.Rmd": "94cb0cd37f951cfe8625e730e89fa9bc7abe06b1b83d26874ddc63c5866bf38a",
+  "docs/metodologia.html": "81e30b907f0b5171d87a03efe8c6a4f6b3b83f98457ef1b74b1794c8dd783055",
+  "docs/methodology-pt-br.html": "6ce36017ab0fe96c6389d63a4b6633235c8ad88013006b961db116b84857fae9"
+}

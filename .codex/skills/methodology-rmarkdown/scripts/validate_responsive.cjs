@@ -18,6 +18,8 @@ const widths = argument("--widths", "320,360,390,768,1024,1440")
   .split(",")
   .map(Number);
 const screenshotDir = argument("--screenshot-dir", null);
+const structurePath = argument("--structure", path.resolve(__dirname, "../../../../docs/report-structure.json"));
+const expected = JSON.parse(fs.readFileSync(structurePath, "utf8"));
 const url = /^https?:/i.test(target)
   ? target
   : pathToFileURL(path.resolve(target)).href;
@@ -155,8 +157,8 @@ const executablePath = candidates.find(fs.existsSync);
       metrics.tocColumns === expectedColumns && metrics.tocContained && metrics.figureTitleOrder &&
       metrics.tableTitleOrder && metrics.tableAlignment && metrics.sourceAndNotesJustified &&
       metrics.referencesJustified && metrics.targetHighlight && metrics.languageToggle &&
-      metrics.languageContained && metrics.languageMenuValid && metrics.tables === 13 &&
-      metrics.figures === 10 && metrics.codeBlocks === 4 && metrics.references === 13;
+      metrics.languageContained && metrics.languageMenuValid && metrics.tables === expected.tables &&
+      metrics.figures === expected.figures && metrics.codeBlocks === expected.code_blocks && metrics.references === expected.references;
     failed ||= !pass;
     results.push({ width, status: response ? response.status() : 200, errors, ...metrics, pass });
     if (screenshotDir) {

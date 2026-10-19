@@ -1,0 +1,14 @@
+{
+  "tables": 14,
+  "figures": 8,
+  "math": 1,
+  "code_blocks": 0,
+  "references": 17,
+  "retired_ids": [
+    "fig-medicamento-crise",
+    "tab-medicamento-crise",
+    "fig-taxa-medicamento",
+    "tab-taxa-medicamento",
+    "tab-sintese"
+  ]
+}

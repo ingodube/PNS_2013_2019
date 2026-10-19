@@ -5,13 +5,16 @@ The Brazilian National Health Survey (Pesquisa Nacional de Saúde, PNS), conduct
 </p>
 
 <p align="justify">
-The analytical programs estimate the prevalence of a medical asthma diagnosis, attacks in the last 12 months, oral-medication or inhaler use, population rates, smoking, out-of-pocket payment, absenteeism, lost days, and income. The workflow is designed to remain transparent, auditable, and reproducible, with confidence intervals that respect the PNS sampling design.
+The analytical programs estimate lifetime self-reported medical asthma diagnosis, recent attacks, questionnaire-conditional medication use, current smoking, payment for medication, restriction of usual activities, and composite individual monthly income. All indicators use adults aged 18 years or older. The October 2026 revision corrects eligibility, missingness, age comparability and monetary treatment; medication use is not interpreted as a comparable access trend.
 </p>
 
 ## Main products
 
 - [Methodological report — English](https://ingodube.github.io/PNS_2013_2019/metodologia.html)
-- [Scientific poster — Portuguese (PT-BR)](poster%20(PT-BR)/poster_pns_asma_morrison.pdf)
+- [Methodological report — Portuguese](https://ingodube.github.io/PNS_2013_2019/methodology-pt-br.html)
+- [Scientific poster — historical Portuguese version](poster%20(PT-BR)/poster_pns_asma_morrison.pdf) — predates this methodological revision; consult the reports for current estimates.
+- [Analytical definitions and output migration](docs/analytical-definitions.md)
+- [Validation record](docs/index.validation.md)
 
 ## Localized analytical materials
 
@@ -35,8 +38,33 @@ source(file.path("Codes (EN)", "PNS Extraction - Asthma.R"))
 ```
 
 <p align="justify">
-Depending on the indicator, the workflow requires <code>PNSIBGE</code>, <code>survey</code>, <code>dplyr</code>, <code>tidyr</code>, <code>ggplot2</code>, <code>writexl</code>, and <code>deflateBR</code>. Raw microdata are not stored in this repository and are retrieved through the mechanisms documented in the R programs.
+Required package versions are recorded in <code>data/analysis_manifest.json</code> and <code>data/sessionInfo.txt</code>. Raw microdata are cached outside this repository. Set <code>PNS_CACHE_DIR</code> to a persistent directory to share downloads and validated intermediate results across runs. Numerical CSV columns use schema 2, documented with eligibility and missingness in the analytical definitions. English and Portuguese entry points use the same analytical core; neither translates questionnaire labels to define events.
 </p>
+
+From the repository root, with R, Python (pandas, numpy, openpyxl), Pandoc and
+Node/Playwright available:
+
+```text
+Rscript tests/test_analysis.R
+Rscript tools/run_analysis.R /absolute/path/to/staging
+Rscript tests/validate_real_data.R /absolute/path/to/staging
+python tools/promote_analysis.py /absolute/path/to/staging --check-only
+python tools/promote_analysis.py /absolute/path/to/staging
+python tools/compare_revision.py
+Rscript .codex/skills/methodology-rmarkdown/scripts/render_bilingual_reports.R .
+python tools/validate_bilingual_outputs.py
+```
+
+`tests/run_entrypoints.R` executes all fourteen entry points against
+`PNS_CACHE_DIR/release` and compares their outputs. Use that default staging
+directory when running this integration check. Run the skill's static and
+responsive validators for both HTML files before publication. Staging does not
+publish anything. Never publish a mixture of old and corrected outputs.
+
+Income retains the eight-component sum, including cash and in-kind earnings.
+Known non-receipt is zero; an unknown component makes the total unknown.
+Results are expressed at August 2025 prices after the official July 2019
+deflation step. The obsolete population-wide asthma medication rate is retired.
 
 <p align="justify">
 Artificial intelligence supported code structuring, consistency review, report formatting, rendering automation, and translation. Scientific decisions, interpretation, validation, and final responsibility remain with the authors.

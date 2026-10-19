@@ -117,65 +117,38 @@ def parse(path: Path) -> Probe:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--repo", type=Path, default=Path(__file__).resolve().parents[1])
-    args = parser.parse_args()
-    root = args.repo.resolve()
-    en = parse(root / "docs" / "metodologia.html")
-    pt = parse(root / "docs" / "methodology-pt-br.html")
-    failures: list[str] = []
-
-    def require(condition: bool, message: str) -> None:
-        if not condition:
-            failures.append(message)
-
-    required_ids = lambda probe: {item for item in probe.ids if item == "TOC" or item.startswith(("fig-", "tab-", "ref-"))}
-    require(required_ids(en) == required_ids(pt), "semantic IDs differ between languages")
-    require(len(set(en.figure_hashes)) == len(set(pt.figure_hashes)) == 10, "figure sets are incomplete")
-    require(number_tokens(en.table_text, "en") == number_tokens(pt.table_text, "pt-BR"), "table numeric values differ")
-    require(en.tags.get("table", 0) == pt.tags.get("table", 0) == 13, "expected 13 tables in each report")
-    require(len(en.figure_hashes) == len(pt.figure_hashes) == 10, "expected 10 figures in each report")
-    require(en.tags.get("pre", 0) == pt.tags.get("pre", 0) == 4, "expected four code blocks in each report")
-    require(en.tags.get("math", 0) == pt.tags.get("math", 0) == 9, "expected nine mathematical expressions in each report")
-    require("translation" in " ".join(en.visible).casefold(), "English AI disclosure does not mention translation")
-    require("tradução" in " ".join(pt.visible).casefold(), "PT-BR AI disclosure does not mention translation")
-    require(
-        not any("Brasil" in cell for cell in en.table_text) and any("Brazil" in cell for cell in en.table_text),
-        "English tables must use Brazil, not Brasil",
-    )
-    for name in UF_NAMES:
-        require(any(name in cell for cell in en.table_text), f"federative-unit name missing from English tables: {name}")
-
-    ignored_links = {"metodologia.html", "methodology-pt-br.html"}
-    en_links = {link for link in en.links if not link.startswith("#") and link not in ignored_links}
-    pt_links = {link for link in pt.links if not link.startswith("#") and link not in ignored_links}
-    require(en_links == pt_links, "external links differ between languages")
-
-    pt_dir = root / "Spreadsheets (PT-BR)"
-    en_dir = root / "Spreadsheets (EN)"
-    for pt_name, en_name in CSV_PAIRS.items():
-        pt_rows = read_csv(pt_dir / pt_name)
-        en_rows = read_csv(en_dir / en_name)
-        require(len(pt_rows) == len(en_rows), f"CSV row count differs: {pt_name}")
-        require(all(len(a) == len(b) for a, b in zip(pt_rows, en_rows)), f"CSV column count differs: {pt_name}")
-        require(csv_numbers(pt_rows) == csv_numbers(en_rows), f"CSV numeric values differ: {pt_name}")
-        pt_ufs = [cell for row in pt_rows for cell in row if cell in UF_NAMES]
-        en_ufs = [cell for row in en_rows for cell in row if cell in UF_NAMES]
-        require(pt_ufs == en_ufs, f"federative-unit values differ: {pt_name}")
-        require(sum(cell == "Brasil" for row in pt_rows for cell in row) ==
-                sum(cell == "Brazil" for row in en_rows for cell in row), f"Brazil localization differs: {pt_name}")
-
-    print(f"semantic_ids={len(required_ids(en))}")
-    print(f"table_numeric_tokens={len(number_tokens(en.table_text, 'en'))}")
-    print(f"figure_hashes={len(en.figure_hashes)}")
-    print(f"csv_pairs={len(CSV_PAIRS)}")
-    if failures:
-        for failure in failures:
-            print(f"FAIL: {failure}", file=sys.stderr)
-        return 1
-    print("bilingual_parity=PASS")
+    import json
+    import pandas as pd
+    root=Path(__file__).resolve().parents[1]
+    config=json.loads((root/'docs/report-structure.json').read_text())
+    en=parse(root/'docs/metodologia.html'); pt=parse(root/'docs/methodology-pt-br.html')
+    required=lambda p:{x for x in p.ids if x=='TOC' or x.startswith(('fig-','tab-','ref-'))}
+    assert required(en)==required(pt), 'Semantic IDs differ'
+    for label,probe in [('en',en),('pt',pt)]:
+        assert probe.tags.get('table',0)==config['tables'], label+' table count'
+        assert len(probe.figure_hashes)==config['figures'], label+' figure count'
+        assert probe.tags.get('math',0)==config['math'], label+' math count'
+        assert probe.tags.get('pre',0)==config['code_blocks'], label+' code count'
+        assert len([i for i in probe.ids if i.startswith('ref-')])==config['references']
+        assert set(config['retired_ids']).issubset(probe.ids)
+    assert number_tokens(en.table_text,'en')==number_tokens(pt.table_text,'pt-BR'), 'HTML numeric parity'
+    for uf in UF_NAMES: assert any(uf in c for c in en.table_text),uf
+    assert 'translation' in ' '.join(en.visible).lower()
+    assert 'tradução' in ' '.join(pt.visible).lower()
+    external=lambda p:{a for a in p.links if not a.startswith('#') and a not in {'metodologia.html','methodology-pt-br.html'}}
+    assert external(en)==external(pt),'External link parity'
+    canonical=pd.read_csv(root/'data/estimates.csv')
+    for group in ['asthma','attacks','activity','payment','medication','income','smoking']:
+        tables=[]
+        for locale in ['PT-BR','EN']:
+            directory=root/('Spreadsheets ('+locale+')')
+            a=pd.read_csv(directory/(group+'.csv')); b=pd.read_excel(directory/(group+'.xlsx'))
+            pd.testing.assert_frame_equal(a,b,check_dtype=False,check_exact=False,rtol=1e-12,atol=1e-12)
+            assert not a.duplicated(['indicator','year','geo']).any()
+            expected=canonical[canonical.indicator.isin(a.indicator.unique())].reset_index(drop=True)
+            pd.testing.assert_frame_equal(a.drop(columns='UF').reset_index(drop=True),expected,check_dtype=False,check_exact=False,rtol=1e-12,atol=1e-12)
+            a['UF']=a.UF.replace({'Brazil':'Brasil'}); tables.append(a)
+        pd.testing.assert_frame_equal(*tables,check_dtype=False)
+    print('PASS: 14 CSV + 14 XLSX; canonical keys, denominators, missingness and values; HTML tables, figures, IDs and references')
     return 0
-
-
-if __name__ == "__main__":
-    raise SystemExit(main())
+if __name__=='__main__': raise SystemExit(main())
